@@ -10,6 +10,8 @@ import RolePermissionComponent from './RolePermissionComponent'; // Import the R
 import MenuManager from './MenuManager'; // Import the RoleDataTable component
 import ArticleManager from './ArticleManager'; // Import the RoleDataTable component
 import RoleMenuDataTable from './RoleMenuDataTable'; // Import the RoleDataTable component
+import MenuIconManager from './MenuIconManager'; // Import the RoleDataTable component
+
 
 import { ToastContainer } from 'react-toastify';
 import 'font-awesome/css/font-awesome.min.css';
@@ -128,6 +130,18 @@ function App() {
                             element={
                                 <Layout>
                                     <RoleMenuDataTable /> {/* Render the RoleDataTable component */}
+                                </Layout>
+                            } 
+                        />
+                    } 
+                />
+                 <Route 
+                    path="/icon-menu" // New route for managing roles
+                    element={
+                        <PrivateRoute 
+                            element={
+                                <Layout>
+                                    <MenuIconManager /> {/* Render the RoleDataTable component */}
                                 </Layout>
                             } 
                         />

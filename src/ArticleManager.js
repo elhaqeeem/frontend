@@ -1,61 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import axios from './axiosInstance'; // Pastikan path ini benar
+import axios from './axiosInstance'; // Ensure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill/dist/quill.snow.css'; // Import Quill styles
 import Swal from 'sweetalert2';
 
 const ArticleManager = () => {
   const [articles, setArticles] = useState([]);
-  const [filteredArticles, setFilteredArticles] = useState([]); // Menyimpan hasil pencarian
-  const [search, setSearch] = useState(''); // State untuk input pencarian
-  const [roles, setRoles] = useState([]);
+  const [filteredArticles, setFilteredArticles] = useState([]); // State for filtered articles
+  const [search, setSearch] = useState(''); // State for search input
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [articleTitle, setArticleTitle] = useState('');
   const [articleContent, setArticleContent] = useState('');
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [articleId, setArticleId] = useState('');
+  // eslint-disable-next-line
   const [userId, setUserId] = useState(1); // Simulated logged-in user ID
 
   useEffect(() => {
-    const fetchRolesAndArticles = async () => {
-      await fetchRoles(); 
-      await fetchArticles(); 
-    };
-    fetchRolesAndArticles();
+    fetchArticles();
   }, []);
 
   useEffect(() => {
-    const result = articles.filter(article =>
+    const result = articles.filter(article => 
       article.title.toLowerCase().includes(search.toLowerCase()) ||
-      article.role_name.toLowerCase().includes(search.toLowerCase())
+      article.content.toLowerCase().includes(search.toLowerCase())
     );
     setFilteredArticles(result);
-  }, [search, articles]); // Efek untuk memfilter data saat input pencarian berubah
-
-  const fetchRoles = async () => {
-    try {
-      const response = await axios.get('/roles');
-      setRoles(response.data.roles || []);
-    } catch (error) {
-      toast.error('Failed to fetch roles.');
-    }
-  };
+  }, [search, articles]);
 
   const fetchArticles = async () => {
     try {
       const response = await axios.get('/articles');
-      const articlesWithRoleNames = response.data.articles.map((article) => {
-        const role = roles.find((role) => role.ID === article.author_id);
-        return {
-          ...article,
-          role_name: role ? role.RoleName : 'Unknown',
-        };
-      });
-      setArticles(articlesWithRoleNames);
-      setFilteredArticles(articlesWithRoleNames); // Inisialisasi hasil pencarian
+      setArticles(response.data.articles || []);
+      setFilteredArticles(response.data.articles || []); // Initialize filtered articles
     } catch (error) {
       toast.error('Failed to fetch articles.');
     }
@@ -67,6 +47,7 @@ const ArticleManager = () => {
       return;
     }
 
+    // Check character limit for article content
     if (articleContent.length > 65535) {
       toast.error('Content exceeds the maximum character limit of 65,535 characters.');
       return;
@@ -149,7 +130,7 @@ const ArticleManager = () => {
     },
     {
       name: 'Author',
-      selector: (row) => row.role_name, // Menampilkan role_name
+      selector: (row) => row.author_id,
       sortable: true,
     },
     {
@@ -198,7 +179,7 @@ const ArticleManager = () => {
       <DataTable
         title="Article List"
         columns={columns}
-        data={filteredArticles}
+        data={filteredArticles} // Use filtered articles
         noDataComponent="No articles available"
         pagination
         className="rounded-lg shadow-lg bg-white"
@@ -214,12 +195,12 @@ const ArticleManager = () => {
               value={articleTitle}
               onChange={(e) => setArticleTitle(e.target.value)}
               className="input input-bordered w-full mb-2"
-              required
+              required  
             />
             <ReactQuill
               value={articleContent}
               onChange={setArticleContent}
-              modules={{ toolbar: toolbarOptions }}
+              modules={{ toolbar: toolbarOptions }} 
               placeholder="Write your article content here..."
               className="mb-4 bg-white text-black"
             />

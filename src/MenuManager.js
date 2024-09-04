@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import axios from './axiosInstance'; // Pastikan path ini benar
+import axios from './axiosInstance'; // Make sure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
 
 const MenuManager = () => {
   const [menus, setMenus] = useState([]);
-  const [filteredMenus, setFilteredMenus] = useState([]); // Menyimpan hasil pencarian
-  const [search, setSearch] = useState(''); // State untuk input pencarian
+  const [filteredMenus, setFilteredMenus] = useState([]); // Stores search results
+  const [search, setSearch] = useState(''); // State for search input
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [menuName, setMenuName] = useState('');
   const [url, setUrl] = useState('');
   const [parentId, setParentId] = useState(null);
   const [roleId, setRoleId] = useState(null);
+  const [iconId, setIconId] = useState(null); // Use consistent casing
   const [selectedMenu, setSelectedMenu] = useState(null);
 
   useEffect(() => {
@@ -25,14 +26,14 @@ const MenuManager = () => {
       menu.url.toLowerCase().includes(search.toLowerCase())
     );
     setFilteredMenus(result);
-  }, [search, menus]); // Efek untuk memfilter data saat input pencarian berubah
+  }, [search, menus]); // Effect to filter data when search input changes
 
   const fetchMenus = async () => {
     try {
       const response = await axios.get('/menus');
       if (response.data && Array.isArray(response.data.menus)) {
         setMenus(response.data.menus);
-        setFilteredMenus(response.data.menus); // Inisialisasi hasil pencarian
+        setFilteredMenus(response.data.menus); // Initialize search results
       } else {
         setMenus([]);
         setFilteredMenus([]);
@@ -50,16 +51,17 @@ const MenuManager = () => {
       url,
       parent_id: parentId,
       role_id: roleId,
+      icon_id: iconId, // Use consistent casing
     };
 
     try {
       if (selectedMenu) {
-        // Update menu yang ada
+        // Update existing menu
         console.log('Updating menu:', selectedMenu.id, menuData); // Debugging line
         await axios.put(`/menus/${selectedMenu.id}`, menuData);
         toast.success('Menu updated successfully.');
       } else {
-        // Buat menu baru
+        // Create new menu
         await axios.post('/menus', menuData);
         toast.success('Menu created successfully.');
       }
@@ -78,6 +80,8 @@ const MenuManager = () => {
     setUrl(menu.url);
     setParentId(menu.parent_id || null);
     setRoleId(menu.role_id || null);
+    setIconId(menu.icon_id || null); // Use consistent casing
+
     setIsModalOpen(true);
   };
 
@@ -97,6 +101,7 @@ const MenuManager = () => {
     setUrl('');
     setParentId(null);
     setRoleId(null);
+    setIconId(null); // Use consistent casing
     setIsModalOpen(false);
   };
 
@@ -121,6 +126,12 @@ const MenuManager = () => {
       selector: (row) => row.parent_id,
       sortable: true,
       cell: (row) => (row.parent_id !== null ? row.parent_id : 'None'),
+    },
+    {
+      name: 'Icon ID',
+      selector: (row) => row.icon_id, // Use consistent casing
+      sortable: true,
+      cell: (row) => (row.icon_id !== null ? row.icon_id : 'None'), // Use consistent casing
     },
     {
       name: 'Actions',
@@ -196,6 +207,13 @@ const MenuManager = () => {
               placeholder="Role ID"
               value={roleId || ''}
               onChange={(e) => setRoleId(e.target.value ? parseInt(e.target.value) : null)}
+              className="input input-bordered w-full mb-2"
+            />
+             <input
+              type="number"
+              placeholder="Icon ID"
+              value={iconId || ''} // Use consistent casing
+              onChange={(e) => setIconId(e.target.value ? parseInt(e.target.value) : null)} // Use consistent casing
               className="input input-bordered w-full mb-2"
             />
             <div className="modal-action">
