@@ -20,7 +20,7 @@ function Login({ onLogin }) {
             .then(response => {
                 toast.success('Login successful!');
                 console.log('Login successful:', response.data);
-                localStorage.setItem('role_id', response.data.role_id); // Save token
+                localStorage.setItem('roleID', response.data.role_id); // Save token
                 localStorage.setItem('token', response.data.token); // Save token
                 onLogin(); // Update authentication status
                 navigate('/'); // Redirect to dashboard after login

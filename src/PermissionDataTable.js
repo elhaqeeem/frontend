@@ -95,18 +95,20 @@ const PermissionDataTable = () => {
     ];
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4 bg-white text-black">
             <ToastContainer />
+            <div className="flex justify-between items-center mb-4">
+            <button className="btn btn-outline btn-primary mb-4" onClick={() => setIsModalOpen(true)}>
+                <i className="fa fa-plus" aria-hidden="true"></i> Add Permission
+            </button>
             <input
                 type="text"
                 placeholder="Search by Permission Name"
                 className="input input-bordered w-full max-w-xs mb-2"
                 onChange={(e) => setSearchValue(e.target.value)}
             />
-            <button className="btn btn-outline btn-primary mb-4" onClick={() => setIsModalOpen(true)}>
-                <i className="fa fa-plus" aria-hidden="true"></i> Add Permission
-            </button>
-
+           
+            </div>
             <DataTable
                 title="Permission List"
                 columns={columns}

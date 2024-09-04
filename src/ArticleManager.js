@@ -1,29 +1,61 @@
 import React, { useEffect, useState } from 'react';
-import axios from './axiosInstance'; // Ensure this path is correct
+import axios from './axiosInstance'; // Pastikan path ini benar
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css'; // Import Quill styles
+import 'react-quill/dist/quill.snow.css';
+import Swal from 'sweetalert2';
 
 const ArticleManager = () => {
   const [articles, setArticles] = useState([]);
+  const [filteredArticles, setFilteredArticles] = useState([]); // Menyimpan hasil pencarian
+  const [search, setSearch] = useState(''); // State untuk input pencarian
+  const [roles, setRoles] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [articleTitle, setArticleTitle] = useState('');
   const [articleContent, setArticleContent] = useState('');
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [articleId, setArticleId] = useState('');
-    // eslint-disable-next-line
   const [userId, setUserId] = useState(1); // Simulated logged-in user ID
 
   useEffect(() => {
-    fetchArticles();
+    const fetchRolesAndArticles = async () => {
+      await fetchRoles(); 
+      await fetchArticles(); 
+    };
+    fetchRolesAndArticles();
   }, []);
+
+  useEffect(() => {
+    const result = articles.filter(article =>
+      article.title.toLowerCase().includes(search.toLowerCase()) ||
+      article.role_name.toLowerCase().includes(search.toLowerCase())
+    );
+    setFilteredArticles(result);
+  }, [search, articles]); // Efek untuk memfilter data saat input pencarian berubah
+
+  const fetchRoles = async () => {
+    try {
+      const response = await axios.get('/roles');
+      setRoles(response.data.roles || []);
+    } catch (error) {
+      toast.error('Failed to fetch roles.');
+    }
+  };
 
   const fetchArticles = async () => {
     try {
       const response = await axios.get('/articles');
-      setArticles(response.data.articles || []);
+      const articlesWithRoleNames = response.data.articles.map((article) => {
+        const role = roles.find((role) => role.ID === article.author_id);
+        return {
+          ...article,
+          role_name: role ? role.RoleName : 'Unknown',
+        };
+      });
+      setArticles(articlesWithRoleNames);
+      setFilteredArticles(articlesWithRoleNames); // Inisialisasi hasil pencarian
     } catch (error) {
       toast.error('Failed to fetch articles.');
     }
@@ -35,6 +67,11 @@ const ArticleManager = () => {
       return;
     }
 
+    if (articleContent.length > 65535) {
+      toast.error('Content exceeds the maximum character limit of 65,535 characters.');
+      return;
+    }
+
     const articleData = {
       title: articleTitle,
       content: articleContent,
@@ -43,8 +80,19 @@ const ArticleManager = () => {
 
     try {
       if (selectedArticle) {
-        await axios.put(`/articles/${articleId}`, articleData);
-        toast.success('Article updated successfully.');
+        const result = await Swal.fire({
+          title: 'Are you sure?',
+          text: 'You are about to update this article!',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, update it!',
+          cancelButtonText: 'No, cancel!',
+        });
+
+        if (result.isConfirmed) {
+          await axios.put(`/articles/${articleId}`, articleData);
+          toast.success('Article updated successfully.');
+        }
       } else {
         await axios.post('/articles', articleData);
         toast.success('Article created successfully.');
@@ -65,12 +113,23 @@ const ArticleManager = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await axios.delete(`/articles/${id}`);
-      toast.success('Article deleted successfully.');
-      fetchArticles();
-    } catch (error) {
-      toast.error('Failed to delete article.');
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You are about to delete this article!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'No, cancel!',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`/articles/${id}`);
+        toast.success('Article deleted successfully.');
+        fetchArticles();
+      } catch (error) {
+        toast.error('Failed to delete article.');
+      }
     }
   };
 
@@ -86,6 +145,11 @@ const ArticleManager = () => {
     {
       name: 'Title',
       selector: (row) => row.title,
+      sortable: true,
+    },
+    {
+      name: 'Author',
+      selector: (row) => row.role_name, // Menampilkan role_name
       sortable: true,
     },
     {
@@ -113,23 +177,36 @@ const ArticleManager = () => {
   ];
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 bg-white text-black">
       <ToastContainer />
-      <button className="btn btn-outline btn-primary mb-4" onClick={() => setIsModalOpen(true)}>
-        Add Article
-      </button>
+      <div className="flex justify-between items-center mb-4">
+        <button className="btn btn-outline btn-primary" onClick={() => setIsModalOpen(true)}>
+          Add Article
+        </button>
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input input-bordered w-full max-w-xs pl-10"
+          />
+          <i className="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        </div>
+      </div>
 
       <DataTable
         title="Article List"
         columns={columns}
-        data={articles}
+        data={filteredArticles}
         noDataComponent="No articles available"
         pagination
+        className="rounded-lg shadow-lg bg-white"
       />
 
       {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-lg mx-auto"> {/* Adjusted size */}
+        <div className="modal modal-open bg-dark text-white">
+          <div className="modal-box max-w-lg mx-auto">
             <h2 className="font-bold text-lg">{selectedArticle ? 'Edit Article' : 'Add Article'}</h2>
             <input
               type="text"
@@ -142,9 +219,9 @@ const ArticleManager = () => {
             <ReactQuill
               value={articleContent}
               onChange={setArticleContent}
-              modules={{ toolbar: toolbarOptions }} // Apply custom toolbar
+              modules={{ toolbar: toolbarOptions }}
               placeholder="Write your article content here..."
-              className="mb-2"
+              className="mb-4 bg-white text-black"
             />
             <div className="modal-action">
               <button className="btn" onClick={handleCreateOrUpdate}>

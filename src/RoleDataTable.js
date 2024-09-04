@@ -111,8 +111,16 @@ const RoleDataTable = () => {
     ];
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4 bg-white text-black">
             <ToastContainer />
+       
+        <div className="flex justify-between items-center mb-4">
+        <button
+                className="btn btn-outline btn-primary mb-4"
+                onClick={() => setIsModalOpen(true)}
+            >
+                <i className="fa fa-plus" aria-hidden="true"></i> Add Role
+            </button>
             <input
                 type="text"
                 placeholder="Search roles"
@@ -120,12 +128,8 @@ const RoleDataTable = () => {
                 onChange={(e) => setSearchText(e.target.value)}
                 className="input input-bordered w-full max-w-xs mb-4"
             />
-            <button
-                className="btn btn-outline btn-primary mb-4"
-                onClick={() => setIsModalOpen(true)}
-            >
-                <i className="fa fa-plus" aria-hidden="true"></i> Add Role
-            </button>
+            
+            </div>
             {error && <p className="text-red-500">{error}</p>}
             <DataTable
                 title="Role List"
