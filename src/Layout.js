@@ -64,7 +64,7 @@ const Layout = ({ children }) => {
                 content: 'Here are your accessible menu items.',
             },
             {
-                target: 'div.p-6',
+                target: 'div.p-1',
                 content: 'This is where your main content will be displayed.',
             },
         ];
@@ -88,7 +88,7 @@ const Layout = ({ children }) => {
     };
 
     const renderMenu = (menu) => (
-        <li key={menu.id} className={`block py-2 px-4 ${location.pathname === menu.url ? 'bg-gray-700 text-white' : 'hover:bg-gray-700'} ${isDarkTheme ? 'hover:bg-gray-600' : 'hover:bg-gray-300'}`}>
+        <li key={menu.id} className={`block py-2 px-4 text-sm ${location.pathname === menu.url ? 'bg-gray-700 text-white border-b-2 border-blue-500' : 'hover:bg-gray-700'} ${isDarkTheme ? 'hover:bg-gray-600' : 'hover:bg-gray-300'}`}>
             <div onClick={() => handleToggle(menu.id)} className="flex justify-between items-center cursor-pointer">
                 <Link to={menu.url} className="block flex-1">
                     {menu.menu_name}
@@ -138,13 +138,13 @@ const Layout = ({ children }) => {
                 </ul>
                 <div className="mt-4">
                     <Logout />
-                    <button onClick={startTour} className="mt-4 btn btn-primary">
+                    <button onClick={startTour} className="mt-4 btn btn-primary text-sm">
                         Start Tour
                     </button>
                 </div>
             </div>
 
-            <div className="flex-1 p-6 overflow-y-auto">
+            <div className="flex-1 p-6 text-sm overflow-y-auto">
                 {children}
             </div>
         </div>

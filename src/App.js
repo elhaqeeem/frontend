@@ -11,6 +11,9 @@ import MenuManager from './MenuManager'; // Import the RoleDataTable component
 import ArticleManager from './ArticleManager'; // Import the RoleDataTable component
 import RoleMenuDataTable from './RoleMenuDataTable'; // Import the RoleDataTable component
 import MenuIconManager from './MenuIconManager'; // Import the RoleDataTable component
+import KraeplinTestManager from './KraeplinTestManager'; // Import the RoleDataTable component
+import QuestionManager from './QuestionManager'; // Import the RoleDataTable component
+
 
 
 import { ToastContainer } from 'react-toastify';
@@ -142,6 +145,30 @@ function App() {
                             element={
                                 <Layout>
                                     <MenuIconManager /> {/* Render the RoleDataTable component */}
+                                </Layout>
+                            } 
+                        />
+                    } 
+                />
+                <Route 
+                    path="/kreaeplin" // New route for managing roles
+                    element={
+                        <PrivateRoute 
+                            element={
+                                <Layout>
+                                    <KraeplinTestManager /> {/* Render the RoleDataTable component */}
+                                </Layout>
+                            } 
+                        />
+                    } 
+                />
+                <Route 
+                    path="/questions" // New route for managing roles
+                    element={
+                        <PrivateRoute 
+                            element={
+                                <Layout>
+                                    <QuestionManager /> {/* Render the RoleDataTable component */}
                                 </Layout>
                             } 
                         />
