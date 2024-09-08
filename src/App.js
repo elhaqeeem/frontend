@@ -13,11 +13,12 @@ import RoleMenuDataTable from './RoleMenuDataTable'; // Import the RoleDataTable
 import MenuIconManager from './MenuIconManager'; // Import the RoleDataTable component
 import KraeplinTestManager from './KraeplinTestManager'; // Import the RoleDataTable component
 import QuestionManager from './QuestionManager'; // Import the RoleDataTable component
-
-
+import UserTestManager from './UserTestManager';
+import TestAnswerManager from './TestAnswers';
 
 import { ToastContainer } from 'react-toastify';
 import 'font-awesome/css/font-awesome.min.css';
+import Quiz from './Quiz';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -169,6 +170,42 @@ function App() {
                             element={
                                 <Layout>
                                     <QuestionManager /> {/* Render the RoleDataTable component */}
+                                </Layout>
+                            } 
+                        />
+                    } 
+                />
+                 <Route 
+                    path="/usertest" // New route for managing roles
+                    element={
+                        <PrivateRoute 
+                            element={
+                                <Layout>
+                                    <UserTestManager /> {/* Render the RoleDataTable component */}
+                                </Layout>
+                            } 
+                        />
+                    } 
+                />
+                 <Route 
+                    path="/useranswer" // New route for managing roles
+                    element={
+                        <PrivateRoute 
+                            element={
+                                <Layout>
+                                    <TestAnswerManager /> {/* Render the RoleDataTable component */}
+                                </Layout>
+                            } 
+                        />
+                    } 
+                />
+                <Route 
+                    path="/quiz" // New route for managing roles
+                    element={
+                        <PrivateRoute 
+                            element={
+                                <Layout>
+                                    <Quiz /> {/* Render the RoleDataTable component */}
                                 </Layout>
                             } 
                         />

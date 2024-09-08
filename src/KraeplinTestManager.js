@@ -3,8 +3,6 @@ import axios from './axiosInstance'; // Ensure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import Swal from 'sweetalert2';
 
 const KraeplinTestManager = () => {
@@ -120,6 +118,12 @@ const KraeplinTestManager = () => {
 
   const columns = [
     {
+      name: 'id',
+      selector: (row) => row.id,
+      sortable: true,
+      cell: row => (row.id),
+    },
+    {
       name: 'Test Date',
       selector: (row) => row.test_date,
       sortable: true,
@@ -158,7 +162,7 @@ const KraeplinTestManager = () => {
       <ToastContainer />
       <div className="flex justify-between items-center mb-4">
         <button className="btn btn-outline btn-primary" onClick={() => setIsModalOpen(true)}>
-          Add Kraeplin Test
+          Add Test
         </button>
         <div className="relative">
           <input
@@ -173,7 +177,7 @@ const KraeplinTestManager = () => {
       </div>
 
       <DataTable
-        title="Kraeplin Test List"
+        title="Test List"
         columns={columns}
         data={filteredTests}
         noDataComponent="No tests available"
@@ -184,7 +188,7 @@ const KraeplinTestManager = () => {
       {isModalOpen && (
         <div className="modal modal-open bg-dark text-white">
           <div className="modal-box max-w-lg mx-auto">
-            <h2 className="font-bold text-lg">{selectedTest ? 'Edit Kraeplin Test' : 'Add Kraeplin Test'}</h2>
+            <h2 className="font-bold text-lg">{selectedTest ? 'Edit Kraeplin Test' : 'Add Test'}</h2>
             <input
               type="date"
               value={testDate}
@@ -200,11 +204,14 @@ const KraeplinTestManager = () => {
               className="input input-bordered w-full mb-2"
               required  
             />
-            <ReactQuill
-              value={description}
-              onChange={setDescription}
+            {/* Replaced ReactQuill with a standard text input */}
+            <input
+              type="text"
               placeholder="Write the description here..."
-              className="mb-4 bg-white text-black"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="input input-bordered w-full mb-2"
+              required
             />
             <div className="modal-action">
               <button className="btn" onClick={handleCreateOrUpdate}>

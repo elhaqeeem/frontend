@@ -6,12 +6,13 @@ import Joyride from 'react-joyride';
 
 const Layout = ({ children }) => {
     const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
-    const [isDarkTheme, setIsDarkTheme] = useState(false);
+    const [isDarkTheme, setIsDarkTheme] = useState(true);
     const [tourSteps, setTourSteps] = useState([]);
     const [runTour, setRunTour] = useState(false);
     const [openMenu, setOpenMenu] = useState({});
     const location = useLocation();
 
+    // Fetch accessible menus
     useEffect(() => {
         const fetchAccessibleMenus = async () => {
             const roleId = localStorage.getItem('roleID');
@@ -53,6 +54,7 @@ const Layout = ({ children }) => {
         fetchAccessibleMenus();
     }, []);
 
+    // Set up Joyride steps
     useEffect(() => {
         const steps = [
             {
@@ -88,10 +90,14 @@ const Layout = ({ children }) => {
     };
 
     const renderMenu = (menu) => (
-        <li key={menu.id} className={`block py-2 px-4 text-sm ${location.pathname === menu.url ? 'bg-gray-700 text-white border-b-2 border-blue-500' : 'hover:bg-gray-700'} ${isDarkTheme ? 'hover:bg-gray-600' : 'hover:bg-gray-300'}`}>
+        <li 
+            key={menu.id} 
+            className={`block py-2 px-4 text-sm transition-colors duration-200 ease-in-out ${location.pathname === menu.url ? 'bg-gray-700 text-white border-b-2 border-blue-500' : 'hover:bg-gray-800 hover:text-white'} ${isDarkTheme ? 'hover:bg-gray-600' : 'hover:bg-gray-300'}`}
+        >
             <div onClick={() => handleToggle(menu.id)} className="flex justify-between items-center cursor-pointer">
-                <Link to={menu.url} className="block flex-1">
-                    {menu.menu_name}
+                <Link to={menu.url} className="block flex-1 flex items-center">
+                    <i className={menu.icon_name} aria-hidden="true"></i>
+                    <span className="ml-2">{menu.menu_name}</span>
                 </Link>
                 {menu.children && menu.children.length > 0 && (
                     <span className="ml-2">
@@ -106,7 +112,7 @@ const Layout = ({ children }) => {
             )}
         </li>
     );
-
+    
     return (
         <div className={`flex min-h-screen ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'}`}>
             <Joyride
@@ -136,7 +142,7 @@ const Layout = ({ children }) => {
                 <ul className="mt-6">
                     {accessibleMenuItems.map(menu => renderMenu(menu))}
                 </ul>
-                <div className="mt-4">
+                <div className="mt-8">
                     <Logout />
                     <button onClick={startTour} className="mt-4 btn btn-primary text-sm">
                         Start Tour

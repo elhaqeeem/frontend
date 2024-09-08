@@ -41,6 +41,11 @@ const LoginForm = ({ onLogin }) => {
         toast.success('Login successful!');
         localStorage.setItem('roleID', response.data.role_id);
         localStorage.setItem('token', response.data.token);
+        localStorage.setItem('id', response.data.id);
+        localStorage.setItem('email', response.data.email);
+        localStorage.setItem('firstName', response.data.firstName);
+
+
         onLogin();
         navigate('/');
       })

@@ -112,6 +112,11 @@ const MenuIconManager = () => {
 
   const columns = [
     {
+      name: 'ID',
+      selector: (row) => row.id,
+      sortable: true,
+    },
+    {
       name: 'Icon Name',
       selector: (row) => row.icon_name,
       sortable: true,

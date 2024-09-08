@@ -11,7 +11,16 @@ function Logout() {
                 console.log(response.data.message);
                 // Handle successful logout, e.g., remove token from localStorage
                 localStorage.removeItem('token');
-                localStorage.removeItem('role_id');
+                localStorage.removeItem('roleID');
+                localStorage.removeItem('email');
+                localStorage.removeItem('firstName');
+                localStorage.removeItem('htmx-history-cache');
+                localStorage.removeItem('id');
+
+
+
+
+
                 navigate('/login');
             })
             .catch(error => {

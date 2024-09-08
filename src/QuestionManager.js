@@ -3,7 +3,6 @@ import axios from './axiosInstance'; // Ensure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
-import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import Swal from 'sweetalert2';
 
@@ -13,7 +12,8 @@ const QuestionManager = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false); // Bulk modal state
   const [questionText, setQuestionText] = useState('');
-  const [correctAnswer, setCorrectAnswer] = useState(null);
+  const [correctAnswer, setCorrectAnswer] = useState('');
+  const [answerOptions, setAnswerOptions] = useState([]); // Use consistent naming
   const [kraeplinTestId, setKraeplinTestId] = useState('');
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [questionId, setQuestionId] = useState('');
@@ -41,7 +41,7 @@ const QuestionManager = () => {
   }, [search, questions]);
 
   const saveQuestion = async () => {
-    if (!kraeplinTestId || !questionText || correctAnswer === null) {
+    if (!kraeplinTestId || !questionText || correctAnswer === '') {
       toast.error('All fields are required.');
       return;
     }
@@ -49,6 +49,7 @@ const QuestionManager = () => {
     const questionData = {
       kraeplin_test_id: Number(kraeplinTestId), // Convert to number
       question_text: questionText,
+      answer_options: answerOptions,
       correct_answer: correctAnswer,
     };
 
@@ -84,8 +85,24 @@ const QuestionManager = () => {
     setQuestionId(question.id);
     setKraeplinTestId(question.kraeplin_test_id);
     setQuestionText(question.question_text);
+    setAnswerOptions(question.answer_options);
     setCorrectAnswer(question.correct_answer);
     setIsModalOpen(true);
+  };
+
+  const addAnswerOption = () => {
+    setAnswerOptions([...answerOptions, '']);
+  };
+
+  const updateAnswerOption = (index, value) => {
+    const newOptions = [...answerOptions];
+    newOptions[index] = value;
+    setAnswerOptions(newOptions);
+  };
+
+  const removeAnswerOption = (index) => {
+    const newOptions = answerOptions.filter((_, i) => i !== index);
+    setAnswerOptions(newOptions);
   };
 
   const handleDelete = async (id) => {
@@ -114,8 +131,9 @@ const QuestionManager = () => {
     setSelectedQuestion(null);
     setKraeplinTestId('');
     setQuestionText('');
-    setCorrectAnswer(null); // Reset to null
+    setCorrectAnswer(''); // Reset to empty string
     setQuestionId('');
+    setAnswerOptions([]);
     setIsModalOpen(false);
   };
 
@@ -128,21 +146,22 @@ const QuestionManager = () => {
       toast.error('Please enter text to import.');
       return;
     }
-  
+
     const textArray = bulkText.split('\n').filter((line) => line.trim());
     const questionsArray = textArray.map((line) => {
       const parts = line.split(',').map((part) => part.trim());
       return {
         kraeplin_test_id: Number(parts[0]), // Convert to number
         question_text: parts[1],
-        correct_answer: Number(parts[2]),
+        answer_options: parts[2].split('|').map((option) => option.trim()),
+        correct_answer: parts[3],
       };
     });
-  
+
     try {
       await axios.post('/questions/bulk-import-text', { questions: questionsArray });
       toast.success('Questions imported successfully from text.');
-      fetchQuestions(); 
+      fetchQuestions();
       setIsBulkModalOpen(false); // Close modal after import
     } catch (error) {
       toast.error('Failed to import questions from text.');
@@ -151,13 +170,12 @@ const QuestionManager = () => {
   };
 
   // Bulk delete handler
-  // Bulk delete handler
   const handleBulkDelete = async () => {
     if (selectedRows.length === 0) {
       toast.error('Please select at least one question to delete.');
       return;
     }
-  
+
     const result = await Swal.fire({
       title: 'Are you sure?',
       text: `You are about to delete ${selectedRows.length} question(s)!`,
@@ -166,12 +184,12 @@ const QuestionManager = () => {
       confirmButtonText: 'Yes, delete them!',
       cancelButtonText: 'No, cancel!',
     });
-  
+
     if (result.isConfirmed) {
       try {
         // Log the IDs being sent for deletion
         console.log('Deleting IDs:', selectedRows.map(row => row.id));
-        
+
         await axios.delete('/questions/bulk', {
           data: { ids: selectedRows.map(row => row.id) },
         });
@@ -183,11 +201,10 @@ const QuestionManager = () => {
       }
     }
   };
-  
 
   const columns = [
     {
-      name: 'Kraeplin Test ID',
+      name: 'Test ID',
       selector: (row) => row.kraeplin_test_id,
       sortable: true,
     },
@@ -196,6 +213,12 @@ const QuestionManager = () => {
       selector: (row) => row.question_text,
       sortable: true,
       cell: (row) => <div dangerouslySetInnerHTML={{ __html: row.question_text }} />,
+    },
+   
+    {
+      name: 'Answer Options',
+      selector: (row) => Array.isArray(row.answer_options) ? row.answer_options.join(', ') : row.answer_options,
+      sortable: true,
     },
     {
       name: 'Correct Answer',
@@ -245,52 +268,78 @@ const QuestionManager = () => {
           <i className="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
         </div>
       </div>
-
       <DataTable
-        title="Question List"
         columns={columns}
         data={filteredQuestions}
-        selectableRows // Enable row selection
-        onSelectedRowsChange={({ selectedRows }) => setSelectedRows(selectedRows)} // Update selected rows
-        noDataComponent="No questions available"
-        pagination
-        className="rounded-lg shadow-lg bg-white"
+        selectableRows
+        onSelectedRowsChange={({ selectedRows }) => setSelectedRows(selectedRows)}
       />
-
-      {/* Modal for Adding/Editing a Question */}
+      
+      {/* Modal for Add/Edit Question */}
       {isModalOpen && (
-        <div className="modal modal-open bg-dark text-white">
-          <div className="modal-box max-w-lg mx-auto">
-            <h2 className="font-bold text-lg">{selectedQuestion ? 'Edit Question' : 'Add Question'}</h2>
-            <div className="form-group">
-              <label className="block mb-2">Kraeplin Test ID</label>
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h2 className="text-xl">{selectedQuestion ? 'Edit Question' : 'Add Question'}</h2>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Kraeplin Test ID</span>
+              </label>
               <input
                 type="number"
                 value={kraeplinTestId}
                 onChange={(e) => setKraeplinTestId(e.target.value)}
-                className="input input-bordered w-full"
+                className="input input-bordered"
               />
             </div>
-            <div className="form-group">
-              <label className="block mb-2">Question Text</label>
-              <ReactQuill value={questionText} onChange={setQuestionText} className="h-42" />
-            </div>
-            <div className="form-group">
-              <label className="block mb-2">Correct Answer</label>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Question Text</span>
+              </label>
               <input
-                type="number"
-                value={correctAnswer || ''} // Convert null to an empty string
-                onChange={(e) => setCorrectAnswer(e.target.value ? Number(e.target.value) : null)}
-                className="input input-bordered w-full"
+                type="text"
+                value={questionText}
+                onChange={(e) => setQuestionText(e.target.value)}
+                className="input input-bordered"
+              />
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Answer Options</span>
+              </label>
+              {answerOptions.map((option, index) => (
+                <div key={index} className="flex space-x-2 mb-2">
+                  <input
+                    type="text"
+                    value={option}
+                    onChange={(e) => updateAnswerOption(index, e.target.value)}
+                    className="input input-bordered flex-grow"
+                  />
+                  <button
+                    className="btn btn-outline btn-error"
+                    onClick={() => removeAnswerOption(index)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button className="btn btn-outline btn-primary" onClick={addAnswerOption}>
+                Add Answer Option
+              </button>
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Correct Answer</span>
+              </label>
+              <input
+                type="text"
+                value={correctAnswer}
+                onChange={(e) => setCorrectAnswer(e.target.value)}
+                className="input input-bordered"
               />
             </div>
             <div className="modal-action">
-              <button className="btn btn-success" onClick={saveQuestion}>
-                Save
-              </button>
-              <button className="btn btn-danger" onClick={resetForm}>
-                Cancel
-              </button>
+              <button className="btn" onClick={resetForm}>Cancel</button>
+              <button className="btn btn-primary" onClick={saveQuestion}>Save</button>
             </div>
           </div>
         </div>
@@ -298,22 +347,19 @@ const QuestionManager = () => {
 
       {/* Modal for Bulk Import */}
       {isBulkModalOpen && (
-        <div className="modal modal-open bg-dark text-white">
-          <div className="modal-box max-w-lg mx-auto">
-            <h2 className="font-bold text-lg">Bulk Import Questions</h2>
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h2 className="text-xl text-white">Bulk Import Questions</h2>
+            <br></br>
             <textarea
               value={bulkText}
               onChange={handleBulkTextChange}
-              className="textarea textarea-bordered w-full h-32"
-              placeholder="Enter bulk text in the format: kraeplin_test_id, question_text, correct_answer"
-            ></textarea>
+              className="textarea textarea-bordered w-full h-32 text-white"
+              placeholder="Format ID,Question,OptionAnswer|OptionAnwer|OptionAnswe,Answer Example 6,Where Agnes live ?,Dubai|Bali|Bandung,Bandung"
+            />
             <div className="modal-action">
-              <button className="btn btn-success" onClick={handleBulkImport}>
-                Import
-              </button>
-              <button className="btn btn-danger" onClick={() => setIsBulkModalOpen(false)}>
-                Cancel
-              </button>
+              <button className="btn" onClick={() => setIsBulkModalOpen(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleBulkImport}>Import</button>
             </div>
           </div>
         </div>
