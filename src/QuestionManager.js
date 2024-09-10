@@ -356,7 +356,7 @@ const QuestionManager = () => {
             <textarea
               value={bulkText}
               onChange={handleBulkTextChange}
-              className="textarea textarea-bordered w-full h-32 text-white"
+              className="textarea textarea-bordered w-full h-32 text-black"
               placeholder="Format ID,Question,OptionAnswer|OptionAnwer|OptionAnswe,Answer Example 6,Where Agnes live ?,Dubai|Bali|Bandung,Bandung"
             />
             <div className="modal-action">

@@ -14,7 +14,7 @@ const KraeplinTestManager = () => {
   const [durationMinutes, setDurationMinutes] = useState('');
   const [description, setDescription] = useState('');
   const [selectedTest, setSelectedTest] = useState(null);
-  const [testId, setTestId] = useState('');
+  const [testId, setTestId] = useState(''); // State to hold the test ID
 
   useEffect(() => {
     fetchTests();
@@ -39,47 +39,49 @@ const KraeplinTestManager = () => {
 
   const handleCreateOrUpdate = async () => {
     if (!testDate || !durationMinutes || !description) {
-        toast.error('All fields are required.');
-        return;
+      toast.error('All fields are required.');
+      return;
     }
-
+  
     const formattedTestDate = new Date(testDate).toISOString(); // This will convert it to "YYYY-MM-DDTHH:MM:SSZ"
-
+  
     const testData = {
-        test_date: formattedTestDate,
-        duration_minutes: parseInt(durationMinutes, 10),
-        description,
+      test_date: formattedTestDate,
+      duration_minutes: parseInt(durationMinutes, 10),
+      description,
+      id: testId, // Include the test ID here for updates
     };
-
+  
     try {
-        if (selectedTest) {
-            const result = await Swal.fire({
-                title: 'Are you sure?',
-                text: 'You are about to update this test!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, update it!',
-                cancelButtonText: 'No, cancel!',
-            });
-
-            if (result.isConfirmed) {
-                await axios.put(`/kraeplin-tests`, { ...testData, id: testId }); // Send ID in the request body
-                toast.success('Test updated successfully.');
-            }
-        } else {
-            await axios.post('/kraeplin-tests', testData);
-            toast.success('Test created successfully.');
+      if (selectedTest) {
+        const result = await Swal.fire({
+          title: 'Are you sure?',
+          text: 'You are about to update this test!',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, update it!',
+          cancelButtonText: 'No, cancel!',
+        });
+  
+        if (result.isConfirmed) {
+          await axios.put(`/kraeplin-tests/${testId}`, testData); // Use testId here
+          toast.success('Test updated successfully.');
         }
-        fetchTests();
-        resetForm();
+      } else {
+        await axios.post('/kraeplin-tests', testData);
+        toast.success('Test created successfully.');
+      }
+      fetchTests();
+      resetForm();
     } catch (error) {
-        toast.error('Failed to save test.');
+      toast.error('Failed to save test.');
     }
   };
+  
 
   const handleEdit = (test) => {
     setSelectedTest(test);
-    setTestId(test.id);
+    setTestId(test.id); // Set the test ID when editing
     setTestDate(test.test_date);
     setDurationMinutes(test.duration_minutes);
     setDescription(test.description);
@@ -112,13 +114,13 @@ const KraeplinTestManager = () => {
     setTestDate('');
     setDurationMinutes('');
     setDescription('');
-    setTestId('');
+    setTestId(''); // Reset the test ID
     setIsModalOpen(false);
   };
 
   const columns = [
     {
-      name: 'id',
+      name: 'ID', // Changed the column name to ID
       selector: (row) => row.id,
       sortable: true,
       cell: row => (row.id),
@@ -147,11 +149,10 @@ const KraeplinTestManager = () => {
       cell: (row) => (
         <div className="flex space-x-2">
           <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
-          <i className="fa fa-pencil" aria-hidden="true"></i>
+            <i className="fa fa-pencil" aria-hidden="true"></i>
           </button>
           <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
-          <i className="fa fa-trash" aria-hidden="true"></i>
-
+            <i className="fa fa-trash" aria-hidden="true"></i>
           </button>
         </div>
       ),
@@ -187,7 +188,7 @@ const KraeplinTestManager = () => {
       />
 
       {isModalOpen && (
-        <div className="modal modal-open bg-dark text-white">
+        <div className="modal modal-open bg-dark text-black">
           <div className="modal-box max-w-lg mx-auto">
             <h2 className="font-bold text-lg">{selectedTest ? 'Edit Kraeplin Test' : 'Add Test'}</h2>
             <input

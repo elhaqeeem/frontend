@@ -16,49 +16,51 @@ const TimerComponent = ({ timer }) => (
 const Quiz = () => {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
-  const [timer, setTimer] = useState(300); // 5 minutes countdown
+  const [timer, setTimer] = useState(300); // Default to 5 minutes if no data is fetched
   const [submitted, setSubmitted] = useState(false);
   const [userTestId, setUserTestId] = useState(null);
   const [hasPreviousAnswers, setHasPreviousAnswers] = useState(false);
+  const [isTimeValid, setIsTimeValid] = useState(false);
 
-  const handleSubmit = useCallback(async () => {
-    if (!userTestId) {
-      toast.error("User test ID is missing.");
-      return;
-    }
+  // Fetch test details including timer duration
+  useEffect(() => {
+    const fetchTestDetails = async () => {
+      try {
+        const response = await axios.get('/kraeplin-tests');
+        const testData = response.data.find(test => test.id === 7);
 
-    setSubmitted(true);
+        if (testData && testData.duration_minutes) {
+          setTimer(testData.duration_minutes * 60);
+        } else {
+          toast.error("Failed to load test duration.");
+        }
+      } catch (error) {
+        toast.error('Failed to fetch test data.');
+        console.error('Error fetching test data:', error);
+      }
+    };
 
-    const testAnswers = Object.keys(answers).map((questionId) => {
-      const question = questions.find((q) => q.id === parseInt(questionId));
-      const selectedAnswerIndex = answers[questionId];
-      const selectedAnswer = question.answer_options[selectedAnswerIndex];
-      const isCorrect = question ? question.correct_answer === selectedAnswer : false;
+    fetchTestDetails();
+  }, []);
 
-      return {
-        user_test_id: userTestId,
-        question_id: parseInt(questionId),
-        answer: selectedAnswer,
-        is_correct: isCorrect,
-        answered_at: new Date().toISOString(),
-      };
-    });
-
-    try {
-      await axios.post("/test-answers", { answers: testAnswers });
-      toast.success("Quiz submitted successfully!");
-    } catch (error) {
-      console.error("Error submitting quiz:", error);
-      toast.error("There was an error submitting your quiz.");
-    }
-  }, [answers, questions, userTestId]);
-
+  // Fetch user test details, including start_time and end_time
   useEffect(() => {
     const fetchUserTestId = async () => {
       try {
         const response = await axios.get('/user-tests');
-        if (response.data && response.data.length > 0) {
-          setUserTestId(response.data[0].id);
+        if (response.data?.length) {
+          const userTest = response.data[0];
+          setUserTestId(userTest.id);
+
+          const currentTime = new Date();
+          const startTime = new Date(userTest.start_time);
+          const endTime = new Date(userTest.end_time);
+
+          if (currentTime >= startTime && currentTime <= endTime) {
+            setIsTimeValid(true);
+          } else {
+            toast.error('The test is not available at this time.');
+          }
         } else {
           toast.error('No user test ID found.');
         }
@@ -71,49 +73,47 @@ const Quiz = () => {
     fetchUserTestId();
   }, []);
 
+  // Fetch questions and check for previous answers
   useEffect(() => {
-    if (userTestId) {
+    if (userTestId && isTimeValid) {
       const fetchQuestions = async () => {
         try {
-          const response = await axios.get('/questions');
-          if (Array.isArray(response.data)) {
-            setQuestions(response.data);
-          } else {
-            toast.error('Received unexpected response format.');
-            console.error('Expected an array but received:', response.data);
-          }
-        } catch (error) {
-          toast.error('Failed to fetch questions.');
-          console.error('Error fetching questions:', error);
-        }
-      };
+          const [questionsResponse, submittedResponse] = await Promise.all([
+            axios.get('/questions'),
+            axios.get(`/test-answers/${userTestId}`)
+          ]);
 
-      const checkIfSubmitted = async () => {
-        try {
-          const response = await axios.get(`/test-answers/${userTestId}`);
-          if (response.data && response.data.length > 0) {
+          if (Array.isArray(questionsResponse.data)) {
+            setQuestions(questionsResponse.data);
+          } else {
+            toast.error('Received unexpected response format for questions.');
+          }
+
+          if (submittedResponse.data?.length) {
             setHasPreviousAnswers(true);
             setSubmitted(true);
             toast.info('You have already submitted this quiz.');
           }
         } catch (error) {
-          console.error('Error checking previous answers:', error);
+          toast.error('Failed to fetch questions or check previous answers.');
+          console.error('Error fetching data:', error);
         }
       };
 
       fetchQuestions();
-      checkIfSubmitted();
     }
-  }, [userTestId]);
+  }, [userTestId, isTimeValid]);
 
+  // Countdown timer
   useEffect(() => {
     if (timer > 0 && !submitted && !hasPreviousAnswers) {
       const intervalId = setInterval(() => setTimer(prevTime => prevTime - 1), 1000);
       return () => clearInterval(intervalId);
     } else if (timer === 0 && !submitted && !hasPreviousAnswers) {
-      handleSubmit();
+      handleSubmit(); // Auto-submit when the timer runs out
     }
-  }, [timer, submitted, hasPreviousAnswers, handleSubmit]);
+    // eslint-disable-next-line
+  }, [timer, submitted, hasPreviousAnswers]);
 
   const handleAnswerChange = (questionId, answerIndex) => {
     setAnswers(prevAnswers => ({
@@ -122,14 +122,46 @@ const Quiz = () => {
     }));
   };
 
+  const handleSubmit = useCallback(async () => {
+    if (!userTestId) {
+      toast.error("User test ID is missing.");
+      return;
+    }
+
+    setSubmitted(true);
+
+    const testAnswers = questions.map((question) => {
+      const selectedAnswerIndex = answers[question.id];
+      const selectedAnswer = question.answer_options[selectedAnswerIndex];
+      const isCorrect = selectedAnswer === question.correct_answer;
+
+      return {
+        user_test_id: userTestId,
+        question_id: question.id,
+        answer: selectedAnswer || null, // Use null for unanswered questions
+        is_correct: isCorrect,
+        answered_at: new Date().toISOString(),
+      };
+    }).filter(answer => answer.answer); // Only include answered questions
+
+    try {
+      await axios.post("/test-answers", { answers: testAnswers });
+      toast.success("Quiz submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+      toast.error("There was an error submitting your quiz.");
+    }
+  }, [answers, questions, userTestId]);
+
   return (
     <div className="container mx-auto p-4 bg-base-200 text-base-content">
       <ToastContainer />
       <h2 className="text-2xl font-bold mb-4">Pretest</h2>
+
+      {/* Timer component */}
       <TimerComponent timer={timer} />
 
-      {/* Conditional rendering of quiz form */}
-      {!hasPreviousAnswers && !submitted && questions.length > 0 ? (
+      {isTimeValid && !hasPreviousAnswers && !submitted && questions.length > 0 ? (
         <>
           {questions.map((question) => (
             <div key={question.id} className="question-block mb-4 p-4 border border-base-300 rounded-lg bg-base-100 shadow-md">
@@ -149,7 +181,6 @@ const Quiz = () => {
             </div>
           ))}
 
-          {/* Submit Button */}
           {!submitted && (
             <button onClick={handleSubmit} className="btn btn-primary">
               Submit

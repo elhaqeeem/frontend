@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from './axiosInstance'; // Ensure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -9,87 +9,76 @@ import Swal from 'sweetalert2';
 
 const ArticleManager = () => {
   const [articles, setArticles] = useState([]);
-  const [filteredArticles, setFilteredArticles] = useState([]); // State for filtered articles
-  const [search, setSearch] = useState(''); // State for search input
+  const [filteredArticles, setFilteredArticles] = useState([]);
+  const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [articleTitle, setArticleTitle] = useState('');
-  const [articleContent, setArticleContent] = useState('');
-  const [selectedArticle, setSelectedArticle] = useState(null);
-  const [articleId, setArticleId] = useState('');
-  // eslint-disable-next-line
-  const [userId, setUserId] = useState(1); // Simulated logged-in user ID
+  const [articleData, setArticleData] = useState({
+    title: '',
+    content: '',
+    id: '',
+  });
+  const userId = 1; // Simulated logged-in user ID
+  const quillRef = useRef(null);
 
   useEffect(() => {
     fetchArticles();
   }, []);
 
   useEffect(() => {
-    const result = articles.filter(article => 
-      article.title.toLowerCase().includes(search.toLowerCase()) ||
-      article.content.toLowerCase().includes(search.toLowerCase())
+    setFilteredArticles(
+      articles.filter(article =>
+        article.title.toLowerCase().includes(search.toLowerCase()) ||
+        article.content.toLowerCase().includes(search.toLowerCase())
+      )
     );
-    setFilteredArticles(result);
   }, [search, articles]);
 
   const fetchArticles = async () => {
     try {
       const response = await axios.get('/articles');
       setArticles(response.data.articles || []);
-      setFilteredArticles(response.data.articles || []); // Initialize filtered articles
     } catch (error) {
       toast.error('Failed to fetch articles.');
     }
   };
 
   const handleCreateOrUpdate = async () => {
-    if (!articleTitle || !articleContent) {
+    const { title, content, id } = articleData;
+
+    if (!title || !content) {
       toast.error('Title and content are required.');
       return;
     }
 
-    // Check character limit for article content
-    if (articleContent.length > 65535) {
-      toast.error('Content exceeds the maximum character limit of 65,535 characters.');
-      return;
-    }
+    const articlePayload = { title, content, author_id: userId };
 
-    const articleData = {
-      title: articleTitle,
-      content: articleContent,
-      author_id: userId,
-    };
+    const confirmationText = id ? 'update this article!' : 'create a new article!';
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: `You are about to ${confirmationText}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, proceed!',
+      cancelButtonText: 'No, cancel!',
+    });
 
-    try {
-      if (selectedArticle) {
-        const result = await Swal.fire({
-          title: 'Are you sure?',
-          text: 'You are about to update this article!',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Yes, update it!',
-          cancelButtonText: 'No, cancel!',
-        });
+    if (result.isConfirmed) {
+      try {
+        id
+          ? await axios.put(`/articles/${id}`, articlePayload)
+          : await axios.post('/articles', articlePayload);
 
-        if (result.isConfirmed) {
-          await axios.put(`/articles/${articleId}`, articleData);
-          toast.success('Article updated successfully.');
-        }
-      } else {
-        await axios.post('/articles', articleData);
-        toast.success('Article created successfully.');
+        toast.success(`Article ${id ? 'updated' : 'created'} successfully.`);
+        fetchArticles();
+        resetForm();
+      } catch (error) {
+        toast.error(`Failed to ${id ? 'update' : 'create'} article.`);
       }
-      fetchArticles();
-      resetForm();
-    } catch (error) {
-      toast.error('Failed to save article.');
     }
   };
 
   const handleEdit = (article) => {
-    setSelectedArticle(article);
-    setArticleId(article.id);
-    setArticleTitle(article.title);
-    setArticleContent(article.content);
+    setArticleData({ title: article.title, content: article.content, id: article.id });
     setIsModalOpen(true);
   };
 
@@ -115,33 +104,30 @@ const ArticleManager = () => {
   };
 
   const resetForm = () => {
-    setSelectedArticle(null);
-    setArticleTitle('');
-    setArticleContent('');
-    setArticleId('');
+    setArticleData({ title: '', content: '', id: '' });
     setIsModalOpen(false);
   };
 
   const columns = [
     {
       name: 'Title',
-      selector: (row) => row.title,
+      selector: row => row.title,
       sortable: true,
     },
     {
       name: 'Author',
-      selector: (row) => row.author_id,
+      selector: row => row.author_id,
       sortable: true,
     },
     {
       name: 'Actions',
-      cell: (row) => (
+      cell: row => (
         <div className="flex space-x-2">
           <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
-          <i className="fa fa-pencil" aria-hidden="true"></i>          </button>
+            <i className="fa fa-pencil" aria-hidden="true"></i>
+          </button>
           <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
-          <i className="fa fa-trash" aria-hidden="true"></i>
-
+            <i className="fa fa-trash" aria-hidden="true"></i>
           </button>
         </div>
       ),
@@ -154,7 +140,7 @@ const ArticleManager = () => {
     ['blockquote', 'code-block'],
     [{ list: 'ordered' }, { list: 'bullet' }],
     ['link', 'image', 'video'],
-    ['clean'], // remove formatting button
+    ['clean'],
   ];
 
   return (
@@ -169,7 +155,7 @@ const ArticleManager = () => {
             type="text"
             placeholder="Search..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={e => setSearch(e.target.value)}
             className="input input-bordered w-full max-w-xs pl-10"
           />
           <i className="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
@@ -179,34 +165,35 @@ const ArticleManager = () => {
       <DataTable
         title="Article List"
         columns={columns}
-        data={filteredArticles} // Use filtered articles
+        data={filteredArticles}
         noDataComponent="No articles available"
         pagination
         className="rounded-lg shadow-lg bg-white"
       />
 
       {isModalOpen && (
-        <div className="modal modal-open bg-dark text-white">
+        <div className="modal modal-open bg-dark text-black">
           <div className="modal-box max-w-lg mx-auto">
-            <h2 className="font-bold text-lg">{selectedArticle ? 'Edit Article' : 'Add Article'}</h2>
+            <h2 className="font-bold text-lg">{articleData.id ? 'Edit Article' : 'Add Article'}</h2>
             <input
               type="text"
               placeholder="Article Title"
-              value={articleTitle}
-              onChange={(e) => setArticleTitle(e.target.value)}
+              value={articleData.title}
+              onChange={e => setArticleData({ ...articleData, title: e.target.value })}
               className="input input-bordered w-full mb-2"
-              required  
+              required
             />
             <ReactQuill
-              value={articleContent}
-              onChange={setArticleContent}
-              modules={{ toolbar: toolbarOptions }} 
+              ref={quillRef}
+              value={articleData.content}
+              onChange={content => setArticleData({ ...articleData, content })}
+              modules={{ toolbar: toolbarOptions }}
               placeholder="Write your article content here..."
               className="mb-4 bg-white text-black"
             />
             <div className="modal-action">
               <button className="btn" onClick={handleCreateOrUpdate}>
-                {selectedArticle ? 'Update' : 'Create'}
+                {articleData.id ? 'Update' : 'Create'}
               </button>
               <button className="btn" onClick={resetForm}>
                 Cancel

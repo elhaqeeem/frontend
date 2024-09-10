@@ -11,6 +11,7 @@ const RoleDataTable = () => {
     const [roleName, setRoleName] = useState('');
     const [searchText, setSearchText] = useState('');
     const [loading, setLoading] = useState(true);
+    // eslint-disable-next-line
     const [error, setError] = useState(null);
 
     useEffect(() => {
