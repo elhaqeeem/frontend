@@ -10,32 +10,39 @@ const UserDataTable = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchText, setSearchText] = useState('');
-    // eslint-disable-next-line
-    const [selectedUser, setSelectedUser] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
-    const [newUser, setNewUser] = useState({ Username: '', Email: '' });
+    const [newUser, setNewUser] = useState({
+        username: '', email: '', password: '', first_name: '', last_name: '', RoleID: 0
+    });
 
+    // Fetch users on component mount
     useEffect(() => {
         fetchUsers();
     }, []);
 
+    // Filter users based on search text
     useEffect(() => {
-        const result = users.filter(user =>
-            user.Username.toLowerCase().includes(searchText.toLowerCase()) ||
-            user.Email.toLowerCase().includes(searchText.toLowerCase())
-        );
-        setFilteredUsers(result);
+        if (Array.isArray(users)) {
+            const result = users.filter(user => 
+                (user?.username?.toLowerCase().includes(searchText.toLowerCase())) || 
+                (user?.email?.toLowerCase().includes(searchText.toLowerCase()))
+            );
+            setFilteredUsers(result);
+        }
     }, [searchText, users]);
 
+    // Fetch users from the API
     const fetchUsers = async () => {
         const token = localStorage.getItem('token');
+        setLoading(true); // Ensure loading state is set to true when fetching
         try {
             const response = await axios.get('/users', {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setUsers(response.data.users);
-            setFilteredUsers(response.data.users);
+            console.log(response); // Debugging the response
+            setUsers(response.data.users || []); 
+            setFilteredUsers(response.data.users || []);
         } catch (error) {
             toast.error('Failed to fetch users.');
             setError(error.response ? error.response.data.error : 'An error occurred');
@@ -46,80 +53,77 @@ const UserDataTable = () => {
         }
     };
 
+    // Add a new user
     const handleAddUser = async () => {
         const token = localStorage.getItem('token');
         try {
-            const response = await axios.post('/users', newUser, {
+            await axios.post('/users', newUser, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setUsers([...users, response.data.user]);
-            setNewUser({ Username: '', Email: '' });
+            setNewUser({ username: '', email: '', password: '', first_name: '', last_name: '', RoleID: 0 });
             toast.success('User added successfully.');
-            setIsModalOpen(false);
+            fetchUsers(); // Refresh data after adding
+            setIsModalOpen(false); // Close modal after success
         } catch (error) {
             toast.error('Failed to add user.');
         }
     };
 
+    // Update an existing user
     const handleUpdateUser = async () => {
         const token = localStorage.getItem('token');
         try {
-            const response = await axios.put(`/users/${editingUser.ID}`, editingUser, {
+            await axios.put(`/users/${editingUser.ID}`, editingUser, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setUsers(users.map(user => (user.ID === editingUser.ID ? response.data.user : user)));
             toast.success('User updated successfully.');
-            setEditingUser(null);
-            setIsModalOpen(false);
+            fetchUsers(); // Refresh data after updating
+            setEditingUser(null); // Clear editing state
+            setIsModalOpen(false); // Close modal after success
         } catch (error) {
             toast.error('Failed to update user.');
         }
     };
 
+    // Delete a user
     const handleDeleteUser = async (id) => {
         const token = localStorage.getItem('token');
         try {
             await axios.delete(`/users/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setUsers(users.filter(user => user.ID !== id));
             toast.success('User deleted successfully.');
+            fetchUsers(); // Refresh data after deleting
         } catch (error) {
             toast.error('Failed to delete user.');
         }
     };
 
+    // Handle editing user action
+    const handleEdit = (user) => {
+        setEditingUser(user);
+        setIsModalOpen(true);
+    };
+
+    // Define table columns
     const columns = [
-        { name: 'ID', selector: row => row.ID, sortable: true },
-        { name: 'Username', selector: row => row.Username, sortable: true },
-        { name: 'Email', selector: row => row.Email, sortable: true },
+        { name: 'ID', selector: row => row.id, sortable: true },
+        { name: 'Username', selector: row => row.username || '', sortable: true },
+        { name: 'Email', selector: row => row.email || '', sortable: true },
         {
             name: 'Actions',
             cell: row => (
                 <div className="flex space-x-2">
-                    <button className="btn btn-outline btn-info" onClick={() => handleViewDetails(row)}>
-                        <i className="fa fa-search" aria-hidden="true"></i>
-                    </button>
                     <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
                         <i className="fa fa-pencil" aria-hidden="true"></i>
                     </button>
-                    <button className="btn btn-outline btn-error" onClick={() => handleDeleteUser(row.ID)}>
+                    <button className="btn btn-outline btn-error" onClick={() => handleDeleteUser(row.id)}>
                         <i className="fa fa-trash" aria-hidden="true"></i>
                     </button>
                 </div>
             ),
         },
     ];
-
-    const handleViewDetails = (user) => {
-        setSelectedUser(user);
-        setIsModalOpen(true);
-    };
-
-    const handleEdit = (user) => {
-        setEditingUser(user);
-        setIsModalOpen(true);
-    };
 
     return (
         <div className="container mx-auto p-4 bg-white text-black">
@@ -146,15 +150,43 @@ const UserDataTable = () => {
                                 <input
                                     type="text"
                                     placeholder="Username"
-                                    value={editingUser.Username}
-                                    onChange={e => setEditingUser({ ...editingUser, Username: e.target.value })}
+                                    value={editingUser.username || ''}
+                                    onChange={e => setEditingUser({ ...editingUser, username: e.target.value })}
                                     className="input input-bordered w-full mb-2"
                                 />
                                 <input
                                     type="email"
                                     placeholder="Email"
-                                    value={editingUser.Email}
-                                    onChange={e => setEditingUser({ ...editingUser, Email: e.target.value })}
+                                    value={editingUser.email || ''}
+                                    onChange={e => setEditingUser({ ...editingUser, email: e.target.value })}
+                                    className="input input-bordered w-full mb-2"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="Password"
+                                    value={editingUser.password || ''}
+                                    onChange={e => setEditingUser({ ...editingUser, password: e.target.value })}
+                                    className="input input-bordered w-full mb-2"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="First Name"
+                                    value={editingUser.first_name || ''}
+                                    onChange={e => setEditingUser({ ...editingUser, first_name: e.target.value })}
+                                    className="input input-bordered w-full mb-2"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Last Name"
+                                    value={editingUser.last_name || ''}
+                                    onChange={e => setEditingUser({ ...editingUser, last_name: e.target.value })}
+                                    className="input input-bordered w-full mb-2"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Role ID"
+                                    value={editingUser.RoleID || ''}
+                                    onChange={e => setEditingUser({ ...editingUser, RoleID: Number(e.target.value) })}
                                     className="input input-bordered w-full mb-2"
                                 />
                                 <div className="modal-action">
@@ -168,19 +200,47 @@ const UserDataTable = () => {
                                 <input
                                     type="text"
                                     placeholder="Username"
-                                    value={newUser.Username}
-                                    onChange={e => setNewUser({ ...newUser, Username: e.target.value })}
+                                    value={newUser.username}
+                                    onChange={e => setNewUser({ ...newUser, username: e.target.value })}
                                     className="input input-bordered w-full mb-2"
                                 />
                                 <input
                                     type="email"
                                     placeholder="Email"
-                                    value={newUser.Email}
-                                    onChange={e => setNewUser({ ...newUser, Email: e.target.value })}
+                                    value={newUser.email}
+                                    onChange={e => setNewUser({ ...newUser, email: e.target.value })}
+                                    className="input input-bordered w-full mb-2"
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="Password"
+                                    value={newUser.password}
+                                    onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                                    className="input input-bordered w-full mb-2"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="First Name"
+                                    value={newUser.first_name}
+                                    onChange={e => setNewUser({ ...newUser, first_name: e.target.value })}
+                                    className="input input-bordered w-full mb-2"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Last Name"
+                                    value={newUser.last_name}
+                                    onChange={e => setNewUser({ ...newUser, last_name: e.target.value })}
+                                    className="input input-bordered w-full mb-2"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Role ID"
+                                    value={newUser.RoleID}
+                                    onChange={e => setNewUser({ ...newUser, RoleID: Number(e.target.value) })}
                                     className="input input-bordered w-full mb-2"
                                 />
                                 <div className="modal-action">
-                                    <button className="btn btn-warning" onClick={handleAddUser}>Add User</button>
+                                    <button className="btn btn-primary" onClick={handleAddUser}>Add User</button>
                                     <button className="btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
                                 </div>
                             </>
@@ -189,13 +249,12 @@ const UserDataTable = () => {
                 </div>
             )}
             <DataTable
-                title="User List"
+                title="Users"
                 columns={columns}
                 data={filteredUsers}
                 progressPending={loading}
-                noDataComponent="No users available"
                 pagination
-                className="rounded-lg shadow-lg bg-white"
+                key={users.length} // Force re-render when users data changes
             />
         </div>
     );

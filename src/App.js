@@ -15,6 +15,7 @@ import KraeplinTestManager from './KraeplinTestManager'; // Import the RoleDataT
 import QuestionManager from './QuestionManager'; // Import the RoleDataTable component
 import UserTestManager from './UserTestManager';
 import TestAnswerManager from './TestAnswers';
+import TestResultManager from './TestResultManager';
 
 import { ToastContainer } from 'react-toastify';
 import 'font-awesome/css/font-awesome.min.css';
@@ -206,6 +207,18 @@ function App() {
                             element={
                                 <Layout>
                                     <Quiz /> {/* Render the RoleDataTable component */}
+                                </Layout>
+                            } 
+                        />
+                    } 
+                />
+                <Route 
+                    path="/resulttest" // New route for managing roles
+                    element={
+                        <PrivateRoute 
+                            element={
+                                <Layout>
+                                    <TestResultManager /> {/* Render the RoleDataTable component */}
                                 </Layout>
                             } 
                         />

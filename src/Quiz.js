@@ -6,7 +6,7 @@ import { FaStopwatch } from 'react-icons/fa'; // Import icon
 
 const TimerComponent = ({ timer }) => (
   <div className="flex justify-center mb-4">
-    <span className="badge badge-error">
+    <span className="badge badge-warning">
       <FaStopwatch className="mr-2" />
       Time left: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')}
     </span>

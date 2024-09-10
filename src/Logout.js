@@ -29,8 +29,8 @@ function Logout() {
     };
 
     return (
-        <button onClick={handleLogout} className="block py-2 px-4 hover:bg-gray-700">
-            Logout
+        <button onClick={handleLogout} className="btn btn-outline btn-primary">
+            <i className="fa fa-sign-out" aria-hidden="true"></i> {/* This is the logout icon */}
         </button>
     );
 }

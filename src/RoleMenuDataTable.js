@@ -100,8 +100,8 @@ const RoleMenuDataTable = () => {
             name: 'Actions',
             cell: row => (
                 <>
-                    <button className="btn btn-sm btn-primary" onClick={() => handleEdit(row)}>Edit</button>
-                    <button className="btn btn-sm btn-danger ml-2" onClick={() => handleDelete(row.id)}>Delete</button>
+                    <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}><i className="fa fa-pencil" aria-hidden="true"></i></button>
+                    <button className="btn btn-outline btn-error ml-2" onClick={() => handleDelete(row.id)}><i className="fa fa-trash" aria-hidden="true"></i></button>
                 </>
             ),
         },

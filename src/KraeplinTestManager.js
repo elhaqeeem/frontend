@@ -147,10 +147,11 @@ const KraeplinTestManager = () => {
       cell: (row) => (
         <div className="flex space-x-2">
           <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
-            Edit
+          <i className="fa fa-pencil" aria-hidden="true"></i>
           </button>
           <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
-            Delete
+          <i className="fa fa-trash" aria-hidden="true"></i>
+
           </button>
         </div>
       ),

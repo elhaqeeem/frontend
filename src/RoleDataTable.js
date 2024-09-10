@@ -130,7 +130,6 @@ const RoleDataTable = () => {
             />
             
             </div>
-            {error && <p className="text-red-500">{error}</p>}
             <DataTable
                 title="Role List"
                 columns={columns}
