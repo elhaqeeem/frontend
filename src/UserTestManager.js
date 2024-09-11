@@ -108,6 +108,7 @@ const UserTestManager = () => {
     setEndTime(new Date(test.end_time));
     setIsModalOpen(true);
   };
+  
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -175,6 +176,11 @@ const UserTestManager = () => {
 
   const columns = [
     {
+      name: 'ID',
+      selector: (row) => row.id,
+      sortable: true,
+    },
+    {
       name: 'User ID',
       selector: (row) => row.user_id,
       sortable: true,
@@ -186,12 +192,26 @@ const UserTestManager = () => {
     },
     {
       name: 'Start Time',
-      selector: (row) => row.start_time,
+      selector: (row) => new Date(row.start_time).toLocaleString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
       sortable: true,
     },
     {
       name: 'End Time',
-      selector: (row) => row.end_time,
+      selector: (row) => new Date(row.end_time).toLocaleString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
       sortable: true,
     },
     {
@@ -199,11 +219,10 @@ const UserTestManager = () => {
       cell: (row) => (
         <div className="flex space-x-2">
           <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
-          <i className="fa fa-pencil" aria-hidden="true"></i>
+            <i className="fa fa-pencil" aria-hidden="true"></i>
           </button>
           <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
-          <i className="fa fa-trash" aria-hidden="true"></i>
-
+            <i className="fa fa-trash" aria-hidden="true"></i>
           </button>
         </div>
       ),
@@ -274,36 +293,30 @@ const UserTestManager = () => {
               ))}
             </select>
 
-            <div className="flex flex-col space-y-2 mt-4">
-              <label>Start Time</label>
-              <DatePicker
-                selected={startTime}
-                onChange={(date) => setStartTime(date)}
-                showTimeSelect
-                timeFormat="HH:mm"
-                timeIntervals={15}
-                dateFormat="MMMM d, yyyy h:mm aa"
-                className="input input-bordered w-full"
-              />
+            {/* Start Time */}
+            <DatePicker
+              selected={startTime}
+              onChange={(date) => setStartTime(date)}
+              showTimeSelect
+              dateFormat="Pp"
+              className="input input-bordered w-full"
+            />
 
-              <label>End Time</label>
-              <DatePicker
-                selected={endTime}
-                onChange={(date) => setEndTime(date)}
-                showTimeSelect
-                timeFormat="HH:mm"
-                timeIntervals={15}
-                dateFormat="MMMM d, yyyy h:mm aa"
-                className="input input-bordered w-full"
-              />
-            </div>
+            {/* End Time */}
+            <DatePicker
+              selected={endTime}
+              onChange={(date) => setEndTime(date)}
+              showTimeSelect
+              dateFormat="Pp"
+              className="input input-bordered w-full"
+            />
 
             <div className="modal-action">
-              <button className="btn btn-primary" onClick={saveUserTest}>
-                {selectedTest ? 'Update' : 'Save'}
+              <button className="btn btn-outline btn-success" onClick={saveUserTest}>
+                {selectedTest ? 'Update' : 'Create'}
               </button>
-              <button className="btn" onClick={() => setIsModalOpen(false)}>
-                Close
+              <button className="btn btn-outline btn-danger" onClick={resetForm}>
+                Cancel
               </button>
             </div>
           </div>

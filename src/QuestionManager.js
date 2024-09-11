@@ -204,6 +204,11 @@ const QuestionManager = () => {
 
   const columns = [
     {
+      name: 'Id',
+      selector: (row) => row.id,
+      sortable: true,
+    },
+    {
       name: 'Test ID',
       selector: (row) => row.kraeplin_test_id,
       sortable: true,
