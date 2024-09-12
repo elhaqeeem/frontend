@@ -258,6 +258,9 @@ const UserTestManager = () => {
         data={filteredUserTests}
         selectableRows
         onSelectedRowsChange={({ selectedRows }) => setSelectedRows(selectedRows)}
+        pagination
+        className="rounded-lg shadow-lg bg-white"
+        title="User Test List"
       />
 
       {isModalOpen && (

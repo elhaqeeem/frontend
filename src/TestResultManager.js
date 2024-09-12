@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 const TestResultManager = () => {
   const [testResults, setTestResults] = useState([]);
   const [search, setSearch] = useState('');
+  const [searchDate, setSearchDate] = useState(''); // New state for date search
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [testResult, setTestResult] = useState({
     userTestId: '',
@@ -34,6 +35,28 @@ const TestResultManager = () => {
     } catch (error) {
       toast.error('Failed to fetch test result.');
       console.error('Error fetching test result:', error);
+    }
+  };
+
+  const fetchTestResultsByDate = async () => {
+    if (!searchDate) {
+      toast.error('Please select a date.');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`/test-answers/by-date`, {
+        params: { date: searchDate },
+      });
+      if (response.data && response.data.length > 0) {
+        setTestResults(response.data);
+      } else {
+        setTestResults([]);
+        toast.info('No test results found for the selected date.');
+      }
+    } catch (error) {
+      toast.error('Failed to fetch test results by date.');
+      console.error('Error fetching test results by date:', error);
     }
   };
 
@@ -106,10 +129,10 @@ const TestResultManager = () => {
       cell: (row) => (
         <div className="flex space-x-2">
           <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
-            Edit
+          <i className="fa fa-pencil" aria-hidden="true"></i>
           </button>
-          <button className="btn btn-outline btn-danger" onClick={() => handleDelete(row.id)}>
-            Delete
+          <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
+          <i className="fa fa-trash" aria-hidden="true"></i>
           </button>
         </div>
       ),
@@ -132,11 +155,26 @@ const TestResultManager = () => {
             Search
           </button>
         </div>
+        <div className="flex space-x-2">
+          <input
+            type="date"
+            value={searchDate}
+            onChange={(e) => setSearchDate(e.target.value)}
+            className="input input-bordered w-full max-w-xs"
+          />
+          <button className="btn btn-outline btn-primary" onClick={fetchTestResultsByDate}>
+            Search by Date
+          </button>
+        </div>
       </div>
-      <DataTable
-        columns={columns}
-        data={testResults}
-        selectableRows
+      <DataTable 
+      columns={columns}
+      data={testResults} 
+      selectableRows
+       pagination
+        className="rounded-lg shadow-lg bg-white"
+        title="Answer Result List"
+
       />
 
       {/* Modal for Add/Edit Test Result */}
@@ -183,6 +221,9 @@ const TestResultManager = () => {
             <div className="modal-action">
               <button className="btn" onClick={resetForm}>
                 Cancel
+              </button>
+              <button className="btn btn-primary" onClick={() => {/* Add save logic here */}}>
+                Save
               </button>
             </div>
           </div>

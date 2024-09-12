@@ -152,7 +152,9 @@ const Quiz = () => {
   };
 
   const handleSubmit = useCallback(async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    if (e && e.preventDefault) {
+        e.preventDefault(); // Prevent default form submission behavior
+    }
 
     if (!idToSubmit) { // Check if idToSubmit is available
         toast.error("ID yang akan disubmit tidak ada.");

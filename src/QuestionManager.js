@@ -280,6 +280,9 @@ const QuestionManager = () => {
         data={filteredQuestions}
         selectableRows
         onSelectedRowsChange={({ selectedRows }) => setSelectedRows(selectedRows)}
+        pagination
+        className="rounded-lg shadow-lg bg-white"
+        title="Question Test List"
       />
       
       {/* Modal for Add/Edit Question */}

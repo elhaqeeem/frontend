@@ -216,6 +216,10 @@ const TestAnswerManager = () => {
         data={filteredTestAnswers}
         selectableRows
         onSelectedRowsChange={({ selectedRows }) => setSelectedRows(selectedRows)}
+         pagination
+        className="rounded-lg shadow-lg bg-white"
+        title="Answer List"
+
       />
 
       {isModalOpen && (
