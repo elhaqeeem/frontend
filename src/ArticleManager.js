@@ -20,12 +20,34 @@ const ArticleManager = () => {
   });
   const [selectedRows, setSelectedRows] = useState([]); // State for selected rows
   const [selectAll, setSelectAll] = useState(false); // State for select all checkbox
-  const userId = 1; // Simulated logged-in user ID
-  const quillRef = useRef(null);
+  const [permissions, setPermissions] = useState([]); // State to track permissions
+  const [userId, setUserId] = useState(null); // State to hold user ID
 
   useEffect(() => {
+    // Retrieve userId from local storage
+    const storedUserId = localStorage.getItem('id');
+    setUserId(storedUserId); // Store userId in state
+
     fetchArticles();
+    if (storedUserId) {
+      fetchPermissions(storedUserId); // Fetch permissions for the user
+    }
   }, []);
+
+  const quillRef = useRef(null);
+  // Define the full toolbar options
+  const toolbarOptions = [
+    [{ 'font': [] }],
+    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+    ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+    [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+    [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+    [{ 'align': [] }],
+    ['link', 'image', 'video'],                       // media
+    ['clean']                                         // remove formatting button
+];
 
   useEffect(() => {
     setFilteredArticles(
@@ -36,6 +58,7 @@ const ArticleManager = () => {
     );
   }, [search, articles]);
 
+  
   const fetchArticles = async () => {
     try {
       const response = await axios.get('/articles');
@@ -45,7 +68,26 @@ const ArticleManager = () => {
     }
   };
 
+  const fetchPermissions = async (userId) => {
+    try {
+      const response = await axios.get(`/roles/${userId}/permissions`);
+      setPermissions(response.data.permissions || []);
+    } catch (error) {
+      toast.error('Failed to fetch user permissions.');
+    }
+  };
+
+  const hasPermission = (permissionName) => {
+    return permissions.some((permission) => permission.permission_name === permissionName);
+  };
+  
+
   const handleCreateOrUpdate = async () => {
+    if (!hasPermission('create_article')) {
+      toast.error('You do not have permission to create or update articles.');
+      return;
+    }
+
     const { title, content, id, tags } = articleData;
 
     if (!title || !content) {
@@ -53,8 +95,13 @@ const ArticleManager = () => {
       return;
     }
 
-    const articlePayload = { title, content, tags, author_id: userId };
-
+    const articlePayload = { 
+        title, 
+        content, 
+        tags, 
+        author_id: parseInt(userId, 10) // Convert userId to an integer
+    };
+    
     const confirmationText = id ? 'update this article!' : 'create a new article!';
     const result = await Swal.fire({
       title: 'Are you sure?',
@@ -81,6 +128,11 @@ const ArticleManager = () => {
   };
 
   const handleEdit = (article) => {
+    if (!hasPermission('edit_article')) {
+      toast.error('You do not have permission to edit articles.');
+      return;
+    }
+
     setArticleData({
       title: article.title,
       content: article.content,
@@ -91,6 +143,11 @@ const ArticleManager = () => {
   };
 
   const handleDelete = async (id) => {
+    if (!hasPermission('delete_article')) {
+      toast.error('You do not have permission to delete articles.');
+      return;
+    }
+
     const result = await Swal.fire({
       title: 'Are you sure?',
       text: 'You are about to delete this article!',
@@ -184,30 +241,44 @@ const ArticleManager = () => {
       sortable: true,
     },
     {
-      name: 'Actions',
-      cell: (row) => (
-        <div className="flex space-x-2">
-          <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
-            <i className="fa fa-pencil" aria-hidden="true"></i>
-          </button>
-          <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
-            <i className="fa fa-trash" aria-hidden="true"></i>
-          </button>
-        </div>
-      ),
-    },
+        name: 'Actions',
+        cell: (row) => (
+          <div className="flex space-x-2">
+            {hasPermission('edit_article') && (
+              <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
+                <i className="fa fa-pencil" aria-hidden="true"></i>
+              </button>
+            )}
+            {hasPermission('delete_article') && (
+              <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
+                <i className="fa fa-trash" aria-hidden="true"></i>
+              </button>
+            )}
+          </div>
+        ),
+      },
   ];
 
   return (
     <div className="container mx-auto p-4 bg-white text-black">
       <ToastContainer position="top-right" />
       <div className="flex justify-between items-center mb-4">
-        <button className="btn btn-outline btn-primary" onClick={() => setIsModalOpen(true)}>
-          Add Article
-        </button>
+      <div className="flex justify-between items-center mb-4">
+        {hasPermission('create_article') && (
+          <button className="btn btn-outline btn-primary" onClick={() => setIsModalOpen(true)}>
+            Add Article
+          </button>
+        )}
+        {/* Other UI elements like Bulk Delete and Search */}
+      </div>
+      <div className="flex justify-between items-center mb-4">
+      {hasPermission('delete_bulk_article') && (
         <button className="btn btn-outline btn-danger" onClick={handleBulkDelete}>
           Bulk Delete
         </button>
+         )}
+        {/* Other UI elements like Bulk Delete and Search */}
+        </div>
         <div className="relative">
           <input
             type="text"
@@ -269,10 +340,14 @@ const ArticleManager = () => {
               required
             />
             <ReactQuill
-              ref={quillRef}
-              value={articleData.content}
-              onChange={(content) => setArticleData({ ...articleData, content })}
-              className="mb-4"
+                ref={quillRef}
+                value={articleData.content}
+                onChange={(content) => setArticleData({ ...articleData, content })}
+                className="mb-4"
+                modules={{
+                    toolbar: toolbarOptions,
+                }}
+                theme="snow"
             />
             <div className="modal-action">
               <button className="btn" onClick={resetForm}>Cancel</button>

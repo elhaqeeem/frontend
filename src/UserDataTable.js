@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from './axiosInstance'; // Ensure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 import 'react-toastify/dist/ReactToastify.css';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import DataTable from 'react-data-table-component';
 
 const UserDataTable = () => {
@@ -16,12 +18,10 @@ const UserDataTable = () => {
         username: '', email: '', password: '', first_name: '', last_name: '', RoleID: 0
     });
 
-    // Fetch users on component mount
     useEffect(() => {
         fetchUsers();
     }, []);
 
-    // Filter users based on search text
     useEffect(() => {
         if (Array.isArray(users)) {
             const result = users.filter(user => 
@@ -32,16 +32,14 @@ const UserDataTable = () => {
         }
     }, [searchText, users]);
 
-    // Fetch users from the API
     const fetchUsers = async () => {
         const token = localStorage.getItem('token');
-        setLoading(true); // Ensure loading state is set to true when fetching
+        setLoading(true);
         try {
             const response = await axios.get('/users', {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            console.log(response); // Debugging the response
-            setUsers(response.data.users || []); 
+            setUsers(response.data.users || []);
             setFilteredUsers(response.data.users || []);
         } catch (error) {
             toast.error('Failed to fetch users.');
@@ -53,59 +51,90 @@ const UserDataTable = () => {
         }
     };
 
-    // Add a new user
-    const handleAddUser = async () => {
-        const token = localStorage.getItem('token');
-        try {
-            await axios.post('/users', newUser, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setNewUser({ username: '', email: '', password: '', first_name: '', last_name: '', RoleID: 0 });
-            toast.success('User added successfully.');
-            fetchUsers(); // Refresh data after adding
-            setIsModalOpen(false); // Close modal after success
-        } catch (error) {
-            toast.error('Failed to add user.');
-        }
+    const handleAddUser = () => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You are about to add a new user.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, add it!'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const token = localStorage.getItem('token');
+                try {
+                    await axios.post('/users', newUser, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    setNewUser({ username: '', email: '', password: '', first_name: '', last_name: '', RoleID: 0 });
+                    toast.success('User added successfully.');
+                    fetchUsers();
+                    setIsModalOpen(false);
+                } catch (error) {
+                    toast.error('Failed to add user.');
+                }
+            }
+        });
     };
 
-    // Update an existing user
-    const handleUpdateUser = async () => {
-        const token = localStorage.getItem('token');
-        try {
-            await axios.put(`/users/${editingUser.ID}`, editingUser, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            toast.success('User updated successfully.');
-            fetchUsers(); // Refresh data after updating
-            setEditingUser(null); // Clear editing state
-            setIsModalOpen(false); // Close modal after success
-        } catch (error) {
-            toast.error('Failed to update user.');
-        }
+    const handleUpdateUser = () => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You are about to update the user.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, update it!'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const token = localStorage.getItem('token');
+                try {
+                    await axios.put(`/users/${editingUser.ID}`, editingUser, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    toast.success('User updated successfully.');
+                    fetchUsers();
+                    setEditingUser(null);
+                    setIsModalOpen(false);
+                } catch (error) {
+                    toast.error('Failed to update user.');
+                }
+            }
+        });
     };
 
-    // Delete a user
-    const handleDeleteUser = async (id) => {
-        const token = localStorage.getItem('token');
-        try {
-            await axios.delete(`/users/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            toast.success('User deleted successfully.');
-            fetchUsers(); // Refresh data after deleting
-        } catch (error) {
-            toast.error('Failed to delete user.');
-        }
+    const handleDeleteUser = (id) => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const token = localStorage.getItem('token');
+                try {
+                    await axios.delete(`/users/${id}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    toast.success('User deleted successfully.');
+                    fetchUsers();
+                } catch (error) {
+                    toast.error('Failed to delete user.');
+                }
+            }
+        });
     };
 
-    // Handle editing user action
     const handleEdit = (user) => {
         setEditingUser(user);
         setIsModalOpen(true);
     };
 
-    // Define table columns
     const columns = [
         { name: 'ID', selector: row => row.id, sortable: true },
         { name: 'Username', selector: row => row.username || '', sortable: true },
@@ -249,12 +278,12 @@ const UserDataTable = () => {
                 </div>
             )}
             <DataTable
-                title="Users"
                 columns={columns}
                 data={filteredUsers}
                 progressPending={loading}
                 pagination
-                key={users.length} // Force re-render when users data changes
+                className="rounded-lg shadow-lg bg-white"
+
             />
         </div>
     );

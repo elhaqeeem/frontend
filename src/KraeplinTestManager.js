@@ -43,13 +43,13 @@ const KraeplinTestManager = () => {
       return;
     }
   
-    const formattedTestDate = new Date(testDate).toISOString(); // This will convert it to "YYYY-MM-DDTHH:MM:SSZ"
+    const formattedTestDate = new Date(testDate).toISOString(); // Convert to ISO format
   
     const testData = {
       test_date: formattedTestDate,
-      duration_minutes: parseInt(durationMinutes, 10),
+      duration_minutes: parseInt(durationMinutes, 10), // Ensure it's an integer
       description,
-      id: testId, // Include the test ID here for updates
+      id: testId ? parseInt(testId, 10) : undefined, // Ensure id is an integer or undefined for new entries
     };
   
     try {
@@ -64,7 +64,7 @@ const KraeplinTestManager = () => {
         });
   
         if (result.isConfirmed) {
-          await axios.put(`/kraeplin-tests/${testId}`, testData); // Use testId here
+          await axios.put(`/kraeplin-tests/${testId}`, testData); // Use the testId here as a number
           toast.success('Test updated successfully.');
         }
       } else {
@@ -77,6 +77,7 @@ const KraeplinTestManager = () => {
       toast.error('Failed to save test.');
     }
   };
+  
   
 
   const handleEdit = (test) => {

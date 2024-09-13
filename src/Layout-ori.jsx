@@ -78,6 +78,7 @@ const Layout = ({ children }) => {
         setCurrentTheme(e.target.value); // Update current theme based on dropdown selection
     };
 
+    // eslint-disable-next-line
     const handleToggle = (id) => {
         setOpenMenu((prevState) => ({
             ...prevState,
@@ -146,9 +147,9 @@ const Layout = ({ children }) => {
             {/* Topbar navigation menu */}
             <nav className={`navbar sticky top-0 z-50 ${currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} px-4 shadow-md`}>
                 <div className="flex-1">
-                    <a className="text-2xl font-bold">
-                        <i className="fa fa-globe" aria-hidden="true"></i> Edu<strong>LMS</strong>
-                    </a>
+                <button className="text-2xl font-bold">
+    <i className="fa fa-globe" aria-hidden="true"></i> Edu<strong>LMS</strong>
+</button>
                 </div>
                 <div className="flex-none">
                 <select onChange={handleThemeChange} value={currentTheme} className="select select-bordered mr-4">

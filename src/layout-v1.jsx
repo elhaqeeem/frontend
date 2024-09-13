@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// eslint-disable-next-line
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // Added useNavigate
 import Logout from './Logout';
 import axios from 'axios';
@@ -139,7 +140,7 @@ const Layout = ({ children }) => {
         return (
             <li key={menu.id} className="dropdown dropdown-hover">
                 <div className="cursor-pointer flex items-center justify-between">
-                    <a
+                    <button
                         onClick={() => handleMenuClick(menu)}
                         className={`transition-colors duration-200 ease-in-out dropdown-toggle ${
                             location.pathname === menu.url ? 'bg-gray-700 text-white' : 'hover:bg-gray-800 hover:text-white'
@@ -147,7 +148,7 @@ const Layout = ({ children }) => {
                     >
                         <i className={menu.icon_name} aria-hidden="true"></i>
                         <span className="ml-2">{menu.menu_name}</span>
-                    </a>
+                    </button>
                     {hasChildren && (
                         <label tabIndex={0} className="ml-2 btn btn-ghost btn-circle" onClick={() => handleToggle(menu.id)}>
                             {openMenu[menu.id] ? '-' : '+'}
@@ -178,9 +179,10 @@ const Layout = ({ children }) => {
 
             <nav className={`navbar sticky top-0 z-50 ${currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} px-4 shadow-md`}>
                 <div className="flex-1">
-                    <a className="text-2xl font-bold">
-                        <i className="fa fa-globe" aria-hidden="true"></i> Edu<strong>LMS</strong>
-                    </a>
+             <button className="text-2xl font-bold">
+    <i className="fa fa-globe" aria-hidden="true"></i> Edu<strong>LMS</strong>
+</button>
+
                 </div>
                 <div className="flex-none">
                     <select onChange={handleThemeChange} value={currentTheme} className="select select-bordered mr-4">

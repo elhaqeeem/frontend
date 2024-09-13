@@ -20,53 +20,12 @@ const ArticleManager = () => {
   });
   const [selectedRows, setSelectedRows] = useState([]); // State for selected rows
   const [selectAll, setSelectAll] = useState(false); // State for select all checkbox
-  const [userId, setUserId] = useState(null); // State for userId
-  const [userPermissions, setUserPermissions] = useState([]); // Store user permissions
+  const userId = 1; // Simulated logged-in user ID
   const quillRef = useRef(null);
 
-  // Fetch user ID and permissions from localStorage on component mount
   useEffect(() => {
-    const storedUserId = localStorage.getItem('id');
-    const storedPermissions = JSON.parse(localStorage.getItem('permissions')) || [];
-
-    if (storedUserId) {
-      setUserId(storedUserId);
-    }
-
-    // Map permissions to permission names
-    const permissionNames = storedPermissions.map((permission) => permission.permission_name);
-    setUserPermissions(permissionNames);
-
-    // Fetch articles after setting user permissions
     fetchArticles();
   }, []);
-
-  useEffect(() => {
-    const storedUserId = localStorage.getItem('id');
-  
-    const fetchPermissions = async (roleId) => {
-      try {
-        const response = await axios.get(`/roles/${roleId}/permissions`);
-        const permissions = response.data.permissions;
-        setUserPermissions(permissions); // Update state
-        localStorage.setItem('permissions', JSON.stringify(permissions)); // Optionally store in localStorage
-      } catch (error) {
-        toast.error('Failed to fetch permissions.');
-      }
-    };
-  
-    if (storedUserId) {
-      setUserId(storedUserId);
-      fetchPermissions(storedUserId); // Replace with the actual role ID
-    }
-  
-    fetchArticles(); // Fetch articles after setting user permissions
-  }, []);
-  
-  // Check if user has a specific permission
-  const hasPermission = (permissionName) => {
-    return userPermissions.includes(permissionName);
-  };
 
   useEffect(() => {
     setFilteredArticles(
@@ -108,19 +67,9 @@ const ArticleManager = () => {
 
     if (result.isConfirmed) {
       try {
-        if (id) {
-          if (!hasPermission('edit_article')) {
-            toast.error('You do not have permission to edit this article.');
-            return;
-          }
-          await axios.put(`/articles/${id}`, articlePayload);
-        } else {
-          if (!hasPermission('create_article')) {
-            toast.error('You do not have permission to create a new article.');
-            return;
-          }
-          await axios.post('/articles', articlePayload);
-        }
+        id
+          ? await axios.put(`/articles/${id}`, articlePayload)
+          : await axios.post('/articles', articlePayload);
 
         toast.success(`Article ${id ? 'updated' : 'created'} successfully.`);
         fetchArticles();
@@ -132,10 +81,6 @@ const ArticleManager = () => {
   };
 
   const handleEdit = (article) => {
-    if (!hasPermission('edit_article')) {
-      toast.error('You do not have permission to edit this article.');
-      return;
-    }
     setArticleData({
       title: article.title,
       content: article.content,
@@ -146,11 +91,6 @@ const ArticleManager = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!hasPermission('delete_article')) {
-      toast.error('You do not have permission to delete this article.');
-      return;
-    }
-
     const result = await Swal.fire({
       title: 'Are you sure?',
       text: 'You are about to delete this article!',
@@ -178,11 +118,6 @@ const ArticleManager = () => {
 
   // Bulk delete handler
   const handleBulkDelete = async () => {
-    if (!hasPermission('delete_article')) {
-      toast.error('You do not have permission to delete articles.');
-      return;
-    }
-
     if (selectedRows.length === 0) {
       toast.error('No articles selected for deletion.');
       return;
@@ -252,16 +187,12 @@ const ArticleManager = () => {
       name: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
-          {hasPermission('edit_article') && (
-            <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
-              <i className="fa fa-pencil" aria-hidden="true"></i>
-            </button>
-          )}
-          {hasPermission('delete_article') && (
-            <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
-              <i className="fa fa-trash" aria-hidden="true"></i>
-            </button>
-          )}
+          <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
+            <i className="fa fa-pencil" aria-hidden="true"></i>
+          </button>
+          <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
+            <i className="fa fa-trash" aria-hidden="true"></i>
+          </button>
         </div>
       ),
     },
@@ -271,16 +202,12 @@ const ArticleManager = () => {
     <div className="container mx-auto p-4 bg-white text-black">
       <ToastContainer position="top-right" />
       <div className="flex justify-between items-center mb-4">
-        {hasPermission('create_article') && (
-          <button className="btn btn-outline btn-primary" onClick={() => setIsModalOpen(true)}>
-            Add Article
-          </button>
-        )}
-        {hasPermission('delete_article') && (
-          <button className="btn btn-outline btn-danger" onClick={handleBulkDelete}>
-            Bulk Delete
-          </button>
-        )}
+        <button className="btn btn-outline btn-primary" onClick={() => setIsModalOpen(true)}>
+          Add Article
+        </button>
+        <button className="btn btn-outline btn-danger" onClick={handleBulkDelete}>
+          Bulk Delete
+        </button>
         <div className="relative">
           <input
             type="text"
@@ -294,48 +221,63 @@ const ArticleManager = () => {
       </div>
 
       <DataTable
-        columns={columns}
+        title="Article List"
+        columns={[
+          {
+            name: 'Select All',
+            cell: () => (
+              <input
+                type="checkbox"
+                checked={selectAll}
+                onChange={() => {
+                  const newSelectedRows = selectAll ? [] : filteredArticles.map((article) => article.id);
+                  setSelectedRows(newSelectedRows);
+                  setSelectAll(!selectAll);
+                }}
+              />
+            ),
+            width: '100px',
+          },
+          ...columns, // Spread the existing columns
+        ]}
         data={filteredArticles}
+        noDataComponent="No articles available"
         pagination
-        selectableRows
-        onSelectedRowsChange={({ selectedRows }) => setSelectedRows(selectedRows.map((row) => row.id))}
-        selectableRowsComponentProps={{
-          type: 'checkbox',
-          checked: selectAll,
-          onChange: (e) => setSelectAll(e.target.checked),
-        }}
+        className="rounded-lg shadow-lg bg-white"
       />
 
-      {/* Article Modal */}
       {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h2>{articleData.id ? 'Edit Article' : 'Create Article'}</h2>
+        <div className="modal modal-open bg-dark text-black">
+          <div className="modal-box max-w-lg mx-auto">
+            <h2 className="font-bold text-lg">
+              {articleData.id ? 'Edit Article' : 'Add Article'}
+            </h2>
             <input
               type="text"
-              placeholder="Title"
+              placeholder="Article Title"
               value={articleData.title}
               onChange={(e) => setArticleData({ ...articleData, title: e.target.value })}
-              className="input input-bordered w-full mb-4"
+              className="input input-bordered w-full mb-2"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Article Tags"
+              value={articleData.tags}
+              onChange={(e) => setArticleData({ ...articleData, tags: e.target.value })}
+              className="input input-bordered w-full mb-2"
+              required
             />
             <ReactQuill
               ref={quillRef}
               value={articleData.content}
-              onChange={(value) => setArticleData({ ...articleData, content: value })}
-            />
-            <input
-              type="text"
-              placeholder="Tags"
-              value={articleData.tags}
-              onChange={(e) => setArticleData({ ...articleData, tags: e.target.value })}
-              className="input input-bordered w-full mb-4"
+              onChange={(content) => setArticleData({ ...articleData, content })}
+              className="mb-4"
             />
             <div className="modal-action">
+              <button className="btn" onClick={resetForm}>Cancel</button>
               <button className="btn btn-primary" onClick={handleCreateOrUpdate}>
-                {articleData.id ? 'Update Article' : 'Create Article'}
-              </button>
-              <button className="btn btn-outline" onClick={resetForm}>
-                Cancel
+                {articleData.id ? 'Update' : 'Create'}
               </button>
             </div>
           </div>
