@@ -12,7 +12,7 @@ const QuestionManager = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false); // Bulk modal state
   const [questionText, setQuestionText] = useState('');
-  const [correctAnswer, setCorrectAnswer] = useState('');
+  const [correctAnswer, setCorrectAnswer] = useState([]);
   const [answerOptions, setAnswerOptions] = useState([]); // Use consistent naming
   const [kraeplinTestId, setKraeplinTestId] = useState('');
   const [selectedQuestion, setSelectedQuestion] = useState(null);
@@ -94,15 +94,30 @@ const QuestionManager = () => {
     setAnswerOptions([...answerOptions, '']);
   };
 
+  const addCorrectAnswerOption = () => {
+    setCorrectAnswer([...correctAnswer, '']);
+  };
+
   const updateAnswerOption = (index, value) => {
     const newOptions = [...answerOptions];
     newOptions[index] = value;
     setAnswerOptions(newOptions);
   };
 
+  const updateCorectAnswerOption = (index, value) => {
+    const newOptions = [...correctAnswer];
+    newOptions[index] = value;
+    setCorrectAnswer(newOptions);
+  };
+
   const removeAnswerOption = (index) => {
     const newOptions = answerOptions.filter((_, i) => i !== index);
     setAnswerOptions(newOptions);
+  };
+
+  const removeCorrectAnswerOption = (index) => {
+    const newOptions = correctAnswer.filter((_, i) => i !== index);
+    setCorrectAnswer(newOptions);
   };
 
   const handleDelete = async (id) => {
@@ -131,7 +146,7 @@ const QuestionManager = () => {
     setSelectedQuestion(null);
     setKraeplinTestId('');
     setQuestionText('');
-    setCorrectAnswer(''); // Reset to empty string
+    setCorrectAnswer([]); // Reset to empty string
     setQuestionId('');
     setAnswerOptions([]);
     setIsModalOpen(false);
@@ -154,7 +169,7 @@ const QuestionManager = () => {
         kraeplin_test_id: Number(parts[0]), // Convert to number
         question_text: parts[1],
         answer_options: parts[2].split('|').map((option) => option.trim()),
-        correct_answer: parts[3],
+        correct_answer: parts[3].split('|').map((option) => option.trim()),
       };
     });
 
@@ -227,7 +242,7 @@ const QuestionManager = () => {
     },
     {
       name: 'Correct Answer',
-      selector: (row) => row.correct_answer,
+      selector: (row) => Array.isArray(row.correct_answer) ? row.correct_answer.join(', ') : row.correct_answer,
       sortable: true,
     },
     {
@@ -338,14 +353,27 @@ const QuestionManager = () => {
             </div>
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Correct Answer</span>
+                <span className="label-text">Correct Answer Options</span>
               </label>
-              <input
-                type="text"
-                value={correctAnswer}
-                onChange={(e) => setCorrectAnswer(e.target.value)}
-                className="input input-bordered"
-              />
+              {correctAnswer.map((option, index) => (
+                <div key={index} className="flex space-x-2 mb-2">
+                  <input
+                    type="text"
+                    value={option}
+                    onChange={(e) => updateCorectAnswerOption(index, e.target.value)}
+                    className="input input-bordered flex-grow"
+                  />
+                  <button
+                    className="btn btn-outline btn-error"
+                    onClick={() => removeCorrectAnswerOption(index)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button className="btn btn-outline btn-primary" onClick={addCorrectAnswerOption}>
+                Add Correct Answer Option
+              </button>
             </div>
             <div className="modal-action">
               <button className="btn" onClick={resetForm}>Cancel</button>
@@ -359,7 +387,7 @@ const QuestionManager = () => {
       {isBulkModalOpen && (
         <div className="modal modal-open">
           <div className="modal-box">
-            <h2 className="text-xl text-white">Bulk Import Questions</h2>
+            <h2 className="text-xl text-gray">Bulk Import Questions</h2>
             <br></br>
             <textarea
               value={bulkText}
