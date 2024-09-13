@@ -317,27 +317,27 @@ const ArticleManager = () => {
         className="rounded-lg shadow-lg bg-white"
       />
 
-      {isModalOpen && (
-        <div className="modal modal-open bg-dark text-black">
-          <div className="modal-box max-w-lg mx-auto">
+{isModalOpen && (
+    <div className="modal modal-open bg-dark text-black">
+        <div className="modal-box max-w-2xl mx-auto"> {/* Mengubah ukuran modal */}
             <h2 className="font-bold text-lg">
-              {articleData.id ? 'Edit Article' : 'Add Article'}
+                {articleData.id ? 'Edit Article' : 'Add Article'}
             </h2>
             <input
-              type="text"
-              placeholder="Article Title"
-              value={articleData.title}
-              onChange={(e) => setArticleData({ ...articleData, title: e.target.value })}
-              className="input input-bordered w-full mb-2"
-              required
+                type="text"
+                placeholder="Article Title"
+                value={articleData.title}
+                onChange={(e) => setArticleData({ ...articleData, title: e.target.value })}
+                className="input input-bordered w-full mb-2"
+                required
             />
             <input
-              type="text"
-              placeholder="Article Tags"
-              value={articleData.tags}
-              onChange={(e) => setArticleData({ ...articleData, tags: e.target.value })}
-              className="input input-bordered w-full mb-2"
-              required
+                type="text"
+                placeholder="Article Tags"
+                value={articleData.tags}
+                onChange={(e) => setArticleData({ ...articleData, tags: e.target.value })}
+                className="input input-bordered w-full mb-2"
+                required
             />
             <ReactQuill
                 ref={quillRef}
@@ -350,14 +350,15 @@ const ArticleManager = () => {
                 theme="snow"
             />
             <div className="modal-action">
-              <button className="btn" onClick={resetForm}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleCreateOrUpdate}>
-                {articleData.id ? 'Update' : 'Create'}
-              </button>
+                <button className="btn" onClick={resetForm}>Cancel</button>
+                <button className="btn btn-primary" onClick={handleCreateOrUpdate}>
+                    {articleData.id ? 'Update' : 'Create'}
+                </button>
             </div>
-          </div>
         </div>
-      )}
+    </div>
+)}
+
     </div>
   );
 };
