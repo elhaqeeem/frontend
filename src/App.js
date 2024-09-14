@@ -16,6 +16,7 @@ import QuestionManager from './QuestionManager'; // Import the RoleDataTable com
 import UserTestManager from './UserTestManager';
 import TestAnswerManager from './TestAnswers';
 import TestResultManager from './TestResultManager';
+import RoleMenuManager from './RoleMenuManager';
 
 import { ToastContainer } from 'react-toastify';
 import 'font-awesome/css/font-awesome.min.css';
@@ -219,6 +220,18 @@ function App() {
                             element={
                                 <Layout>
                                     <TestResultManager /> {/* Render the RoleDataTable component */}
+                                </Layout>
+                            } 
+                        />
+                    } 
+                />
+                 <Route 
+                    path="/rolemenu" // New route for managing roles
+                    element={
+                        <PrivateRoute 
+                            element={
+                                <Layout>
+                                    <RoleMenuManager /> {/* Render the RoleDataTable component */}
                                 </Layout>
                             } 
                         />

@@ -1,7 +1,7 @@
 {
   "name": "new-frontend",
   "version": "0.1.0",
-  "proxy": "http://localhost:8080",
+  "proxy": "http://localhost:8081",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
@@ -28,6 +28,7 @@
     "react-router-dom": "^6.26.1",
     "react-scripts": "5.0.1",
     "react-toastify": "^10.0.5",
+    "styled-components": "^6.1.13",
     "sweetalert2": "^11.12.4",
     "web-vitals": "^2.1.4"
   },

@@ -14,8 +14,10 @@ function Logout() {
                 localStorage.removeItem('roleID');
                 localStorage.removeItem('email');
                 localStorage.removeItem('firstName');
-                localStorage.removeItem('htmx-history-cache');
+               // localStorage.removeItem('htmx-history-cache');
                 localStorage.removeItem('id');
+                //localStorage.removeItem('permissions');
+                
 
 
 

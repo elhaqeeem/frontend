@@ -18,7 +18,9 @@ const Quiz = () => {
   const [answers, setAnswers] = useState({});
   const [timer, setTimer] = useState(300); // Default 5 minutes
   const [submitted, setSubmitted] = useState(false);
+  // eslint-disable-next-line
   const [userTestId, setUserTestId] = useState(null);
+  // eslint-disable-next-line
   const [hasPreviousAnswers, setHasPreviousAnswers] = useState(false);
   const [storedTestId, setStoredTestId] = useState(null);
   const [idToSubmit, setIdToSubmit] = useState(null); // New state to hold idToSubmit
@@ -141,6 +143,7 @@ const Quiz = () => {
     } else if (timer === 0 && !submitted && !hasPreviousAnswers) {
       handleSubmit(); // Auto-submit ketika waktu habis
     }
+    // eslint-disable-next-line
   }, [timer, submitted, hasPreviousAnswers]);
 
   const handleAnswerChange = (questionId, answerIndex) => {

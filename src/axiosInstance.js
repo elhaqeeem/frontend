@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:8080', // Update with your API URL
+    baseURL: 'http://localhost:8081', // Update with your API URL
 });
 
 // Add a request interceptor
