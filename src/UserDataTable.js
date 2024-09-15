@@ -18,10 +18,12 @@ const UserDataTable = () => {
         username: '', email: '', password: '', first_name: '', last_name: '', RoleID: 0
     });
 
+    // Fetch users on component mount
     useEffect(() => {
         fetchUsers();
     }, []);
 
+    // Filter users based on search text
     useEffect(() => {
         if (Array.isArray(users)) {
             const result = users.filter(user => 
@@ -32,6 +34,7 @@ const UserDataTable = () => {
         }
     }, [searchText, users]);
 
+    // Fetch users from backend
     const fetchUsers = async () => {
         const token = localStorage.getItem('token');
         setLoading(true);
@@ -51,7 +54,8 @@ const UserDataTable = () => {
         }
     };
 
-    const handleAddUser = () => {
+    // Add a new user
+    const handleAddUser = async () => {
         Swal.fire({
             title: 'Are you sure?',
             text: "You are about to add a new user.",
@@ -78,7 +82,8 @@ const UserDataTable = () => {
         });
     };
 
-    const handleUpdateUser = () => {
+    // Update an existing user
+    const handleUpdateUser = async () => {
         Swal.fire({
             title: 'Are you sure?',
             text: "You are about to update the user.",
@@ -105,7 +110,8 @@ const UserDataTable = () => {
         });
     };
 
-    const handleDeleteUser = (id) => {
+    // Delete a user
+    const handleDeleteUser = async (id) => {
         Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this!",
@@ -130,11 +136,13 @@ const UserDataTable = () => {
         });
     };
 
+    // Set user for editing
     const handleEdit = (user) => {
         setEditingUser(user);
         setIsModalOpen(true);
     };
 
+    // Define table columns
     const columns = [
         { name: 'ID', selector: row => row.id, sortable: true },
         { name: 'Username', selector: row => row.username || '', sortable: true },
@@ -282,8 +290,8 @@ const UserDataTable = () => {
                 data={filteredUsers}
                 progressPending={loading}
                 pagination
-                className="rounded-lg shadow-lg bg-white"
-
+                highlightOnHover
+                pointerOnHover
             />
         </div>
     );
