@@ -17,10 +17,12 @@ import UserTestManager from './UserTestManager';
 import TestAnswerManager from './TestAnswers';
 import TestResultManager from './TestResultManager';
 import RoleMenuManager from './RoleMenuManager';
+import Quiz from './Quiz';
+import CourseManager from './CourseManager';
+
 
 import { ToastContainer } from 'react-toastify';
 import 'font-awesome/css/font-awesome.min.css';
-import Quiz from './Quiz';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -232,6 +234,18 @@ function App() {
                             element={
                                 <Layout>
                                     <RoleMenuManager /> {/* Render the RoleDataTable component */}
+                                </Layout>
+                            } 
+                        />
+                    } 
+                />
+                 <Route 
+                    path="/course-manager" // New route for managing roles
+                    element={
+                        <PrivateRoute 
+                            element={
+                                <Layout>
+                                    <CourseManager /> {/* Render the RoleDataTable component */}
                                 </Layout>
                             } 
                         />
