@@ -6,7 +6,7 @@ import Joyride from 'react-joyride';
 
 const Layout = ({ children }) => {
     const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
-    const [currentTheme, setCurrentTheme] = useState('cupcake'); // Default theme
+    const [currentTheme, setCurrentTheme] = useState('lemonade'); // Default theme
     const [tourSteps, setTourSteps] = useState([]);
     const [runTour, setRunTour] = useState(false);
     const [openMenu, setOpenMenu] = useState({});

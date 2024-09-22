@@ -15,6 +15,7 @@ const CourseManager = () => {
   const [courseData, setCourseData] = useState({
     title: '',
     description: '',
+    harga: '', // Tambahkan harga di sini
     id: '',
   });
   const [selectedRows, setSelectedRows] = useState([]);
@@ -70,14 +71,15 @@ const CourseManager = () => {
       return;
     }
 
-    const { title, description, id } = courseData;
+    const { title, description, harga, id } = courseData; // Ambil juga harga
 
-    if (!title || !description) {
-      toast.error('Title and description are required.');
+    if (!title || !description || !harga) { // Validasi harga juga
+      toast.error('Title, description, and price are required.');
       return;
     }
 
-    const coursePayload = { title, description };
+
+    const coursePayload = { title, description, harga: parseInt(harga) }; // Parse harga as integer
 
     const confirmationText = id ? 'update this course!' : 'create a new course!';
     const result = await Swal.fire({
@@ -115,6 +117,7 @@ const CourseManager = () => {
     setCourseData({
       title: course.title,
       description: course.description,
+      harga: course.harga, // Set harga di sini saat edit
       id: course.id,
     });
     setIsModalOpen(true);
@@ -149,7 +152,7 @@ const CourseManager = () => {
 
   const resetForm = () => {
     console.log('Reset form');
-    setCourseData({ title: '', description: '', id: '' });
+    setCourseData({ title: '', description: '', harga: '', id: '' }); // Reset harga juga
     setIsModalOpen(false);
   };
 
@@ -215,17 +218,23 @@ const CourseManager = () => {
       sortable: true,
     },
     {
+      name: 'Price', // Tambahkan kolom harga
+      selector: (row) => row.harga,
+      sortable: true,
+    },
+    {
       name: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
           {hasPermission('edit_course') && (
             <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
-              Edit
+            <i className="fa fa-pencil" aria-hidden="true"></i>
             </button>
           )}
           {hasPermission('delete_course') && (
-            <button className="btn btn-outline btn-danger" onClick={() => handleDelete(row.id)}>
-              Delete
+            <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
+              <i className="fa fa-trash" aria-hidden="true"></i>
+
             </button>
           )}
         </div>
@@ -234,31 +243,35 @@ const CourseManager = () => {
   ];
 
   return (
-    <div>
-      <h1>Course Manager</h1>
-      <div className="flex justify-between mb-4">
-        <input
-          type="text"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="input"
-        />
-        <button className="btn btn-primary" onClick={() => {
+    <div className="container mx-auto p-4 bg-white text-black">
+      <div className="flex justify-between items-center mb-4">
+        
+        <button className="btn btn-outline btn-primary" onClick={() => {
           console.log('Open add course modal');
           setIsModalOpen(true);
         }}>
           Add Course
         </button>
-        <button className="btn btn-danger" onClick={handleBulkDelete}>
+        <button className="btn btn-outline btn-danger" onClick={handleBulkDelete}>
           Delete Selected
         </button>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="input input-bordered w-full max-w-xs pl-10"
+          />
       </div>
       <DataTable
+         title="Course List"
+
         columns={columns}
         data={filteredCourses}
         pagination
         selectableRows
+        className="rounded-lg shadow-lg bg-white"
+
         onSelectedRowsChange={({ selectedRows }) => {
           console.log('Selected rows changed:', selectedRows.map(row => row.id));
           setSelectedRows(selectedRows.map(row => row.id));
@@ -292,6 +305,17 @@ const CourseManager = () => {
           className="quill-editor"
         />
       </div>
+      <div className="form-control mt-4">
+              <label className="label">
+                <span className="label-text">Price</span>
+              </label>
+              <input
+                type="number"
+                value={courseData.harga}
+                onChange={(e) => setCourseData({ ...courseData, harga: e.target.value })}
+                className="input input-bordered"
+              />
+            </div>
       <div className="modal-action">
         <button className="btn btn-primary" onClick={handleCreateOrUpdate}>
           {courseData.id ? 'Update' : 'Create'}
