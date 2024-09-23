@@ -28,7 +28,7 @@ const TimerComponent = ({ timer, initialTime }) => {
         Time left: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')}
       </span>
       <div className="w-full mt-2">
-        <progress className="progress progress-error" value={progress} max="100"></progress>
+        <progress className="progress progress-info" value={progress} max="100"></progress>
       </div>
     </div>
   );

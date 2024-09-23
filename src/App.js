@@ -20,9 +20,9 @@ import RoleMenuManager from './RoleMenuManager';
 import Quiz from './Quiz';
 import CourseManager from './CourseManager';
 
-
 import { ToastContainer } from 'react-toastify';
 import 'font-awesome/css/font-awesome.min.css';
+import MaterialManager from './MaterialManager';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -246,6 +246,18 @@ function App() {
                             element={
                                 <Layout>
                                     <CourseManager /> {/* Render the RoleDataTable component */}
+                                </Layout>
+                            } 
+                        />
+                    } 
+                />
+                 <Route 
+                    path="/material-manager" // New route for managing roles
+                    element={
+                        <PrivateRoute 
+                            element={
+                                <Layout>
+                                    <MaterialManager /> {/* Render the RoleDataTable component */}
                                 </Layout>
                             } 
                         />
