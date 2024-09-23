@@ -19,7 +19,7 @@ import TestResultManager from './TestResultManager';
 import RoleMenuManager from './RoleMenuManager';
 import Quiz from './Quiz';
 import CourseManager from './CourseManager';
-
+import FileUpload from './FileUpload';
 import { ToastContainer } from 'react-toastify';
 import 'font-awesome/css/font-awesome.min.css';
 import MaterialManager from './MaterialManager';
@@ -258,6 +258,18 @@ function App() {
                             element={
                                 <Layout>
                                     <MaterialManager /> {/* Render the RoleDataTable component */}
+                                </Layout>
+                            } 
+                        />
+                    } 
+                />
+                 <Route 
+                    path="/file-upload" // New route for managing roles
+                    element={
+                        <PrivateRoute 
+                            element={
+                                <Layout>
+                                    <FileUpload /> {/* Render the RoleDataTable component */}
                                 </Layout>
                             } 
                         />

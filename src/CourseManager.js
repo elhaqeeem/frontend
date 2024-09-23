@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react'; // Tambahkan useRef di sini
 import axios from './axiosInstance'; // Ensure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -21,6 +21,29 @@ const CourseManager = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [permissions, setPermissions] = useState([]);// eslint-disable-next-line
   const [userId, setUserId] = useState(null);
+  const quillRef = useRef(null);
+  const modules = {
+    toolbar: [
+      [{ header: '1' }, { header: '2' }, { font: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ color: [] }, { background: [] }],
+      [{ script: 'sub' }, { script: 'super' }],
+      ['blockquote', 'code-block'],
+      [{ align: [] }],
+      ['link', 'image', 'video'],
+      ['clean'], // clear formatting
+    ],
+  };
+
+  const formats = [
+    'header', 'font', 'size',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image', 'video',
+    'color', 'background',
+    'script', 'align',
+  ];
 
   useEffect(() => {
     const storedUserId = localStorage.getItem('id');
@@ -162,7 +185,7 @@ const CourseManager = () => {
       toast.error('No courses selected for deletion.');
       return;
     }
-
+  
     const result = await Swal.fire({
       title: 'Are you sure?',
       text: `You are about to delete ${selectedRows.length} course(s)!`,
@@ -171,11 +194,12 @@ const CourseManager = () => {
       confirmButtonText: 'Yes, delete them!',
       cancelButtonText: 'No, cancel!',
     });
-
+  
     if (result.isConfirmed) {
       try {
+        // Send the selectedRows directly as an array, not wrapped in an object
         await axios.delete('/courses/bulk-delete', {
-          data: { ids: selectedRows },
+          data: selectedRows, // Change this line to directly use selectedRows
         });
         toast.success('Selected courses deleted successfully.');
         fetchCourses();
@@ -185,6 +209,7 @@ const CourseManager = () => {
       }
     }
   };
+  
 
   const columns = [
     {
@@ -279,9 +304,9 @@ const CourseManager = () => {
       />
       <ToastContainer />
       {isModalOpen && (
-  <div className="modal modal-open">
-    <div className="modal-box">
-      <h2 className="font-bold text-lg">
+        <div className="modal modal-open bg-dark text-black">
+          <div className="modal-box max-w-lg mx-auto">
+          <h2 className="font-bold text-lg">
         {courseData.id ? 'Edit Course' : 'Add Course'}
       </h2>
       <div className="form-control">
@@ -292,18 +317,21 @@ const CourseManager = () => {
           type="text"
           value={courseData.title}
           onChange={(e) => setCourseData({ ...courseData, title: e.target.value })}
-          className="input input-bordered"
-        />
+          className="input input-bordered w-full mb-2"
+          />
       </div>
       <div className="form-control mt-4">
         <label className="label">
           <span className="label-text">Description</span>
         </label>
         <ReactQuill
+          ref={quillRef}
           value={courseData.description}
           onChange={(value) => setCourseData({ ...courseData, description: value })}
-          className="quill-editor"
-        />
+          className="mb-4"
+          modules={modules} // Tambahkan modules untuk toolbar lengkap
+      formats={formats} 
+          />
       </div>
       <div className="form-control mt-4">
               <label className="label">
@@ -313,8 +341,8 @@ const CourseManager = () => {
                 type="number"
                 value={courseData.harga}
                 onChange={(e) => setCourseData({ ...courseData, harga: e.target.value })}
-                className="input input-bordered"
-              />
+                className="input input-bordered w-full mb-2"
+                />
             </div>
       <div className="modal-action">
         <button className="btn btn-primary" onClick={handleCreateOrUpdate}>

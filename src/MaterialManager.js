@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import axios from './axiosInstance'; // Ensure this path is correct
+import axios from './axiosInstance'; // Pastikan path ini benar
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
 import Swal from 'sweetalert2';
-import ReactQuill from 'react-quill'; // For rich text content editing
+import ReactQuill from 'react-quill'; // Untuk editor konten rich text
 import 'react-quill/dist/quill.snow.css';
 
 const MaterialManager = () => {
@@ -13,7 +13,7 @@ const MaterialManager = () => {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [materialData, setMaterialData] = useState({
-    course_id: '',
+    course_id: '',  // Diubah jadi angka di input
     title: '',
     content: '',
     id: ''
@@ -46,12 +46,17 @@ const MaterialManager = () => {
   const handleCreateOrUpdate = async () => {
     const { course_id, title, content, id } = materialData;
 
-    if (!course_id || !title || !content) {
-      toast.error('Course ID, Title, and Content are required.');
+    // Pastikan course_id adalah integer
+    if (!Number.isInteger(Number(course_id)) || !title || !content) {
+      toast.error('Course ID must be an integer, and Title and Content are required.');
       return;
     }
 
-    const materialPayload = { course_id, title, content };
+    const materialPayload = { 
+      course_id: Number(course_id), // Pastikan dikirim sebagai angka
+      title, 
+      content 
+    };
 
     const confirmationText = id ? 'update this material!' : 'create a new material!';
     const result = await Swal.fire({
@@ -197,37 +202,35 @@ const MaterialManager = () => {
       </div>
 
       {/* Modal for Create/Edit Material */}
-      {isModalOpen && (
-        <div className="modal">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">{materialData.id ? 'Edit' : 'Create'} Material</h3>
-            <div className="py-4">
-              <input
-                type="text"
-                placeholder="Course ID"
-                value={materialData.course_id}
-                onChange={(e) => setMaterialData({ ...materialData, course_id: e.target.value })}
-                className="input input-bordered w-full mb-2"
-              />
-              <input
-                type="text"
-                placeholder="Title"
-                value={materialData.title}
-                onChange={(e) => setMaterialData({ ...materialData, title: e.target.value })}
-                className="input input-bordered w-full mb-2"
-              />
-              <ReactQuill
-                value={materialData.content}
-                onChange={(content) => setMaterialData({ ...materialData, content })}
-              />
-            </div>
-            <div className="modal-action">
-              <button className="btn btn-primary" onClick={handleCreateOrUpdate}>Save</button>
-              <button className="btn" onClick={resetForm}>Cancel</button>
-            </div>
+      <div className={`modal ${isModalOpen ? 'modal-open' : ''}`}>
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">{materialData.id ? 'Edit' : 'Create'} Material</h3>
+          <div className="py-4">
+            <input
+              type="number"  // Ubah type menjadi number agar input selalu angka
+              placeholder="Course ID"
+              value={materialData.course_id}
+              onChange={(e) => setMaterialData({ ...materialData, course_id: e.target.value })}
+              className="input input-bordered w-full mb-2"
+            />
+            <input
+              type="text"
+              placeholder="Title"
+              value={materialData.title}
+              onChange={(e) => setMaterialData({ ...materialData, title: e.target.value })}
+              className="input input-bordered w-full mb-2"
+            />
+            <ReactQuill
+              value={materialData.content}
+              onChange={(content) => setMaterialData({ ...materialData, content })}
+            />
+          </div>
+          <div className="modal-action">
+            <button className="btn btn-primary" onClick={handleCreateOrUpdate}>Save</button>
+            <button className="btn" onClick={resetForm}>Cancel</button>
           </div>
         </div>
-      )}
+      </div>
 
       <ToastContainer />
     </div>
