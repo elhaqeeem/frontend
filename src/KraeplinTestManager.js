@@ -29,13 +29,19 @@ const KraeplinTestManager = () => {
 
   const fetchTests = async () => {
     try {
-      const response = await axios.get('/kraeplin-tests'); // Adjust API endpoint accordingly
+      const token = localStorage.getItem('token'); // Ganti 'yourTokenKey' dengan kunci yang sesuai
+      const response = await axios.get('/kraeplin-tests', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setTests(response.data || []);
       setFilteredTests(response.data || []);
     } catch (error) {
       toast.error('Failed to fetch tests.');
     }
   };
+  
 
   const handleCreateOrUpdate = async () => {
     if (!testDate || !durationMinutes || !description) {

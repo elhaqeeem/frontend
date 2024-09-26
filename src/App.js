@@ -1,37 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Layout from './Layout-ori'; // Adjust the path if necessary
+import Layout from './Layout-ori'; // Sesuaikan path jika perlu
 import Dashboard from './Dashboard';
 import Login from './Login';
 import UserDataTable from './UserDataTable';
-import RoleDataTable from './RoleDataTable'; // Import the RoleDataTable component
-import PermissionDataTable from './PermissionDataTable'; // Import the RoleDataTable component
-import RolePermissionComponent from './RolePermissionComponent'; // Import the RoleDataTable component
-import MenuManager from './MenuManager'; // Import the RoleDataTable component
-import ArticleManager from './ArticleManager'; // Import the RoleDataTable component
-import RoleMenuDataTable from './RoleMenuDataTable'; // Import the RoleDataTable component
-import MenuIconManager from './MenuIconManager'; // Import the RoleDataTable component
-import KraeplinTestManager from './KraeplinTestManager'; // Import the RoleDataTable component
-import QuestionManager from './QuestionManager'; // Import the RoleDataTable component
+import RoleDataTable from './RoleDataTable';
+import PermissionDataTable from './PermissionDataTable';
+import RolePermissionComponent from './RolePermissionComponent';
+import MenuManager from './MenuManager';
+import ArticleManager from './ArticleManager';
+import RoleMenuDataTable from './RoleMenuDataTable';
+import MenuIconManager from './MenuIconManager';
+import KraeplinTestManager from './KraeplinTestManager';
+import QuestionManager from './QuestionManager';
 import UserTestManager from './UserTestManager';
 import TestAnswerManager from './TestAnswers';
 import TestResultManager from './TestResultManager';
 import RoleMenuManager from './RoleMenuManager';
 import Quiz from './Quiz';
 import CourseManager from './CourseManager';
-import FileUpload from './FileUpload';
+import MaterialManager from './MaterialManager';
+import GoogleDriveUpload from './gdrive';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ToastContainer } from 'react-toastify';
 import 'font-awesome/css/font-awesome.min.css';
-import MaterialManager from './MaterialManager';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
-        // Initialize state based on localStorage value
         return !!localStorage.getItem('token');
     });
 
     useEffect(() => {
-        // Check for token on mount
         const token = localStorage.getItem('token');
         setIsAuthenticated(!!token);
     }, []);
@@ -41,243 +40,88 @@ function App() {
     );
 
     return (
-        <Router>
-            <ToastContainer />
-            <Routes>
-                <Route path="/login" element={<Login onLogin={() => setIsAuthenticated(true)} />} />
-                <Route 
-                    path="/" 
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <Dashboard />
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                <Route 
-                    path="/users" 
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <UserDataTable />
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                <Route 
-                    path="/roles" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <RoleDataTable /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-            
-                {/* Add other protected routes here */}
-                <Route 
-                    path="/permissions" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <PermissionDataTable /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                <Route 
-                    path="/rolepermissions" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <RolePermissionComponent /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                <Route 
-                    path="/menumanager" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <MenuManager /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                 <Route 
-                    path="/article" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <ArticleManager /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                <Route 
-                    path="/access-menu" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <RoleMenuDataTable /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                 <Route 
-                    path="/icon-menu" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <MenuIconManager /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                <Route 
-                    path="/kreaeplin" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <KraeplinTestManager /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                <Route 
-                    path="/questions" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <QuestionManager /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                 <Route 
-                    path="/usertest" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <UserTestManager /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                 <Route 
-                    path="/useranswer" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <TestAnswerManager /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                <Route 
-                    path="/quiz" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <Quiz /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                <Route 
-                    path="/resulttest" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <TestResultManager /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                 <Route 
-                    path="/rolemenu" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <RoleMenuManager /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                 <Route 
-                    path="/course-manager" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <CourseManager /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                 <Route 
-                    path="/material-manager" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <MaterialManager /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-                 <Route 
-                    path="/file-upload" // New route for managing roles
-                    element={
-                        <PrivateRoute 
-                            element={
-                                <Layout>
-                                    <FileUpload /> {/* Render the RoleDataTable component */}
-                                </Layout>
-                            } 
-                        />
-                    } 
-                />
-            </Routes>
-            
-        </Router>
+            <Router>
+                <ToastContainer />
+                <Routes>
+                    <Route path="/login" element={<Login onLogin={() => setIsAuthenticated(true)} />} />
+                    <Route 
+                        path="/" 
+                        element={<PrivateRoute element={<Layout><Dashboard /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/users" 
+                        element={<PrivateRoute element={<Layout><UserDataTable /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/roles" 
+                        element={<PrivateRoute element={<Layout><RoleDataTable /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/permissions" 
+                        element={<PrivateRoute element={<Layout><PermissionDataTable /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/rolepermissions" 
+                        element={<PrivateRoute element={<Layout><RolePermissionComponent /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/menumanager" 
+                        element={<PrivateRoute element={<Layout><MenuManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/article" 
+                        element={<PrivateRoute element={<Layout><ArticleManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/access-menu" 
+                        element={<PrivateRoute element={<Layout><RoleMenuDataTable /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/icon-menu" 
+                        element={<PrivateRoute element={<Layout><MenuIconManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/kreaeplin" 
+                        element={<PrivateRoute element={<Layout><KraeplinTestManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/questions" 
+                        element={<PrivateRoute element={<Layout><QuestionManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/usertest" 
+                        element={<PrivateRoute element={<Layout><UserTestManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/useranswer" 
+                        element={<PrivateRoute element={<Layout><TestAnswerManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/quiz" 
+                        element={<PrivateRoute element={<Layout><Quiz /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/resulttest" 
+                        element={<PrivateRoute element={<Layout><TestResultManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/rolemenu" 
+                        element={<PrivateRoute element={<Layout><RoleMenuManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/course-manager" 
+                        element={<PrivateRoute element={<Layout><CourseManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/material-manager" 
+                        element={<PrivateRoute element={<Layout><MaterialManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/file-upload" 
+                        element={<PrivateRoute element={<Layout><GoogleDriveUpload /></Layout>} />} 
+                    />
+                </Routes>
+            </Router>
     );
 }
 
