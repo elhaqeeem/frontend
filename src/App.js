@@ -20,8 +20,6 @@ import RoleMenuManager from './RoleMenuManager';
 import Quiz from './Quiz';
 import CourseManager from './CourseManager';
 import MaterialManager from './MaterialManager';
-import GoogleDriveUpload from './gdrive';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ToastContainer } from 'react-toastify';
 import 'font-awesome/css/font-awesome.min.css';
 
@@ -116,10 +114,7 @@ function App() {
                         path="/material-manager" 
                         element={<PrivateRoute element={<Layout><MaterialManager /></Layout>} />} 
                     />
-                    <Route 
-                        path="/file-upload" 
-                        element={<PrivateRoute element={<Layout><GoogleDriveUpload /></Layout>} />} 
-                    />
+                  
                 </Routes>
             </Router>
     );
