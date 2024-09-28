@@ -88,6 +88,7 @@ const RoleMenuManager = () => {
         response = await axios.put(`/roles/menus/${selectedRoleMenu.id}`, { role_id: roleId, menu_id: menuId });
       } else {
         // Tambah role menu
+        // eslint-disable-next-line
         response = await axios.post('/roles/menus', { role_id: roleId, menu_id: menuId });
       }
   

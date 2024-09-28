@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'; // Tambahkan useRef di sini
+import React, { useEffect, useState, useRef } from 'react';
 import axios from './axiosInstance'; // Ensure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -15,14 +15,15 @@ const CourseManager = () => {
   const [courseData, setCourseData] = useState({
     title: '',
     description: '',
-    harga: '', // Tambahkan harga di sini
-    path_image:'',
+    harga: '',
+    path_image: '', // Tambahkan path_image di sini
     id: '',
   });
   const [selectedRows, setSelectedRows] = useState([]);
-  const [permissions, setPermissions] = useState([]);// eslint-disable-next-line
+  const [permissions, setPermissions] = useState([]);
   const [userId, setUserId] = useState(null);
   const quillRef = useRef(null);
+
   const modules = {
     toolbar: [
       [{ header: '1' }, { header: '2' }, { font: [] }],
@@ -69,8 +70,7 @@ const CourseManager = () => {
   const fetchCourses = async () => {
     try {
       const response = await axios.get('/courses');
-      console.log('Courses fetched:', response.data); 
-      setCourses(response.data.courses || []); 
+      setCourses(response.data.courses || []);
     } catch (error) {
       toast.error('Failed to fetch courses.');
     }
@@ -102,7 +102,6 @@ const CourseManager = () => {
       return;
     }
 
-
     const coursePayload = {
       title,
       description,
@@ -121,7 +120,6 @@ const CourseManager = () => {
     });
 
     if (result.isConfirmed) {
-      console.log(`Create or update course: ${id ? 'Updating course' : 'Creating course'}`);
       try {
         id
           ? await axios.put(`/courses/${id}`, coursePayload)
@@ -136,7 +134,7 @@ const CourseManager = () => {
     }
   };
 
-  const handleImageUpload = async (event) => {
+    const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
     formData.append('file', file);
@@ -155,7 +153,6 @@ const CourseManager = () => {
   };
 
   const handleEdit = (course) => {
-    console.log('Edit course:', course);
     if (!hasPermission('edit_course')) {
       toast.error('You do not have permission to edit courses.');
       return;
@@ -164,116 +161,42 @@ const CourseManager = () => {
     setCourseData({
       title: course.title,
       description: course.description,
-      harga: course.harga, // Set harga di sini saat edit
+      harga: course.harga,
       path_image: course.path_image, // Set path_image saat edit
       id: course.id,
     });
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    console.log('Delete course with id:', id);
-    if (!hasPermission('delete_course')) {
-      toast.error('You do not have permission to delete courses.');
-      return;
-    }
-
-    const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: 'You are about to delete this course!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'No, cancel!',
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await axios.delete(`/courses/${id}`);
-        toast.success('Course deleted successfully.');
-        fetchCourses();
-      } catch (error) {
-        toast.error('Failed to delete course.');
-      }
-    }
-  };
-
   const resetForm = () => {
-    console.log('Reset form');
-    setCourseData({ title: '', description: '', harga: '',path_image:'', id: '' }); // Reset harga juga
+    setCourseData({
+      title: '',
+      description: '',
+      harga: '',
+      path_image: '', // Reset path_image
+      id: '',
+    });
     setIsModalOpen(false);
   };
 
-  const handleBulkDelete = async () => {
-    console.log('Bulk delete selected courses:', selectedRows);
-    if (selectedRows.length === 0) {
-      toast.error('No courses selected for deletion.');
-      return;
-    }
-  
-    const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: `You are about to delete ${selectedRows.length} course(s)!`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, delete them!',
-      cancelButtonText: 'No, cancel!',
-    });
-  
-    if (result.isConfirmed) {
-      try {
-        // Send the selectedRows directly as an array, not wrapped in an object
-        await axios.delete('/courses/bulk-delete', {
-          data: selectedRows, // Change this line to directly use selectedRows
-        });
-        toast.success('Selected courses deleted successfully.');
-        fetchCourses();
-        setSelectedRows([]);
-      } catch (error) {
-        toast.error('Failed to delete selected courses.');
-      }
-    }
-  };
-  
-
   const columns = [
-    {
-      name: 'Select',
-      cell: (row) => (
-        <input
-          type="checkbox"
-          checked={selectedRows.includes(row.id)}
-          onChange={() => {
-            console.log(`Toggle selection for course id: ${row.id}`);
-            setSelectedRows((prevSelected) => {
-              if (prevSelected.includes(row.id)) {
-                return prevSelected.filter((id) => id !== row.id);
-              } else {
-                return [...prevSelected, row.id];
-              }
-            });
-          }}
-        />
-      ),
-      width: '100px',
-    },
     {
       name: 'Title',
       selector: (row) => row.title,
       sortable: true,
     },
-    //{
-    //name: 'Description',
-    //  selector: (row) => row.description,
-    //  sortable: true,
-    //},
     {
-      name: 'Price', // Tambahkan kolom harga
+      name: 'Description',
+      selector: (row) => row.description,
+      sortable: true,
+    },
+    {
+      name: 'Price',
       selector: (row) => row.harga,
       sortable: true,
     },
     {
-      name: 'Path', // Tambahkan kolom harga
+      name: 'Image',
       selector: (row) => row.path_image,
       sortable: true,
     },
@@ -283,13 +206,7 @@ const CourseManager = () => {
         <div className="flex space-x-2">
           {hasPermission('edit_course') && (
             <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
-            <i className="fa fa-pencil" aria-hidden="true"></i>
-            </button>
-          )}
-          {hasPermission('delete_course') && (
-            <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
-              <i className="fa fa-trash" aria-hidden="true"></i>
-
+              Edit
             </button>
           )}
         </div>
@@ -300,15 +217,8 @@ const CourseManager = () => {
   return (
     <div className="container mx-auto p-4 bg-white text-black">
       <div className="flex justify-between items-center mb-4">
-        
-        <button className="btn btn-outline btn-primary" onClick={() => {
-          console.log('Open add course modal');
-          setIsModalOpen(true);
-        }}>
+        <button className="btn btn-outline btn-primary" onClick={() => setIsModalOpen(true)}>
           Add Course
-        </button>
-        <button className="btn btn-outline btn-danger" onClick={handleBulkDelete}>
-          Delete Selected
         </button>
         <input
           type="text"
@@ -316,79 +226,65 @@ const CourseManager = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="input input-bordered w-full max-w-xs pl-10"
-          />
+        />
       </div>
       <DataTable
-         title="Course List"
-
+        title="Course List"
         columns={columns}
         data={filteredCourses}
         pagination
         selectableRows
         className="rounded-lg shadow-lg bg-white"
-
-        onSelectedRowsChange={({ selectedRows }) => {
-          console.log('Selected rows changed:', selectedRows.map(row => row.id));
-          setSelectedRows(selectedRows.map(row => row.id));
-        }}
       />
       <ToastContainer />
       {isModalOpen && (
         <div className="modal modal-open bg-dark text-black">
           <div className="modal-box max-w-lg mx-auto">
-          <h2 className="font-bold text-lg">
-        {courseData.id ? 'Edit Course' : 'Add Course'}
-      </h2>
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Title</span>
-        </label>
-        <input
-          type="text"
-          value={courseData.title}
-          onChange={(e) => setCourseData({ ...courseData, title: e.target.value })}
-          className="input input-bordered w-full mb-2"
-          />
-      </div>
-      <div className="form-control mt-4">
-        <label className="label">
-          <span className="label-text">Description</span>
-        </label>
-        <ReactQuill
-          ref={quillRef}
-          value={courseData.description}
-          onChange={(value) => setCourseData({ ...courseData, description: value })}
-          className="mb-4"
-          modules={modules} // Tambahkan modules untuk toolbar lengkap
-      formats={formats} 
-          />
-      </div>
-      <div className="form-control mt-4">
-              <label className="label">
-                <span className="label-text">Price</span>
-              </label>
+            <h2 className="font-bold text-lg">{courseData.id ? 'Edit Course' : 'Add Course'}</h2>
+            <div className="form-control">
+              <label className="label">Title</label>
+              <input
+                type="text"
+                value={courseData.title}
+                onChange={(e) => setCourseData({ ...courseData, title: e.target.value })}
+                className="input input-bordered w-full mb-2"
+              />
+            </div>
+            <div className="form-control mt-4">
+              <label className="label">Description</label>
+              <ReactQuill
+                ref={quillRef}
+                value={courseData.description}
+                onChange={(value) => setCourseData({ ...courseData, description: value })}
+                className="mb-4"
+                modules={modules}
+                formats={formats}
+              />
+            </div>
+            <div className="form-control mt-4">
+              <label className="label">Price</label>
               <input
                 type="number"
                 value={courseData.harga}
                 onChange={(e) => setCourseData({ ...courseData, harga: e.target.value })}
                 className="input input-bordered w-full mb-2"
-                />
+              />
             </div>
             <div className="form-control mt-4">
               <label className="label">Upload Image</label>
               <input type="file" onChange={handleImageUpload} className="file-input w-full" />
             </div>
-      <div className="modal-action">
-        <button className="btn btn-primary" onClick={handleCreateOrUpdate}>
-          {courseData.id ? 'Update' : 'Create'}
-        </button>
-        <button className="btn btn-secondary" onClick={resetForm}>
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            <div className="modal-action">
+              <button className="btn btn-primary" onClick={handleCreateOrUpdate}>
+                {courseData.id ? 'Update' : 'Create'}
+              </button>
+              <button className="btn btn-secondary" onClick={resetForm}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

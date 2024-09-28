@@ -28,7 +28,7 @@ function Dashboard() {
                     <div className="carousel w-full mt-8">
                         {courses.map((course, index) => (
                             <div id={`slide${index}`} key={course.id} className="carousel-item relative w-full">
-                                <img src={course.imageUrl} alt={course.title} className="w-full object-cover h-64" />
+                                <img src={course.path_image} alt={course.title} className="w-full object-cover h-64" />
                                 <div className="absolute bottom-0 left-0 p-4 bg-black bg-opacity-50 text-white">
                                     <h2 className="text-2xl font-bold">{course.title}</h2>
                                     <p>{course.description}</p>
