@@ -6,7 +6,7 @@ import Joyride from 'react-joyride';
 
 const Layout = ({ children }) => {
     const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
-    const [currentTheme, setCurrentTheme] = useState('nord'); // Default theme
+    const [currentTheme, setCurrentTheme] = useState('lemonade'); // Default theme
     const [tourSteps, setTourSteps] = useState([]);
     const [runTour, setRunTour] = useState(false);
     const [openMenu, setOpenMenu] = useState({});
@@ -175,11 +175,20 @@ const Layout = ({ children }) => {
 
             {/* Main content area */}
             <main className="p-6 text-sm">{children}</main>
-            <footer className="footer footer-center bg-base-300 text-base-content p-4">
-                <aside>
-                    <p>Copyright © {new Date().getFullYear()} - All right reserved by Edu LMS</p>
-                </aside>
-            </footer>
+            <div className="flex flex-col min-h-screen">
+  {/* Konten Utama */}
+  <div className="flex-grow">
+    {/* Semua konten lain ada di sini */}
+  </div>
+
+  {/* Footer */}
+  <footer className="footer footer-center bg-base-300 text-base-content p-4">
+    <aside>
+      <p>Copyright © {new Date().getFullYear()} - All right reserved by Edu LMS</p>
+    </aside>
+  </footer>
+</div>
+
         </div>
     );
 };

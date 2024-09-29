@@ -103,7 +103,7 @@ function Dashboard() {
             <ToastContainer />
 
             {/* Main Content */}
-            <div className="flex-1 p-6 bg-gray-100">
+            <div className="flex-1 p-6 bg-white-100">
                 {/* Courses Section */}
                 {courses.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -118,7 +118,7 @@ function Dashboard() {
                                 .delivery(format('auto')); // Pilih format gambar otomatis
 
                             return (
-                                <div key={course.id} className="card card-compact bg-base-76 w-96 shadow-xl">
+                                <div key={course.id} className="card card-compact bg-base-50 w-50 shadow-xl">
                                 <figure>
                                     {/* Tampilkan gambar yang sudah di-resize menggunakan AdvancedImage */}
                                     <AdvancedImage 
@@ -127,24 +127,24 @@ function Dashboard() {
                                         className="object-cover h-64 w-full" 
                                     />
                                 </figure>
-                                <div className="card-body">
+                                <div className="card-body bg-white">
                                     <h2 className="card-title">{course.title}</h2>
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <button className="btn btn-round btn-secondary text-white">
+                                            <button className="btn btn-outline btn-secondary text-white">
                                                 Rp. {Number(course.harga).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
                                             </button>
-                                            {course.discount && ( // Tampilkan jika ada diskon
+                                           {/* {course.discount && ( // Tampilkan jika ada diskon
                                                 <span className="text-red-500 ml-2">
                                                     Disc: {course.discount}% 
                                                 </span>
                                             )}
                                             {/* Tampilkan harga setelah diskon */}
-                                            {course.discount && (
+                                           {/*  {course.discount && (
                                                 <span className="line-through ml-2 text-gray-500">
                                                     Rp. {Number(course.harga - (course.harga * (course.discount / 100))).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
                                                 </span>
-                                            )}
+                                            )}*/}
                                         </div>
                                         <button 
                                             className="btn btn-circle btn-warning"

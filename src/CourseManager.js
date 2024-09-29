@@ -17,6 +17,8 @@ const CourseManager = () => {
     description: '',
     harga: '', // Tambahkan harga di sini
     path_image:'',
+    discount: '',
+    expire: '',
     id: '',
   });
   const [selectedRows, setSelectedRows] = useState([]);
@@ -95,9 +97,9 @@ const CourseManager = () => {
       return;
     }
 
-    const { title, description, harga, path_image, id } = courseData;
+    const { title, description, harga,discount,expire, path_image, id } = courseData;
 
-    if (!title || !description || !harga || !path_image) {
+    if (!title || !description || !harga || !path_image || !discount ||!expire) {
       toast.error('All fields are required, including image.');
       return;
     }
@@ -107,7 +109,9 @@ const CourseManager = () => {
       title,
       description,
       harga: parseInt(harga),
-      path_image, // Sertakan path_image di payload
+      discount:parseInt(discount),
+      expire: new Date(expire).toISOString(), // Konversi expire menjadi format ISO sebelum dikirim
+      path_image,
     };
 
     const confirmationText = id ? 'update this course!' : 'create a new course!';
@@ -166,8 +170,12 @@ const CourseManager = () => {
       description: course.description,
       harga: course.harga, // Set harga di sini saat edit
       path_image: course.path_image, // Set path_image saat edit
+      discount: course.discount,
+      expire: course.expire ? new Date(course.expire).toISOString().split('T')[0] : null, // Konversi tanggal dari course.expire
       id: course.id,
     });
+    
+
     setIsModalOpen(true);
   };
 
@@ -200,7 +208,7 @@ const CourseManager = () => {
 
   const resetForm = () => {
     console.log('Reset form');
-    setCourseData({ title: '', description: '', harga: '',path_image:'', id: '' }); // Reset harga juga
+    setCourseData({ title: '', description: '', harga: '',path_image:'',discount:'',expire:'', id: '' }); // Reset harga juga
     setIsModalOpen(false);
   };
 
@@ -262,19 +270,19 @@ const CourseManager = () => {
       selector: (row) => row.title,
       sortable: true,
     },
-    //{
-    //name: 'Description',
-    //  selector: (row) => row.description,
-    //  sortable: true,
-    //},
+    {
+    name: 'Discount',
+      selector: (row) => row.discount,
+      sortable: true,
+    },
     {
       name: 'Price', // Tambahkan kolom harga
       selector: (row) => row.harga,
       sortable: true,
     },
     {
-      name: 'Path', // Tambahkan kolom harga
-      selector: (row) => row.path_image,
+      name: 'Expire', // Tambahkan kolom harga
+      selector: (row) => row.expire,
       sortable: true,
     },
     {
@@ -371,6 +379,28 @@ const CourseManager = () => {
                 type="number"
                 value={courseData.harga}
                 onChange={(e) => setCourseData({ ...courseData, harga: e.target.value })}
+                className="input input-bordered w-full mb-2"
+                />
+            </div>
+            <div className="form-control mt-4">
+              <label className="label">
+                <span className="label-text">Discount</span>
+              </label>
+              <input
+                type="number"
+                value={courseData.discount}
+                onChange={(e) => setCourseData({ ...courseData, discount: e.target.value })}
+                className="input input-bordered w-full mb-2"
+                />
+            </div>
+            <div className="form-control mt-4">
+              <label className="label">
+                <span className="label-text">Expire</span>
+              </label>
+              <input
+                type="date"
+                value={courseData.expire}
+                onChange={(e) => setCourseData({ ...courseData, expire: e.target.value })}
                 className="input input-bordered w-full mb-2"
                 />
             </div>
