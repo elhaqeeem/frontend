@@ -86,12 +86,12 @@ const Layout = ({ children }) => {
         }));
     };
     const themes = [
-        "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", 
-        "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", 
-        "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", 
-        "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter", 
+        "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave",
+        "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua",
+        "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula",
+        "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter",
         "dim", "nord", "sunset"
-      ];
+    ];
     const renderMenu = (menu) => {
         if (!menu || !menu.menu_name || !menu.url) {
             return null;
@@ -104,7 +104,7 @@ const Layout = ({ children }) => {
                 <div className="cursor-pointer flex items-center justify-between">
                     <Link
                         to={menu.url}
-                        className={`transition-colors duration-200 ease-in-out dropdown-toggle ${location.pathname === menu.url ? 'bg-gray-700 text-white' : 'hover:bg-gray-800 hover:text-white'}`}
+                        className={`transition-colors duration-200 ease-in-out dropdown-toggle ${location.pathname === menu.url ? 'text-black underline' : 'badge:bg-yellow-100 badge:text-black'}`} // Underline untuk item aktif, badge-style untuk tidak aktif
                     >
                         <i className={menu.icon_name} aria-hidden="true"></i>
                         <span className="ml-2">{menu.menu_name}</span>
@@ -120,7 +120,10 @@ const Layout = ({ children }) => {
                     <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
                         {menu.children.map((child) => (
                             <li key={child.id}>
-                                <Link to={child.url}>
+                                <Link
+                                    to={child.url}
+                                    className={`${location.pathname === child.url ? 'underline text-black' : 'text-gray-700'}`} // Underline untuk link aktif, dan warna teks untuk tidak aktif
+                                >
                                     <i className={child.icon_name} aria-hidden="true"></i>
                                     <span className="ml-2">{child.menu_name}</span>
                                 </Link>
@@ -128,6 +131,7 @@ const Layout = ({ children }) => {
                         ))}
                     </ul>
                 )}
+
             </li>
         );
     };
@@ -147,18 +151,18 @@ const Layout = ({ children }) => {
             {/* Topbar navigation menu */}
             <nav className={`navbar sticky top-0 z-50 ${currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} px-4 shadow-md`}>
                 <div className="flex-1">
-                <button className="text-2xl font-bold">
-    <i className="fa fa-globe" aria-hidden="true"></i> Edu<strong>LMS</strong>
-</button>
+                    <button className="text-2xl font-bold">
+                        <i className="fa fa-globe" aria-hidden="true"></i> Edu<strong>LMS</strong>
+                    </button>
                 </div>
                 <div className="flex-none">
-                <select onChange={handleThemeChange} value={currentTheme} className="select select-bordered mr-4">
-                {themes.map((theme) => (
-                    <option key={theme} value={theme}>
-                    {theme.charAt(0).toUpperCase() + theme.slice(1)}
-                    </option>
-                ))}
-                </select>
+                    <select onChange={handleThemeChange} value={currentTheme} className="select select-bordered mr-4">
+                        {themes.map((theme) => (
+                            <option key={theme} value={theme}>
+                                {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                            </option>
+                        ))}
+                    </select>
                     <ul className="menu menu-horizontal p-0">
                         {accessibleMenuItems.map((menu) => renderMenu(menu))}
                     </ul>
@@ -171,6 +175,11 @@ const Layout = ({ children }) => {
 
             {/* Main content area */}
             <main className="p-6 text-sm">{children}</main>
+            <footer className="footer footer-center bg-base-300 text-base-content p-4">
+                <aside>
+                    <p>Copyright © {new Date().getFullYear()} - All right reserved by Edu LMS</p>
+                </aside>
+            </footer>
         </div>
     );
 };
