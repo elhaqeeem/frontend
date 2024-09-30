@@ -31,8 +31,9 @@ function Logout() {
     };
 
     return (
-        <button onClick={handleLogout} className="btn btn-outline btn-primary">
-            <i className="fa fa-sign-out" aria-hidden="true"></i> {/* This is the logout icon */}
+        <button onClick={handleLogout}   className="btn btn-circle btn-warning fixed bottom-8 right-8 shadow-lg"
+>
+            <i className="fa fa-power-off" aria-hidden="true"></i> {/* This is the logout icon */}
         </button>
     );
 }

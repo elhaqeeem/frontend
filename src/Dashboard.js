@@ -16,6 +16,48 @@ function Dashboard() {
     const [orderStatus, setOrderStatus] = useState(null); // State untuk status order
     const [isLoading, setIsLoading] = useState(false); // State untuk loading saat order
 
+    // Komponen Card
+    const Card = ({ title, description, discount }) => {
+        return (
+            <div style={styles.card}>
+                <div style={styles.watermark}>{discount}% OFF</div>
+                <div style={styles.cardContent}>
+                    <h3>{title}</h3>
+                    <p>{description}</p>
+                </div>
+            </div>
+        );
+    };
+
+    // Gaya untuk Card
+    const styles = {
+        card: {
+            position: 'relative',
+            backgroundColor: '#fff',
+            border: '1px solid #ddd',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            padding: '20px',
+            margin: '20px',
+        },
+        cardContent: {
+            padding: '10px',
+        },
+        watermark: {
+            position: 'absolute',
+            top: '10px',
+            left: '10px',
+            backgroundColor: 'rgba(255, 0, 0, 0.7)', // Warna latar belakang
+            color: 'white',
+            padding: '5px 10px',
+            borderRadius: '4px',
+            fontWeight: 'bold',
+            fontSize: '14px',
+            transform: 'rotate(-15deg)', // Memutar watermark
+        },
+    };
+
     useEffect(() => {
         fetchCourses();
     }, []);
@@ -103,7 +145,10 @@ function Dashboard() {
             <ToastContainer />
 
             {/* Main Content */}
+
             <div className="flex-1 p-6 bg-white-100">
+                <div className="divider divider-secondary"><strong><h1>Courses</h1></strong></div>
+
                 {/* Courses Section */}
                 {courses.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -111,7 +156,7 @@ function Dashboard() {
                             // Gunakan public ID dari path_image untuk membuat gambar
                             const publicId = course.path_image.split('/').slice(-2).join('/'); // Ambil public ID
                             const myImage = cld.image(publicId); // Ambil path_image dari API (hanya public ID)
-                            
+
                             myImage
                                 .resize(scale().width(1000)) // Resize gambar sesuai kebutuhan
                                 .delivery(quality('auto')) // Optimasi kualitas otomatis
@@ -119,43 +164,49 @@ function Dashboard() {
 
                             return (
                                 <div key={course.id} className="card card-compact bg-base-50 w-50 shadow-xl">
-                                <figure>
-                                    {/* Tampilkan gambar yang sudah di-resize menggunakan AdvancedImage */}
-                                    <AdvancedImage 
-                                        cldImg={myImage} 
-                                        alt={course.title}
-                                        className="object-cover h-64 w-full" 
-                                    />
-                                </figure>
-                                <div className="card-body bg-white">
-                                    <h2 className="card-title">{course.title}</h2>
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <button className="btn btn-outline btn-secondary text-white">
-                                                Rp. {Number(course.harga).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
-                                            </button>
-                                           {/* {course.discount && ( // Tampilkan jika ada diskon
-                                                <span className="text-red-500 ml-2">
-                                                    Disc: {course.discount}% 
+                                    {course.discount > 0 && (
+                                        <div style={styles.watermark}>
+                                            Disc: {course.discount}%
+                                        </div>
+                                    )}
+
+
+                                    <figure>
+                                        {/* Tampilkan gambar yang sudah di-resize menggunakan AdvancedImage */}
+                                        <AdvancedImage
+                                            cldImg={myImage}
+                                            alt={course.title}
+                                            className="object-cover h-64 w-full"
+                                        />
+                                    </figure>
+
+                                    <div className="card-body bg-white">
+                                        <h2 className="card-title">{course.title}</h2>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <button className="btn btn-outline btn-secondary text-white">
+                                                Rp. {Number(course.harga - (course.harga * (course.discount / 100))).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
+                                                {/* Tampilkan harga setelah diskon */}
+                                                {course.discount > 0 && (
+                                                <span className="line-through ml-2 text-gray-500">
+                                                    Rp. {Number(course.harga).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
+
+                                               
                                                 </span>
                                             )}
-                                            {/* Tampilkan harga setelah diskon */}
-                                           {/*  {course.discount && (
-                                                <span className="line-through ml-2 text-gray-500">
-                                                    Rp. {Number(course.harga - (course.harga * (course.discount / 100))).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
-                                                </span>
-                                            )}*/}
+                                                </button>
+                                               
+                                            </div>
+                                            <button
+                                                className="btn btn-circle btn-accent"
+                                                onClick={() => handleLearnMore(course)}
+                                            >
+                                                <i className="fa fa-cart-plus" aria-hidden="true"></i>
+                                            </button>
                                         </div>
-                                        <button 
-                                            className="btn btn-circle btn-warning"
-                                            onClick={() => handleLearnMore(course)}
-                                        >
-                                            <i className="fa fa-cart-plus" aria-hidden="true"></i>
-                                        </button>
                                     </div>
                                 </div>
-                            </div>
-                            
+
                             );
                         })}
                     </div>
@@ -175,19 +226,19 @@ function Dashboard() {
                             ✕
                         </button>
                         <h2 className="text-2xl font-bold mb-4">{selectedCourse.title}</h2>
-                        
+
                         {/* Scrollable container for ReactQuill */}
                         <div className="quill-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                            <ReactQuill 
+                            <ReactQuill
                                 value={selectedCourse.description} // Assuming 'description' contains the full course description
-                                readOnly={true} 
+                                readOnly={true}
                                 theme="bubble"
                             />
                         </div>
 
                         {/* Icon Keranjang dan Tombol Pesan */}
                         <div className="flex items-center justify-end mt-4">
-                            <button 
+                            <button
                                 className="btn btn-primary mr-2"
                                 onClick={handleOrder}
                                 disabled={isLoading} // Disabled saat loading
