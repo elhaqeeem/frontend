@@ -14,14 +14,9 @@ function Logout() {
                 localStorage.removeItem('roleID');
                 localStorage.removeItem('email');
                 localStorage.removeItem('firstName');
-               // localStorage.removeItem('htmx-history-cache');
+                // localStorage.removeItem('htmx-history-cache');
                 localStorage.removeItem('id');
                 //localStorage.removeItem('permissions');
-                
-
-
-
-
 
                 navigate('/login');
             })
@@ -31,10 +26,10 @@ function Logout() {
     };
 
     return (
-        <button onClick={handleLogout}   className="btn btn-circle btn-warning fixed bottom-8 right-8 shadow-lg"
->
-            <i className="fa fa-power-off" aria-hidden="true"></i> {/* This is the logout icon */}
-        </button>
+        <a onClick={handleLogout}
+        >
+           Logout {/* This is the logout icon */}
+        </a>
     );
 }
 

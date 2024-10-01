@@ -1,29 +1,29 @@
 import React, { useState, useEffect } from 'react';
-// eslint-disable-next-line
-import { Link, useLocation, useNavigate } from 'react-router-dom'; // Added useNavigate
+import { Link, useLocation } from 'react-router-dom';
 import Logout from './Logout';
 import axios from 'axios';
 import Joyride from 'react-joyride';
 
 const Layout = ({ children }) => {
     const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
-    const [currentTheme, setCurrentTheme] = useState('cupcake');
+    const [currentTheme, setCurrentTheme] = useState('autumn'); // Default theme
     const [tourSteps, setTourSteps] = useState([]);
-    const [runTour, setRunTour] = useState(false);
+    const [runTour, setRunTour] = useState(false);// eslint-disable-next-line
     const [openMenu, setOpenMenu] = useState({});
-    const [permissions, setPermissions] = useState([]); // Store permissions
+    const [cartItems, setCartItems] = useState([]); // State untuk item di keranjang
+    const [isCartModalOpen, setIsCartModalOpen] = useState(false); // State untuk mengontrol modal keranjang
     const location = useLocation();
-    const navigate = useNavigate(); // To navigate after permission check failure
 
+    
     const themes = [
-        "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", 
-        "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", 
-        "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", 
-        "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter", 
+        "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave",
+        "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua",
+        "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula",
+        "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter",
         "dim", "nord", "sunset"
     ];
-    
 
+    // Fetch accessible menus
     useEffect(() => {
         const fetchAccessibleMenus = async () => {
             const roleId = localStorage.getItem('roleID');
@@ -60,35 +60,14 @@ const Layout = ({ children }) => {
             }
         };
 
-        const fetchPermissions = async () => {
-            const roleId = localStorage.getItem('roleID');
-            if (!roleId) return;
-
-            try {
-                const token = localStorage.getItem('token');
-                const response = await axios.get(`/roles/${roleId}/permissions`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                if (response.data && response.data.permissions) {
-                    setPermissions(response.data.permissions);
-                }
-            } catch (error) {
-                console.error('Error fetching permissions:', error);
-            }
-        };
-
         fetchAccessibleMenus();
-        fetchPermissions();
     }, []);
 
     useEffect(() => {
         const steps = [
             {
                 target: '.select',
-                content: 'Select theme to customize your frame.',
+                content: 'select theme to customize your frame.',
             },
             {
                 target: '.navbar',
@@ -102,71 +81,92 @@ const Layout = ({ children }) => {
         setTourSteps(steps);
     }, []);
 
-    // Set theme dynamically
+    // Set theme dynamically by updating the data-theme attribute on the HTML tag
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', currentTheme);
     }, [currentTheme]);
 
     const handleThemeChange = (e) => {
-        setCurrentTheme(e.target.value);
+        setCurrentTheme(e.target.value); // Update current theme based on dropdown selection
     };
 
-    const handleToggle = (id) => {
-        setOpenMenu((prevState) => ({
-            ...prevState,
-            [id]: !prevState[id],
-        }));
-    };
+    // Fetch Cart Items from API
+    useEffect(() => {
+        const fetchCartItems = async () => {
+            try {
+                const user_id = localStorage.getItem('id');  // Ambil user_id dari localStorage
+                const token = localStorage.getItem('token');
 
-    const checkPermission = (menuId) => {
-        return permissions.some((perm) => perm.menu_id === menuId);
-    };
+                // Menggunakan query parameter untuk mengirim user_id sebagai filter
+                const response = await axios.get(`/orders?user_id=${user_id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-    const handleMenuClick = (menu) => {
-        if (!checkPermission(menu.id)) {
-            alert('You do not have permission to access this menu.');
-            return;
-        }
-        navigate(menu.url); // Navigate only if permission check passes
+                setCartItems(response.data); // Simpan data pesanan ke state
+            } catch (error) {
+                console.error('Error fetching cart items:', error);
+            }
+        };
+
+        fetchCartItems();
+    }, []); // Dependency array kosong agar hanya berjalan sekali saat komponen dimount
+
+    const toggleCartModal = () => {
+        setIsCartModalOpen(!isCartModalOpen); // Toggle modal keranjang
     };
 
     const renderMenu = (menu) => {
         if (!menu || !menu.menu_name || !menu.url) {
             return null;
         }
-
+    
         const hasChildren = menu.children && menu.children.length > 0;
-
+    
         return (
             <li key={menu.id} className="dropdown dropdown-hover">
                 <div className="cursor-pointer flex items-center justify-between">
-                    <button
-                        onClick={() => handleMenuClick(menu)}
+                    <Link
+                        to={menu.url}
                         className={`transition-colors duration-200 ease-in-out dropdown-toggle ${
-                            location.pathname === menu.url ? 'bg-gray-700 text-white' : 'hover:bg-gray-800 hover:text-white'
-                        }`}
+                            location.pathname === menu.url ? 'text-black underline' : 'badge:bg-yellow-100 badge:text-black'
+                        }`} // Underline untuk item aktif, badge-style untuk tidak aktif
                     >
-                        <i className={menu.icon_name} aria-hidden="true"></i>
+                        {/* Menambahkan ikon dari menu.icon_name */}
+                        <i className={menu.icon_name} aria-hidden="true"></i> {/* Menggunakan icon_name yang valid */}
                         <span className="ml-2">{menu.menu_name}</span>
-                    </button>
+                    </Link>
                     {hasChildren && (
-                        <label tabIndex={0} className="ml-2 btn btn-ghost btn-circle" onClick={() => handleToggle(menu.id)}>
+                        <label tabIndex={0} className="ml-2 btn btn-ghost btn-circle">
                             {openMenu[menu.id] ? '-' : '+'}
                         </label>
                     )}
                 </div>
-
+    
                 {hasChildren && (
                     <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                        {menu.children.map((child) => renderMenu(child))}
+                        {menu.children.map((child) => (
+                            <li key={child.id}>
+                                <Link
+                                    to={child.url}
+                                    className={`${location.pathname === child.url ? 'underline text-black' : 'text-gray-700'}`} // Underline untuk link aktif, dan warna teks untuk tidak aktif
+                                >
+                                    {/* Menambahkan ikon dari child.icon_name */}
+                                    <i className={child.icon_name} aria-hidden="true"></i> {/* Menggunakan icon_name yang valid */}
+                                    <span className="ml-2">{child.menu_name}</span>
+                                </Link>
+                            </li>
+                        ))}
                     </ul>
                 )}
             </li>
         );
     };
+    
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen flex flex-col overflow-x-hidden">
             <Joyride
                 steps={tourSteps}
                 run={runTour}
@@ -177,32 +177,82 @@ const Layout = ({ children }) => {
                 }}
             />
 
-            <nav className={`navbar sticky top-0 z-50 ${currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} px-4 shadow-md`}>
-                <div className="flex-1">
-             <button className="text-2xl font-bold">
-    <i className="fa fa-globe" aria-hidden="true"></i> Edu<strong>LMS</strong>
-</button>
+            {/* Topbar navigation menu */}
+            <nav className={`navbar sticky top-0 z-50 w-full ${currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} px-4 shadow-md flex items-center justify-between`}>
 
-                </div>
-                <div className="flex-none">
-                    <select onChange={handleThemeChange} value={currentTheme} className="select select-bordered mr-4">
+                <Link to="/">
+                    <button className="text-2xl font-bold">
+                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        <i style={{ color: 'gray' }}>Edu</i>
+                        <i><strong style={{ color: 'orange' }}>LMS</strong></i>
+                    </button>
+                </Link>
+
+                <div className="flex items-center space-x-4">
+                    <select onChange={handleThemeChange} value={currentTheme} className="select select-bordered hidden md:inline-block">
                         {themes.map((theme) => (
                             <option key={theme} value={theme}>
                                 {theme.charAt(0).toUpperCase() + theme.slice(1)}
                             </option>
                         ))}
                     </select>
-                    <ul className="menu menu-horizontal p-0">
+
+                    {/* Menu yang dapat diakses */}
+                    <ul className="menu menu-horizontal p-0 hidden lg:flex">
                         {accessibleMenuItems.map((menu) => renderMenu(menu))}
                     </ul>
+
+                    {/* Keranjang */}
+                    <button className="btn btn-outline btn-secondary" onClick={toggleCartModal}>
+                        <i className="fa fa-shopping-cart" aria-hidden="true"></i>
+                        <span className="badge badge-sm badge-primary">{cartItems.length}</span>
+                    </button>
+
                     <Logout />
-                    <button onClick={() => setRunTour(true)} className="ml-4 btn btn-primary">
-                        Start Tour
+                    <button onClick={() => setRunTour(true)}className="btn btn-circle btn-secondary fixed bottom-8 left-8 shadow-lg">
+                        ?
                     </button>
                 </div>
             </nav>
 
-            <main className="p-6 text-sm">{children}</main>
+           
+
+            {/* Main content area */}
+            <main className="flex-grow p-6 text-sm w-full max-w-7xl mx-auto overflow-x-hidden">
+                {children}
+            </main>
+                         {/* Modal Keranjang */}
+            {isCartModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg w-64 md:w-96">
+                        <h2 className="text-xl font-bold mb-4">Keranjang</h2>
+                        {cartItems.length > 0 ? (
+                            <ul>
+                                {cartItems.map((item) => (
+                                    <li key={item.id} className="mb-2">
+                                        <Link to={`/order/${item.id}`}>
+                                            <span>Order ID: {item.id}</span> <br />
+                                            <span>Total Price: Rp {item.total_price.toLocaleString()}</span> <br />
+                                            <span>Status: {item.payment_status}</span>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>Keranjang kosong</p>
+                        )}
+                        <div className="flex justify-end mt-4">
+                            <button className="btn btn-secondary" onClick={toggleCartModal}>Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Footer */}
+            <footer className="footer footer-center bg-base-300 text-base-content p-4 mt-auto w-full">
+                <aside>
+                    <p>Copyright © {new Date().getFullYear()} - All rights reserved by Edu LMS</p>
+                </aside>
+            </footer>
         </div>
     );
 };

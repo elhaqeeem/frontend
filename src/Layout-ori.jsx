@@ -8,7 +8,7 @@ const Layout = ({ children }) => {
     const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
     const [currentTheme, setCurrentTheme] = useState('autumn'); // Default theme
     const [tourSteps, setTourSteps] = useState([]);
-    const [runTour, setRunTour] = useState(false);// eslint-disable-next-line
+    const [runTour, setRunTour] = useState(false);
     const [openMenu, setOpenMenu] = useState({});
     const [cartItems, setCartItems] = useState([]); // State untuk item di keranjang
     const [isCartModalOpen, setIsCartModalOpen] = useState(false); // State untuk mengontrol modal keranjang
@@ -20,7 +20,7 @@ const Layout = ({ children }) => {
         3: 'fa fa-cog',          // Misal, icon_id 3 = ikon pengaturan
         // Tambahkan lebih banyak mapping sesuai kebutuhan
     };
-    
+
     const themes = [
         "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave",
         "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua",
@@ -43,7 +43,7 @@ const Layout = ({ children }) => {
                     },
                 });
 
-                if (response.data && response.data.menus) {
+                if (response.data && Array.isArray(response.data.menus)) {
                     const menuMap = {};
                     const rootMenus = [];
 
@@ -73,7 +73,7 @@ const Layout = ({ children }) => {
         const steps = [
             {
                 target: '.select',
-                content: 'select theme to customize your frame.',
+                content: 'Select theme to customize your frame.',
             },
             {
                 target: '.navbar',
@@ -96,14 +96,55 @@ const Layout = ({ children }) => {
         setCurrentTheme(e.target.value); // Update current theme based on dropdown selection
     };
 
+    const handleDeleteOrder = async (orderId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/orders/${orderId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                // Remove the deleted order from cartItems
+                setCartItems(cartItems.filter(item => item.id !== orderId));
+            }
+        } catch (error) {
+            console.error("Failed to delete order:", error);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        try {
+            const orderIds = cartItems.map(item => item.id);
+            const token = localStorage.getItem('token');
+
+            const response = await fetch('/orders/bulk-delete', {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ids: orderIds }),
+            });
+
+            if (response.ok) {
+                setCartItems([]); // Hapus semua order dari keranjang jika berhasil
+            } else {
+                console.error("Failed to bulk delete orders, status:", response.status);
+            }
+        } catch (error) {
+            console.error("Failed to bulk delete orders:", error);
+        }
+    };
+
     // Fetch Cart Items from API
     useEffect(() => {
         const fetchCartItems = async () => {
             try {
-                const user_id = localStorage.getItem('id');  // Ambil user_id dari localStorage
+                const user_id = localStorage.getItem('id'); // Ambil user_id dari localStorage
                 const token = localStorage.getItem('token');
 
-                // Menggunakan query parameter untuk mengirim user_id sebagai filter
                 const response = await axios.get(`/orders?user_id=${user_id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -127,39 +168,36 @@ const Layout = ({ children }) => {
         if (!menu || !menu.menu_name || !menu.url) {
             return null;
         }
-    
-        const hasChildren = menu.children && menu.children.length > 0;
-    
+
+        const hasChildren = Array.isArray(menu.children) && menu.children.length > 0;
+
         return (
             <li key={menu.id} className="dropdown dropdown-hover">
                 <div className="cursor-pointer flex items-center justify-between">
                     <Link
                         to={menu.url}
-                        className={`transition-colors duration-200 ease-in-out dropdown-toggle ${
-                            location.pathname === menu.url ? 'text-black underline' : 'badge:bg-yellow-100 badge:text-black'
-                        }`} // Underline untuk item aktif, badge-style untuk tidak aktif
+                        className={`transition-colors duration-200 ease-in-out dropdown-toggle ${location.pathname === menu.url ? 'text-gray underline' : 'badge:bg-yellow-100 badge:text-black'
+                            }`}
                     >
-                        {/* Menambahkan ikon dari menu.icon_name */}
-                        <i className={menu.icon_name} aria-hidden="true"></i> {/* Menggunakan icon_name yang valid */}
+                        <i className={menu.icon_name} aria-hidden="true"></i>
                         <span className="ml-2">{menu.menu_name}</span>
                     </Link>
                     {hasChildren && (
-                        <label tabIndex={0} className="ml-2 btn btn-ghost btn-circle">
-                            {openMenu[menu.id] ? '-' : '+'}
+                        <label tabIndex={0} >
+                            {openMenu[menu.id]}
                         </label>
                     )}
                 </div>
-    
+
                 {hasChildren && (
                     <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
                         {menu.children.map((child) => (
                             <li key={child.id}>
                                 <Link
                                     to={child.url}
-                                    className={`${location.pathname === child.url ? 'underline text-black' : 'text-gray-700'}`} // Underline untuk link aktif, dan warna teks untuk tidak aktif
+                                    className={`${location.pathname === child.url ? 'underline text-black' : 'text-gray-700'}`}
                                 >
-                                    {/* Menambahkan ikon dari child.icon_name */}
-                                    <i className={child.icon_name} aria-hidden="true"></i> {/* Menggunakan icon_name yang valid */}
+                                    <i className={child.icon_name} aria-hidden="true"></i>
                                     <span className="ml-2">{child.menu_name}</span>
                                 </Link>
                             </li>
@@ -169,7 +207,6 @@ const Layout = ({ children }) => {
             </li>
         );
     };
-    
 
     return (
         <div className="min-h-screen flex flex-col overflow-x-hidden">
@@ -184,12 +221,12 @@ const Layout = ({ children }) => {
             />
 
             {/* Topbar navigation menu */}
-            <nav className={`navbar sticky top-0 z-50 w-full ${currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} px-4 shadow-md flex items-center justify-between`}>
+            <nav className={`navbar bg-primary text-primary-content sticky top-0 z-50 w-full ${currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} px-4 shadow-md flex items-center justify-between`}>
 
                 <Link to="/">
                     <button className="text-2xl font-bold">
-                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
-                        <i style={{ color: 'gray' }}>Edu</i>
+                        <i className="fa fa-university" aria-hidden="true"></i>
+                        <i style={{ color: 'white' }}>Edu</i>
                         <i><strong style={{ color: 'orange' }}>LMS</strong></i>
                     </button>
                 </Link>
@@ -205,56 +242,96 @@ const Layout = ({ children }) => {
 
                     {/* Menu yang dapat diakses */}
                     <ul className="menu menu-horizontal p-0 hidden lg:flex">
-                        {accessibleMenuItems.map((menu) => renderMenu(menu))}
+                        {accessibleMenuItems.length > 0 ? (
+                            accessibleMenuItems.map((menu) => renderMenu(menu))
+                        ) : (
+                            <li>Tidak ada menu yang tersedia</li>
+                        )}
                     </ul>
 
-                    {/* Keranjang */}
-                    <button className="btn btn-outline btn-secondary" onClick={toggleCartModal}>
-                        <i className="fa fa-shopping-cart" aria-hidden="true"></i>
-                        <span className="badge badge-sm badge-primary">{cartItems.length}</span>
-                    </button>
 
-                    <Logout />
-                    <button onClick={() => setRunTour(true)} className="ml-4 btn btn-warning">
-                        Start Tour
+
+                    {/* Icon keranjang */}
+                    <button onClick={toggleCartModal} className="btn btn-ghost">
+                        <i className="fa fa-cart-plus text-lg"></i>
+                        <span className="indicator-item badge badge-secondary text-white">{Array.isArray(cartItems) ? cartItems.length : 0}</span>
                     </button>
+                    <div className="dropdown dropdown-end">
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                            <div className="w-10 rounded-full">
+                                <img
+                                    alt="Tailwind CSS Navbar component"
+                                    src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                            </div>
+                        </div>
+                        <ul
+                            tabIndex={0}
+                            className="menu menu-sm text-black dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
+                            <li>
+                                <a className="justify-between">
+                                    Profile
+                                    <span className="badge">New</span>
+                                </a>
+                            </li>
+                            <li><a>Settings</a></li>
+                            <li><a><Logout /></a></li>
+                        </ul>
+                    </div>
+
+                    {/* Modal keranjang */}
+                    {isCartModalOpen && (
+                        <div className="modal modal-open">
+                            <div className="modal-box">
+                            <button
+                            className="absolute top-2 right-2 btn btn-sm btn-circle"
+                            onClick={toggleCartModal}
+                        >
+                            ✕
+                        </button>
+                                <h3 className="font-bold text-lg text-black">Keranjang Pesanan</h3>
+                                {Array.isArray(cartItems) && cartItems.length > 0 ? (
+                                    <ul>
+                                        {cartItems.map((item) => (
+                                            <li key={item.id} className="mb-2 border p-4">
+                                                <Link to={`/order/${item.id}`}>
+                                                    <span>Order ID: {item.id}</span> <br />
+                                                    <span>Total Price: Rp {item.total_price.toLocaleString()}</span> <br />
+                                                    <span>Status: <div className="badge badge-warning badge-outline">{item.payment_status}</div></span>
+                                                </Link>
+                                                <button
+                                                    className="btn btn-danger mt-2"
+                                                    onClick={() => handleDeleteOrder(item.id)}>
+                                                    Hapus Order
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-black"></p>
+                                )}
+
+                                {Array.isArray(cartItems) && cartItems.length > 0 && (
+                                    <button
+                                        className="btn btn-danger mt-4"
+                                        onClick={handleBulkDelete}>
+                                        Hapus Semua Order
+                                    </button>
+                                )}
+
+                               
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </nav>
 
-            {/* Modal Keranjang */}
-            {isCartModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-lg w-64 md:w-96">
-                        <h2 className="text-xl font-bold mb-4">Keranjang</h2>
-                        {cartItems.length > 0 ? (
-                            <ul>
-                                {cartItems.map((item) => (
-                                    <li key={item.id} className="mb-2">
-                                        <Link to={`/order/${item.id}`}>
-                                            <span>Order ID: {item.id}</span> <br />
-                                            <span>Total Price: Rp {item.total_price.toLocaleString()}</span> <br />
-                                            <span>Status: {item.payment_status}</span>
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p>Keranjang kosong</p>
-                        )}
-                        <div className="flex justify-end mt-4">
-                            <button className="btn btn-secondary" onClick={toggleCartModal}>Tutup</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Main content area */}
-            <main className="flex-grow p-6 text-sm w-full max-w-7xl mx-auto overflow-x-hidden">
+            {/* Main content */}
+            <main className="flex-grow p-4">
                 {children}
             </main>
-
             {/* Footer */}
-            <footer className="footer footer-center bg-base-300 text-base-content p-4 mt-auto w-full">
+            <footer className="footer footer-center bg-primary text-primary-content text-base-content p-4 mt-auto w-full">
                 <aside>
                     <p>Copyright © {new Date().getFullYear()} - All rights reserved by Edu LMS</p>
                 </aside>

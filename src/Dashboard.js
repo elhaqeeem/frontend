@@ -16,8 +16,8 @@ function Dashboard() {
     const [orderStatus, setOrderStatus] = useState(null); // State untuk status order
     const [isLoading, setIsLoading] = useState(false); // State untuk loading saat order
 
-    // Komponen Card
-    const Card = ({ title, description, discount }) => {
+// eslint-disable-next-line
+    const card = ({ title, description, discount }) => {
         return (
             <div style={styles.card}>
                 <div style={styles.watermark}>{discount}% OFF</div>
@@ -238,15 +238,16 @@ function Dashboard() {
 
                         {/* Icon Keranjang dan Tombol Pesan */}
                         <div className="flex items-center justify-end mt-4">
+                       
                             <button
-                                className="btn btn-primary mr-2"
+                                className="btn btn-accent mr-2"
                                 onClick={handleOrder}
                                 disabled={isLoading} // Disabled saat loading
                             >
                                 {isLoading ? 'Processing...' : (
                                     <>
-                                        <i className="fas fa-shopping-cart"></i> {/* Ganti dengan ikon keranjang yang sesuai */}
-                                        Buy Now
+                                        <i className="fa fa-cart-plus"></i> {/* Ganti dengan ikon keranjang yang sesuai */}
+                                       
                                     </>
                                 )}
                             </button>

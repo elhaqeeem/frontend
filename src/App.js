@@ -44,7 +44,10 @@ function App() {
                     <Route path="/login" element={<Login onLogin={() => setIsAuthenticated(true)} />} />
                     <Route 
                         path="/" 
-                        element={<PrivateRoute element={<Layout><Dashboard /></Layout>} />} 
+                        element={<PrivateRoute element={<Layout>
+                            <Dashboard />
+
+                            </Layout>} />} 
                     />
                     <Route 
                         path="/users" 
