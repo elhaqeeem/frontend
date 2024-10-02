@@ -7,19 +7,13 @@ import Joyride from 'react-joyride';
 const Layout = ({ children }) => {
     const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
     const [currentTheme, setCurrentTheme] = useState('autumn'); // Default theme
-    const [tourSteps, setTourSteps] = useState([]);
-    const [runTour, setRunTour] = useState(false);
+    const [tourSteps, setTourSteps] = useState([]);// eslint-disable-next-line
+    const [runTour, setRunTour] = useState(false);// eslint-disable-next-line
     const [openMenu, setOpenMenu] = useState({});
     const [cartItems, setCartItems] = useState([]); // State untuk item di keranjang
     const [isCartModalOpen, setIsCartModalOpen] = useState(false); // State untuk mengontrol modal keranjang
     const location = useLocation();
 
-    const iconMapping = {
-        1: 'fa fa-home',         // Misal, icon_id 1 = ikon rumah
-        2: 'fa fa-user',         // Misal, icon_id 2 = ikon pengguna
-        3: 'fa fa-cog',          // Misal, icon_id 3 = ikon pengaturan
-        // Tambahkan lebih banyak mapping sesuai kebutuhan
-    };
 
     const themes = [
         "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave",
@@ -179,7 +173,7 @@ const Layout = ({ children }) => {
                         className={`transition-colors duration-200 ease-in-out dropdown-toggle ${location.pathname === menu.url ? 'text-gray underline' : 'badge:bg-yellow-100 badge:text-black'
                             }`}
                     >
-                        <i className={menu.icon_name} aria-hidden="true"></i>
+                        <i className={menu.icon_name} aria-hidden="true" style={{ color: 'gold' }}></i>
                         <span className="ml-2">{menu.menu_name}</span>
                     </Link>
                     {hasChildren && (
@@ -197,7 +191,7 @@ const Layout = ({ children }) => {
                                     to={child.url}
                                     className={`${location.pathname === child.url ? 'underline text-black' : 'text-gray-700'}`}
                                 >
-                                    <i className={child.icon_name} aria-hidden="true"></i>
+                                    <i className={child.icon_name} aria-hidden="true" style={{ color: 'red' }}></i>
                                     <span className="ml-2">{child.menu_name}</span>
                                 </Link>
                             </li>
@@ -268,13 +262,14 @@ const Layout = ({ children }) => {
                             tabIndex={0}
                             className="menu menu-sm text-black dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
                             <li>
-                                <a className="justify-between">
+                                <a href="/profile" className="justify-between">
                                     Profile
-                                    <span className="badge">New</span>
+                                    <span className="badge badge-secondary text-white">New</span>
                                 </a>
+
                             </li>
-                            <li><a>Settings</a></li>
-                            <li><a><Logout /></a></li>
+                            <li><a href="/setting"> Settings</a></li>
+                            <li><Logout /></li>
                         </ul>
                     </div>
 
@@ -282,17 +277,17 @@ const Layout = ({ children }) => {
                     {isCartModalOpen && (
                         <div className="modal modal-open">
                             <div className="modal-box">
-                            <button
-                            className="absolute top-2 right-2 btn btn-sm btn-circle"
-                            onClick={toggleCartModal}
-                        >
-                            ✕
-                        </button>
+                                <button
+                                    className="absolute top-2 right-2 btn btn-sm btn-circle"
+                                    onClick={toggleCartModal}
+                                >
+                                    ✕
+                                </button>
                                 <h3 className="font-bold text-lg text-black">Keranjang Pesanan</h3>
                                 {Array.isArray(cartItems) && cartItems.length > 0 ? (
                                     <ul>
                                         {cartItems.map((item) => (
-                                            <li key={item.id} className="mb-2 border p-4">
+                                            <li key={item.id} className="mb-2 border p-4 text-black">
                                                 <Link to={`/order/${item.id}`}>
                                                     <span>Order ID: {item.id}</span> <br />
                                                     <span>Total Price: Rp {item.total_price.toLocaleString()}</span> <br />
@@ -307,7 +302,9 @@ const Layout = ({ children }) => {
                                         ))}
                                     </ul>
                                 ) : (
-                                    <p className="text-black"></p>
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+  <img src="./empty-cart.png" width="200" alt="Empty Cart" />
+</div>
                                 )}
 
                                 {Array.isArray(cartItems) && cartItems.length > 0 && (
@@ -318,7 +315,7 @@ const Layout = ({ children }) => {
                                     </button>
                                 )}
 
-                               
+
                             </div>
                         </div>
                     )}

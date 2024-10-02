@@ -26,7 +26,7 @@ function Logout() {
     };
 
     return (
-        <a onClick={handleLogout}
+        <a href onClick={handleLogout}
         >
            Logout {/* This is the logout icon */}
         </a>
