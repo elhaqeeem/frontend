@@ -14,7 +14,6 @@ const Layout = ({ children }) => {
     const [isCartModalOpen, setIsCartModalOpen] = useState(false); // State untuk mengontrol modal keranjang
     const location = useLocation();
 
-
     const themes = [
         "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave",
         "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua",
@@ -81,6 +80,9 @@ const Layout = ({ children }) => {
         setTourSteps(steps);
     }, []);
 
+   
+    
+    
     // Set theme dynamically by updating the data-theme attribute on the HTML tag
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', currentTheme);
@@ -226,7 +228,7 @@ const Layout = ({ children }) => {
                 </Link>
 
                 <div className="flex items-center space-x-4">
-                    <select onChange={handleThemeChange} value={currentTheme} className="select select-bordered hidden md:inline-block">
+                    <select onChange={handleThemeChange} value={currentTheme} className="select select-bordered hidden md:inline-block text-black">
                         {themes.map((theme) => (
                             <option key={theme} value={theme}>
                                 {theme.charAt(0).toUpperCase() + theme.slice(1)}
@@ -283,29 +285,43 @@ const Layout = ({ children }) => {
                                 >
                                     ✕
                                 </button>
-                                <h3 className="font-bold text-lg text-black">Keranjang Pesanan</h3>
+                                <div className="divider divider-primary">                                <h3 className="font-bold text-lg text-black">Keranjang Pesanan</h3>
+                                </div>
+
                                 {Array.isArray(cartItems) && cartItems.length > 0 ? (
-                                    <ul>
-                                        {cartItems.map((item) => (
-                                            <li key={item.id} className="mb-2 border p-4 text-black">
-                                                <Link to={`/order/${item.id}`}>
-                                                    <span>Order ID: {item.id}</span> <br />
-                                                    <span>Total Price: Rp {item.total_price.toLocaleString()}</span> <br />
-                                                    <span>Status: <div className="badge badge-warning badge-outline">{item.payment_status}</div></span>
-                                                </Link>
-                                                <button
-                                                    className="btn btn-danger mt-2"
-                                                    onClick={() => handleDeleteOrder(item.id)}>
-                                                    Hapus Order
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-  <img src="./empty-cart.png" width="200" alt="Empty Cart" />
+    <div className="grid grid-cols-1  gap-4">
+        {cartItems.map((item) => (
+            <div key={item.id} className="flex justify-between items-center border p-4 text-black">
+                <div>
+                    <Link to={`/order/${item.id}`}>
+                        <span>Order ID: {item.id}</span> <br />
+                        <span>Total Price: Rp {item.total_price.toLocaleString()}</span> <br />
+                        <span>Status: <div className="badge badge-warning badge-outline">{item.payment_status}</div></span>
+                    </Link>
+                </div>
+                <div className="flex flex-col justify-between h-full">
+    <button
+        className="btn btn-rounded btn-primary" // Tambahkan margin bawah untuk memberi jarak
+        onClick={() => handleDeleteOrder(item.id)}>
+        <i className="fa fa-trash"></i> 
+    </button>
+    <button
+        className="btn btn-rounded btn-success"
+       >
+        <i className="fa fa-money"></i> 
+    </button>
 </div>
-                                )}
+
+            </div>
+        ))}
+    </div>
+) : (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <img src="./empty-cart.png" width="200" alt="Empty Cart" />
+    </div>
+    
+)}
+
 
                                 {Array.isArray(cartItems) && cartItems.length > 0 && (
                                     <button

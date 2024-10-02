@@ -29,6 +29,8 @@ function Dashboard() {
         );
     };
 
+  
+
     // Gaya untuk Card
     const styles = {
         card: {
@@ -57,6 +59,7 @@ function Dashboard() {
             transform: 'rotate(-15deg)', // Memutar watermark
         },
     };
+   
 
     useEffect(() => {
         fetchCourses();
@@ -114,6 +117,11 @@ function Dashboard() {
             setIsLoading(true); // eslint-disable-next-line
             const response = await axios.post('/orders', orderData);
             toast.success('Order created successfully!');
+            closeModal();
+            window.location.reload(); 
+
+
+
         } catch (error) {
             console.error('Failed to create order:', error);
             if (error.response) {
