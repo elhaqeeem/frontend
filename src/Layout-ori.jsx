@@ -13,6 +13,7 @@ const Layout = ({ children }) => {
     const [cartItems, setCartItems] = useState([]); // State untuk item di keranjang
     const [isCartModalOpen, setIsCartModalOpen] = useState(false); // State untuk mengontrol modal keranjang
     const location = useLocation();
+    
 
     const themes = [
         "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave",
@@ -90,6 +91,58 @@ const Layout = ({ children }) => {
 
     const handleThemeChange = (e) => {
         setCurrentTheme(e.target.value); // Update current theme based on dropdown selection
+    };
+
+    // Fetch cart items on component mount
+    useEffect(() => {
+        const fetchCartItems = async () => {
+            const user_id = localStorage.getItem('id'); 
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`/orders?user_id=${user_id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setCartItems(response.data);
+        };
+
+        fetchCartItems();
+    }, []);
+
+    // Handle payment
+    const handlePayment = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const email = localStorage.getItem('email'); 
+            const firstName = localStorage.getItem('firstName'); 
+            //const user_id = localStorage.getItem('id'); 
+            
+            const customer = {
+                first_name: firstName, // Replace with actual customer details
+                email: email,
+            };
+
+            const response = await axios.post(
+                '/payment',
+                {
+                    orders: cartItems,
+                    customer: customer,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            const paymentURLs = response.data.payment_urls;
+            // Redirect the user to the first payment URL (or handle multiple orders as needed)
+            if (paymentURLs.length > 0) {
+                window.location.href = paymentURLs[0];
+            }
+        } catch (error) {
+            console.error('Payment error:', error);
+        }
     };
 
     const handleDeleteOrder = async (orderId) => {
@@ -307,7 +360,10 @@ const Layout = ({ children }) => {
     </button>
     <button
         className="btn btn-rounded btn-success"
+        onClick={() => handlePayment(item.id)}
+
        >
+
         <i className="fa fa-money"></i> 
     </button>
 </div>
@@ -327,6 +383,8 @@ const Layout = ({ children }) => {
                                     <button
                                         className="btn btn-danger mt-4"
                                         onClick={handleBulkDelete}>
+                                                    <i className="fa fa-trash"></i> 
+
                                         Hapus Semua Order
                                     </button>
                                 )}

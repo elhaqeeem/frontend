@@ -159,7 +159,7 @@ function Dashboard() {
 
                 {/* Courses Section */}
                 {courses.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                         {courses.map((course) => {
                             // Gunakan public ID dari path_image untuk membuat gambar
                             const publicId = course.path_image.split('/').slice(-2).join('/'); // Ambil public ID
@@ -192,16 +192,13 @@ function Dashboard() {
                                         <h2 className="card-title">{course.title}</h2>
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <button className="btn btn-outline btn-secondary text-white">
+                                                <button className="btn btn-outline btn-secondary">
                                                 Rp. {Number(course.harga - (course.harga * (course.discount / 100))).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
-                                                {/* Tampilkan harga setelah diskon */}
-                                                {course.discount > 0 && (
-                                                <span className="line-through ml-2 text-gray-500">
-                                                    Rp. {Number(course.harga).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
-
-                                               
-                                                </span>
-                                            )}
+                                                {/* Tampilkan harga setelah diskon 
+                                                {course.discount > 0 && 
+                                                (<span className="line-through text-gray-500">
+                                                Rp. {Number(course.harga).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
+                                                </span>)} */}
                                                 </button>
                                                
                                             </div>
