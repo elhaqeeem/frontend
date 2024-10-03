@@ -21,7 +21,6 @@ import Quiz from './Quiz';
 import CourseManager from './CourseManager';
 import MaterialManager from './MaterialManager';
 import { ToastContainer } from 'react-toastify';
-import 'font-awesome/css/font-awesome.min.css';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {

@@ -94,20 +94,7 @@ const Layout = ({ children }) => {
     };
 
     // Fetch cart items on component mount
-    useEffect(() => {
-        const fetchCartItems = async () => {
-            const user_id = localStorage.getItem('id'); 
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`/orders?user_id=${user_id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            setCartItems(response.data);
-        };
-
-        fetchCartItems();
-    }, []);
+   
 
     // Handle payment
     const handlePayment = async () => {
