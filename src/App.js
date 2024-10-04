@@ -20,6 +20,8 @@ import RoleMenuManager from './RoleMenuManager';
 import Quiz from './Quiz';
 import CourseManager from './CourseManager';
 import MaterialManager from './MaterialManager';
+import QuizKraeplin from './Quiz-kraeplin';
+import TestItemManager from './TestItemManager';
 import { ToastContainer } from 'react-toastify';
 
 function App() {
@@ -115,6 +117,14 @@ function App() {
                     <Route 
                         path="/material-manager" 
                         element={<PrivateRoute element={<Layout><MaterialManager /></Layout>} />} 
+                    />
+                     <Route 
+                        path="/Quis-Kraeplin" 
+                        element={<PrivateRoute element={<Layout><QuizKraeplin /></Layout>} />} 
+                    />
+                     <Route 
+                        path="/Question-Kraeplin" 
+                        element={<PrivateRoute element={<Layout><TestItemManager /></Layout>} />} 
                     />
                   
                 </Routes>
