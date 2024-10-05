@@ -12,16 +12,20 @@ const Layout = ({ children }) => {
     const [openMenu, setOpenMenu] = useState({});
     const [cartItems, setCartItems] = useState([]); // State untuk item di keranjang
     const [isCartModalOpen, setIsCartModalOpen] = useState(false); // State untuk mengontrol modal keranjang
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false); // State untuk modal profile
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile menu state
     const location = useLocation();
-    
 
-    const themes = [
-        "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave",
-        "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua",
-        "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula",
-        "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter",
-        "dim", "nord", "sunset"
-    ];
+    const toggleMobileMenu = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
+    };
+    //const themes = [
+    //    "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave",
+    //    "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua",
+    //    "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula",
+    //    "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter",
+    //    "dim", "nord", "sunset"
+    //];
 
     // Fetch accessible menus
     useEffect(() => {
@@ -81,29 +85,35 @@ const Layout = ({ children }) => {
         setTourSteps(steps);
     }, []);
 
-   
-    
-    
+
+
+
     // Set theme dynamically by updating the data-theme attribute on the HTML tag
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', currentTheme);
     }, [currentTheme]);
 
+
+
+    // eslint-disable-next-line
     const handleThemeChange = (e) => {
         setCurrentTheme(e.target.value); // Update current theme based on dropdown selection
     };
 
     // Fetch cart items on component mount
-   
+
+    const toggleProfileModal = () => {
+        setIsProfileModalOpen(!isProfileModalOpen); // Toggle modal profile
+    };
 
     // Handle payment
     const handlePayment = async () => {
         try {
             const token = localStorage.getItem('token');
-            const email = localStorage.getItem('email'); 
-            const firstName = localStorage.getItem('firstName'); 
+            const email = localStorage.getItem('email');
+            const firstName = localStorage.getItem('firstName');
             //const user_id = localStorage.getItem('id'); 
-            
+
             const customer = {
                 first_name: firstName, // Replace with actual customer details
                 email: email,
@@ -258,62 +268,114 @@ const Layout = ({ children }) => {
 
             {/* Topbar navigation menu */}
             <nav className={`navbar bg-primary text-primary-content sticky top-0 z-50 w-full ${currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} px-4 shadow-md flex items-center justify-between`}>
+                {/* Mobile Menu Toggle Button */}
+
 
                 <Link to="/">
                     <button className="text-2xl font-bold">
-                        <i className="fa fa-university" aria-hidden="true"></i>
+                        {/* <i className="fa fa-university" aria-hidden="true"></i>*/}
                         <i style={{ color: 'white' }}>Edu</i>
                         <i><strong style={{ color: 'orange' }}>LMS</strong></i>
                     </button>
                 </Link>
+                <button className="lg:hidden text-white" onClick={toggleMobileMenu}>
+                    <i className="fa fa-bars"></i>
+                </button>
+                <div className={`lg:flex ${isMobileMenuOpen ? 'block' : 'hidden'} flex-col lg:flex-row`}>
 
-                <div className="flex items-center space-x-4">
-                    <select onChange={handleThemeChange} value={currentTheme} className="select select-bordered hidden md:inline-block text-black">
+                    {/*
+                     <select onChange={handleThemeChange} value={currentTheme} className="select select-bordered text-black">
                         {themes.map((theme) => (
                             <option key={theme} value={theme}>
                                 {theme.charAt(0).toUpperCase() + theme.slice(1)}
                             </option>
                         ))}
-                    </select>
+                    </select> */}
 
                     {/* Menu yang dapat diakses */}
-                    <ul className="menu menu-horizontal p-0 hidden lg:flex">
-                        {accessibleMenuItems.length > 0 ? (
-                            accessibleMenuItems.map((menu) => renderMenu(menu))
-                        ) : (
-                            <li>Tidak ada menu yang tersedia</li>
-                        )}
+                    <ul className="menu menu-horizontal p-0 lg:flex">
+                        {accessibleMenuItems.length > 0 ? accessibleMenuItems.map(renderMenu) : <li>Tidak ada menu yang tersedia</li>}
                     </ul>
 
-
+                     {/* Floating Profile Button */}
+                     <div
+                        role="button"
+                        className="btn btn-ghost btn-circle avatar"
+                        style={{
+                            position: 'fixed',
+                            bottom: '20px',
+                            right: '20px',
+                            zIndex: 1000,
+                            cursor: 'pointer',
+                        }}
+                        onClick={toggleProfileModal}
+                    >
+                        <div className="w-10 rounded-full">
+                            <img
+                                alt="User Avatar"
+                                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                            />
+                        </div>
+                    </div>
 
                     {/* Icon keranjang */}
                     <button onClick={toggleCartModal} className="btn btn-ghost">
                         <i className="fa fa-cart-plus text-lg"></i>
                         <span className="indicator-item badge badge-secondary text-white">{Array.isArray(cartItems) ? cartItems.length : 0}</span>
                     </button>
-                    <div className="dropdown dropdown-end">
-                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                            <div className="w-10 rounded-full">
-                                <img
-                                    alt="Tailwind CSS Navbar component"
-                                    src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                     {/* Modal Profile */}
+                     {isProfileModalOpen && (
+                        <div
+                            style={{
+                                position: 'fixed',
+                                top: 0,
+                                left: 0,
+                                width: '100vw',
+                                height: '100vh',
+                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                zIndex: 1001,
+                            }}
+                        >
+                            <div
+                                style={{
+                                    backgroundColor: '#fff',
+                                    padding: '20px',
+                                    borderRadius: '8px',
+                                    width: '300px',
+                                    textAlign: 'center',
+                                }}
+                            >
+                                <h3 className="text-lg text-black font-bold mb-4">User Menu</h3>
+                                
+                                <ul style={{ listStyle: 'none', padding: 0 }}>
+                                    <li>
+                                        <Link to="/profile" className="flex items-center justify-start">
+                                            <i className="fa fa-users mr-2" aria-hidden="true" style={{ color: 'red' }}></i>
+                                            Profile
+                                        </Link>
+                                    </li>
+                                    <li className="mt-2">
+                                        <Link to="/setting" className="flex items-center justify-start">
+                                            <i className="fa fa-gear mr-2" aria-hidden="true" style={{ color: 'red' }}></i>
+                                            Settings
+                                        </Link>
+                                    </li>
+                                    <li className="mt-2">
+                                        <Logout />
+                                    </li>
+                                </ul>
+                                <button
+                                    className="btn mt-4"
+                                    onClick={toggleProfileModal}
+                                >
+                                    Close
+                                </button>
                             </div>
                         </div>
-                        <ul
-                            tabIndex={0}
-                            className="menu menu-sm text-black dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
-                            <li>
-                                <a href="/profile" className="justify-between">
-                                    Profile
-                                    <span className="badge badge-secondary text-white">New</span>
-                                </a>
-
-                            </li>
-                            <li><a href="/setting"> Settings</a></li>
-                            <li><Logout /></li>
-                        </ul>
-                    </div>
+                        )}
 
                     {/* Modal keranjang */}
                     {isCartModalOpen && (
@@ -329,48 +391,48 @@ const Layout = ({ children }) => {
                                 </div>
 
                                 {Array.isArray(cartItems) && cartItems.length > 0 ? (
-    <div className="grid grid-cols-1  gap-4">
-        {cartItems.map((item) => (
-            <div key={item.id} className="flex justify-between items-center border p-4 text-black">
-                <div>
-                    <Link to={`/order/${item.id}`}>
-                        <span>Order ID: {item.id}</span> <br />
-                        <span>Total Price: Rp {item.total_price.toLocaleString()}</span> <br />
-                        <span>Status: <div className="badge badge-warning badge-outline">{item.payment_status}</div></span>
-                    </Link>
-                </div>
-                <div className="flex flex-col justify-between h-full">
-    <button
-        className="btn btn-rounded btn-primary" // Tambahkan margin bawah untuk memberi jarak
-        onClick={() => handleDeleteOrder(item.id)}>
-        <i className="fa fa-trash"></i> 
-    </button>
-    <button
-        className="btn btn-rounded btn-success"
-        onClick={() => handlePayment(item.id)}
+                                    <div className="grid grid-cols-1  gap-4">
+                                        {cartItems.map((item) => (
+                                            <div key={item.id} className="flex justify-between items-center border p-4 text-black">
+                                                <div>
+                                                    <Link to={`/order/${item.id}`}>
+                                                        <span>Order ID: {item.id}</span> <br />
+                                                        <span>Total Price: Rp {item.total_price.toLocaleString()}</span> <br />
+                                                        <span>Status: <div className="badge badge-warning badge-outline">{item.payment_status}</div></span>
+                                                    </Link>
+                                                </div>
+                                                <div className="flex flex-col justify-between h-full">
+                                                    <button
+                                                        className="btn btn-rounded btn-primary" // Tambahkan margin bawah untuk memberi jarak
+                                                        onClick={() => handleDeleteOrder(item.id)}>
+                                                        <i className="fa fa-trash"></i>
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-rounded btn-success"
+                                                        onClick={() => handlePayment(item.id)}
 
-       >
+                                                    >
 
-        <i className="fa fa-money"></i> 
-    </button>
-</div>
+                                                        <i className="fa fa-money"></i>
+                                                    </button>
+                                                </div>
 
-            </div>
-        ))}
-    </div>
-) : (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <img src="./empty-cart.png" width="200" alt="Empty Cart" />
-    </div>
-    
-)}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                                        <img src="./empty-cart.png" width="200" alt="Empty Cart" />
+                                    </div>
+
+                                )}
 
 
                                 {Array.isArray(cartItems) && cartItems.length > 0 && (
                                     <button
                                         className="btn btn-danger mt-4"
                                         onClick={handleBulkDelete}>
-                                                    <i className="fa fa-trash"></i> 
+                                        <i className="fa fa-trash"></i>
 
                                         Hapus Semua Order
                                     </button>
