@@ -297,85 +297,98 @@ const Layout = ({ children }) => {
                         {accessibleMenuItems.length > 0 ? accessibleMenuItems.map(renderMenu) : <li>Tidak ada menu yang tersedia</li>}
                     </ul>
 
-                     {/* Floating Profile Button */}
-                     <div
-                        role="button"
-                        className="btn btn-ghost btn-circle avatar"
-                        style={{
-                            position: 'fixed',
-                            bottom: '20px',
-                            right: '20px',
-                            zIndex: 1000,
-                            cursor: 'pointer',
-                        }}
-                        onClick={toggleProfileModal}
-                    >
-                        <div className="w-10 rounded-full">
-                            <img
-                                alt="User Avatar"
-                                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                            />
-                        </div>
-                    </div>
-
                     {/* Icon keranjang */}
                     <button onClick={toggleCartModal} className="btn btn-ghost">
                         <i className="fa fa-cart-plus text-lg"></i>
                         <span className="indicator-item badge badge-secondary text-white">{Array.isArray(cartItems) ? cartItems.length : 0}</span>
                     </button>
-                     {/* Modal Profile */}
-                     {isProfileModalOpen && (
+                     {/* Floating Profile Button */}
+                     
+    <div>
+      {/* Ikon gear dengan efek melayang dan warna */}
+      <i 
+        className="fa fa-gear fa-spin p-0 lg:flex" 
+        style={{ 
+          fontSize: '24px',
+          position: 'fixed', 
+          top: '20px', 
+          right: '7px', 
+          color: 'white', 
+          textShadow: '0 0 10px gray, 0 0 20px gray, 0 0 30px white', 
+          transition: 'transform 0.5s', 
+          transform: 'translateY(0)' 
+        }} 
+        onClick={toggleProfileModal}
+      ></i>
+
+      {/* Modal Profile (tampilkan jika profileModal true) */}
+     
+
+      {/* Tambahkan keyframe animasi di sini */}
+      <style>
+        {`
+        @keyframes float {
+          0% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
+          100% {
+            transform: translateY(0);
+          }
+        }
+        `}
+      </style>
+    </div>
+  
+
+
+                    {/* Left Sidebar Profile */}
+                    {isProfileModalOpen && (
                         <div
                             style={{
                                 position: 'fixed',
                                 top: 0,
-                                left: 0,
-                                width: '100vw',
+                                right: 0,
+                                width: '300px', // Sidebar width
                                 height: '100vh',
-                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
+                                backgroundColor: '#fff',
+                                boxShadow: '2px 0px 10px rgba(0, 0, 0, 0.2)', // Adding a subtle shadow
                                 zIndex: 1001,
+                                padding: '20px',
+                                transition: 'transform 0.3s ease-in-out',
+                                transform: isProfileModalOpen ? 'translateX(0)' : 'translateX(-100%)', // Slide in/out effect
                             }}
                         >
-                            <div
-                                style={{
-                                    backgroundColor: '#fff',
-                                    padding: '20px',
-                                    borderRadius: '8px',
-                                    width: '300px',
-                                    textAlign: 'center',
-                                }}
+                            <h3 className="text-lg text-black font-bold mb-4">User Menu</h3>
+
+                            <ul style={{ listStyle: 'none', padding: 0 }}>
+                                <li>
+                                    <Link to="/profile" className="flex items-center text-black justify-start">
+                                        <i className="fa fa-users mr-2" aria-hidden="true" style={{ color: 'red' }}></i>
+                                        Profile
+                                    </Link>
+                                </li>
+                                <li className="mt-2">
+                                    <Link to="/setting" className="flex items-center text-black justify-start">
+                                        <i className="fa fa-gear mr-2" aria-hidden="true" style={{ color: 'red' }}></i>
+                                        Settings
+                                    </Link>
+                                </li>
+                                <li className="mt-2">
+                                    <Logout />
+                                </li>
+                            </ul>
+                            <button
+                                className="btn mt-4"
+                                onClick={toggleProfileModal}
                             >
-                                <h3 className="text-lg text-black font-bold mb-4">User Menu</h3>
-                                
-                                <ul style={{ listStyle: 'none', padding: 0 }}>
-                                    <li>
-                                        <Link to="/profile" className="flex items-center justify-start">
-                                            <i className="fa fa-users mr-2" aria-hidden="true" style={{ color: 'red' }}></i>
-                                            Profile
-                                        </Link>
-                                    </li>
-                                    <li className="mt-2">
-                                        <Link to="/setting" className="flex items-center justify-start">
-                                            <i className="fa fa-gear mr-2" aria-hidden="true" style={{ color: 'red' }}></i>
-                                            Settings
-                                        </Link>
-                                    </li>
-                                    <li className="mt-2">
-                                        <Logout />
-                                    </li>
-                                </ul>
-                                <button
-                                    className="btn mt-4"
-                                    onClick={toggleProfileModal}
-                                >
-                                    Close
-                                </button>
-                            </div>
+                                Close
+                            </button>
                         </div>
-                        )}
+                    )}
+
 
                     {/* Modal keranjang */}
                     {isCartModalOpen && (

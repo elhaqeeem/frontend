@@ -117,8 +117,8 @@ function Dashboard() {
             setIsLoading(true); // eslint-disable-next-line
             const response = await axios.post('/orders', orderData);
             toast.success('Order created successfully!');
+            window.location.re(); 
             closeModal();
-            window.location.reload(); 
 
 
 

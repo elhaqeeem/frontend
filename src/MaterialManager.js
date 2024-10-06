@@ -43,6 +43,24 @@ const MaterialManager = () => {
     }
   };
 
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post('/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      setMaterialData({ ...materialData, content: response.data.url });
+      toast.success('Image uploaded successfully.');
+    } catch (error) {
+      toast.error('Failed to upload image.');
+    }
+  };
+
   const handleCreateOrUpdate = async () => {
     const { course_id, title, content, id } = materialData;
 
@@ -220,10 +238,14 @@ const MaterialManager = () => {
               onChange={(e) => setMaterialData({ ...materialData, title: e.target.value })}
               className="input input-bordered w-full mb-2"
             />
-            <ReactQuill
-              value={materialData.content}
-              onChange={(content) => setMaterialData({ ...materialData, content })}
-            />
+           
+           <div className="form-control mt-4">
+        <label className="label">Upload file material</label>
+        <input 
+            type="file" 
+            onChange={handleImageUpload} // Pass the event directly
+        />
+    </div>
           </div>
           <div className="modal-action">
             <button className="btn btn-primary" onClick={handleCreateOrUpdate}>Save</button>

@@ -26,9 +26,9 @@ function Logout() {
     };
 
     return (
-        <a href onClick={handleLogout}
-        >
-           Logout {/* This is the logout icon */}
+        <a href onClick={handleLogout} className="flex items-center text-black justify-start">
+            <i className="fa fa-power-off mr-2" aria-hidden="true" style={{ color: 'red' }}></i>
+            Logout {/* This is the logout icon */}
         </a>
     );
 }

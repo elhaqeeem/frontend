@@ -22,7 +22,9 @@ import CourseManager from './CourseManager';
 import MaterialManager from './MaterialManager';
 import QuizKraeplin from './Quiz-kraeplin';
 import TestItemManager from './TestItemManager';
+import ImageManager from './ImageManager';
 import { ToastContainer } from 'react-toastify';
+
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -125,6 +127,10 @@ function App() {
                      <Route 
                         path="/Question-Kraeplin" 
                         element={<PrivateRoute element={<Layout><TestItemManager /></Layout>} />} 
+                    />
+                     <Route 
+                        path="/File-Manager" 
+                        element={<PrivateRoute element={<Layout><ImageManager /></Layout>} />} 
                     />
                   
                 </Routes>
