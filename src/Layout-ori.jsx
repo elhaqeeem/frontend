@@ -219,21 +219,15 @@ const Layout = ({ children }) => {
 
         return (
             <li key={menu.id} className="dropdown dropdown-hover">
-                <div className="cursor-pointer flex items-center justify-between">
-                    <Link
-                        to={menu.url}
-                        className={`transition-colors duration-200 ease-in-out dropdown-toggle ${location.pathname === menu.url ? 'text-gray underline' : 'badge:bg-yellow-100 badge:text-black'
-                            }`}
-                    >
-                        <i className={menu.icon_name} aria-hidden="true" style={{ color: 'gold' }}></i>
-                        <span className="ml-2">{menu.menu_name}</span>
-                    </Link>
-                    {hasChildren && (
-                        <label tabIndex={0} >
-                            {openMenu[menu.id]}
-                        </label>
-                    )}
-                </div>
+               <div className="tooltip tooltip-left" data-tip={menu.menu_name}>
+    <Link
+      to={menu.url}
+      className={`transition-colors duration-200 ease-in-out ${location.pathname === menu.url ? 'text-gray underline' : 'badge:bg-yellow-100 badge:text-black'}`}
+    >
+      {/* Display only the icon */}
+      <i className={menu.icon_name} aria-hidden="true" style={{ color: 'gold' }}></i>
+    </Link>
+  </div>
 
                 {hasChildren && (
                     <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
@@ -273,7 +267,7 @@ const Layout = ({ children }) => {
 
                 <Link to="/">
                     <button className="text-2xl font-bold">
-                        {/* <i className="fa fa-university" aria-hidden="true"></i>*/}
+                     <i className="fa fa-university" aria-hidden="true"></i>
                         <i style={{ color: 'white' }}>Edu</i>
                         <i><strong style={{ color: 'orange' }}>LMS</strong></i>
                     </button>
@@ -304,42 +298,11 @@ const Layout = ({ children }) => {
                     </button>
                      {/* Floating Profile Button */}
                      
-    <div>
+    <div className="menu menu-horizontal p-0 lg:flex">
       {/* Ikon gear dengan efek melayang dan warna */}
-      <i 
-        className="fa fa-gear fa-spin p-0 lg:flex" 
-        style={{ 
-          fontSize: '24px',
-          position: 'fixed', 
-          top: '20px', 
-          right: '7px', 
-          color: 'white', 
-          textShadow: '0 0 10px gray, 0 0 20px gray, 0 0 30px white', 
-          transition: 'transform 0.5s', 
-          transform: 'translateY(0)' 
-        }} 
-        onClick={toggleProfileModal}
-      ></i>
-
-      {/* Modal Profile (tampilkan jika profileModal true) */}
+      <button className="btn btn-ghost" onClick={toggleProfileModal}><i className="fa fa-gear text-lg"></i>
+      </button>
      
-
-      {/* Tambahkan keyframe animasi di sini */}
-      <style>
-        {`
-        @keyframes float {
-          0% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
-          100% {
-            transform: translateY(0);
-          }
-        }
-        `}
-      </style>
     </div>
   
 
@@ -352,7 +315,7 @@ const Layout = ({ children }) => {
                                 top: 0,
                                 right: 0,
                                 width: '300px', // Sidebar width
-                                height: '100vh',
+                                height: '60vh',
                                 backgroundColor: '#fff',
                                 boxShadow: '2px 0px 10px rgba(0, 0, 0, 0.2)', // Adding a subtle shadow
                                 zIndex: 1001,
