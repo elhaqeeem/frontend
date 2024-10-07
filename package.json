@@ -17,6 +17,7 @@
     "chart.js": "^4.4.4",
     "cloudinary-build-url": "^0.2.4",
     "daisyui": "^4.12.10",
+    "dotenv": "^16.4.5",
     "font-awesome": "^4.7.0",
     "google-auth-library": "^9.14.1",
     "googleapis": "^144.0.0",

@@ -8,6 +8,7 @@ import { AdvancedImage } from '@cloudinary/react'; // Import AdvancedImage
 import { Cloudinary } from '@cloudinary/url-gen'; // Import Cloudinary for image configuration
 import { scale } from '@cloudinary/url-gen/actions/resize'; // Import action for resizing
 import { quality, format } from '@cloudinary/url-gen/actions/delivery'; // Import actions for quality and format
+import 'daisyui/dist/full.css'; // Import DaisyUI styles
 
 function Dashboard() {
     const [courses, setCourses] = useState([]);
@@ -15,8 +16,9 @@ function Dashboard() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [orderStatus, setOrderStatus] = useState(null); // State untuk status order
     const [isLoading, setIsLoading] = useState(false); // State untuk loading saat order
+    const [isCoursesLoading, setIsCoursesLoading] = useState(true); // State untuk loading courses
 
-// eslint-disable-next-line
+    // eslint-disable-next-line
     const card = ({ title, description, discount }) => {
         return (
             <div style={styles.card}>
@@ -28,8 +30,6 @@ function Dashboard() {
             </div>
         );
     };
-
-  
 
     // Gaya untuk Card
     const styles = {
@@ -59,7 +59,6 @@ function Dashboard() {
             transform: 'rotate(-15deg)', // Memutar watermark
         },
     };
-   
 
     useEffect(() => {
         fetchCourses();
@@ -67,11 +66,14 @@ function Dashboard() {
 
     // Function to fetch courses from the API
     const fetchCourses = async () => {
+        setIsCoursesLoading(true); // Set loading state to true
         try {
             const response = await axios.get('/courses'); // Endpoint API untuk mendapatkan courses
             setCourses(response.data.courses || []);
         } catch (error) {
             console.error('Failed to fetch courses:', error);
+        } finally {
+            setIsCoursesLoading(false); // Set loading state to false
         }
     };
 
@@ -117,11 +119,8 @@ function Dashboard() {
             setIsLoading(true); // eslint-disable-next-line
             const response = await axios.post('/orders', orderData);
             toast.success('Order created successfully!');
-            window.location.re(); 
+            window.location.reload(); 
             closeModal();
-
-
-
         } catch (error) {
             console.error('Failed to create order:', error);
             if (error.response) {
@@ -140,13 +139,13 @@ function Dashboard() {
         }
     };
 
-    // Konfigurasi Cloudinary
+    // Konfigurasi Cloudinary menggunakan environment variable
     const cld = new Cloudinary({
         cloud: {
-            cloudName: 'db8atpjwp', // Ganti dengan cloud name Anda
+            cloudName: process.env.REACT_APP_CLOUD_NAME, // Ambil cloudName dari .env
         },
     });
-
+// eslint-disable-next-line
     return (
         <div className="flex min-h-screen">
             {/* ToastContainer for notifications */}
@@ -158,7 +157,25 @@ function Dashboard() {
                 <div className="divider divider-secondary"><strong><h1>Courses</h1></strong></div>
 
                 {/* Courses Section */}
-                {courses.length > 0 ? (
+                {isCoursesLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                        {[...Array(5)].map((_, index) => ( // Create 5 skeletons
+                            <div key={index} className="card card-compact bg-base-50 w-50 shadow-xl">
+                                <div className="h-64 skeleton"></div> {/* Skeleton for image */}
+                                <div className="card-body bg-white">
+                                    <h2 className="skeleton text-xl">
+                                        </h2> {/* Skeleton for title */}
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="skeleton h-10 w-20"></div> {/* Skeleton for price */}
+                                        </div>
+                                        <div className="skeleton h-10 w-10"></div> {/* Skeleton for button */}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                         {courses.map((course) => {
                             // Gunakan public ID dari path_image untuk membuat gambar
@@ -178,7 +195,6 @@ function Dashboard() {
                                         </div>
                                     )}
 
-
                                     <figure>
                                         {/* Tampilkan gambar yang sudah di-resize menggunakan AdvancedImage */}
                                         <AdvancedImage
@@ -193,14 +209,8 @@ function Dashboard() {
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <button className="btn btn-outline btn-secondary">
-                                                Rp. {Number(course.harga - (course.harga * (course.discount / 100))).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
-                                                {/* Tampilkan harga setelah diskon 
-                                                {course.discount > 0 && 
-                                                (<span className="line-through text-gray-500">
-                                                Rp. {Number(course.harga).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
-                                                </span>)} */}
+                                                    Rp. {Number(course.harga - (course.harga * (course.discount / 100))).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }).replace('Rp', '')}
                                                 </button>
-                                               
                                             </div>
                                             <button
                                                 className="btn btn-circle btn-accent"
@@ -211,12 +221,9 @@ function Dashboard() {
                                         </div>
                                     </div>
                                 </div>
-
                             );
                         })}
                     </div>
-                ) : (
-                    <p>Loading courses...</p>
                 )}
             </div>
 
@@ -243,7 +250,6 @@ function Dashboard() {
 
                         {/* Icon Keranjang dan Tombol Pesan */}
                         <div className="flex items-center justify-end mt-4">
-                       
                             <button
                                 className="btn btn-accent mr-2"
                                 onClick={handleOrder}
@@ -251,8 +257,7 @@ function Dashboard() {
                             >
                                 {isLoading ? 'Processing...' : (
                                     <>
-                                        <i className="fa fa-cart-plus"></i> {/* Ganti dengan ikon keranjang yang sesuai */}
-                                       
+                                        <i className="fa fa-cart-plus"></i>
                                     </>
                                 )}
                             </button>

@@ -4,8 +4,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
 import Swal from 'sweetalert2';
-import ReactQuill from 'react-quill'; // Untuk editor konten rich text
-import 'react-quill/dist/quill.snow.css';
 
 const MaterialManager = () => {
   const [materials, setMaterials] = useState([]);

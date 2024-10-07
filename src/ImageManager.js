@@ -43,7 +43,7 @@ const ImageManager = () => {
   };
 
   const handleUpdateTags = async (publicID, tags) => {
-    try {
+    try {// eslint-disable-next-line
       const response = await axios.put(`/asset/${publicID}`, { tags });
       toast.success('Tags updated successfully.');
       fetchImages();
