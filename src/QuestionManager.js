@@ -14,15 +14,53 @@ const QuestionManager = () => {
   const [questionText, setQuestionText] = useState('');
   const [correctAnswer, setCorrectAnswer] = useState([]);
   const [answerOptions, setAnswerOptions] = useState([]); // Use consistent naming
-  const [kraeplinTestId, setKraeplinTestId] = useState('');
+  const [kraeplinTestId, setKraeplinTestId] = useState("");
+  const [kraeplinTests, setKraeplinTests] = useState([]);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [questionId, setQuestionId] = useState('');
   const [bulkText, setBulkText] = useState(''); // Bulk text state
   const [selectedRows, setSelectedRows] = useState([]); // State for selected rows
+  const token = localStorage.getItem("token"); // Ambil token dari localStorage
 
   useEffect(() => {
     fetchQuestions();
   }, []);
+
+   // Fetch data from the API
+  useEffect(() => {
+    const fetchKraeplinTests = async () => {
+      try {
+        const response = await fetch("/kraeplin-tests", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Tambahkan Authorization header
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.status === 401) {
+          console.error("Authorization header required");
+          return;
+        }
+
+        const data = await response.json();
+        
+        // Pastikan data yang diterima adalah array
+        if (Array.isArray(data)) {
+          setKraeplinTests(data);
+        } else {
+          console.error("Data format is not an array:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching kraeplin tests:", error);
+      }
+    };
+
+    if (token) {
+      fetchKraeplinTests(); // Panggil fetch jika token ada
+    } else {
+      console.error("No authorization token found");
+    }
+  }, [token]);
 
   const fetchQuestions = async () => {
     try {
@@ -304,18 +342,29 @@ const QuestionManager = () => {
       {isModalOpen && (
         <div className="modal modal-open">
           <div className="modal-box">
-            <h2 className="text-xl">{selectedQuestion ? 'Edit Question' : 'Add Question'}</h2>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Kraeplin Test ID</span>
-              </label>
-              <input
-                type="number"
-                value={kraeplinTestId}
-                onChange={(e) => setKraeplinTestId(e.target.value)}
-                className="input input-bordered"
-              />
-            </div>
+          <div className="form-control">
+      <label className="label">
+        <span className="label-text">Kraeplin Test</span>
+      </label>
+      <select
+        value={kraeplinTestId}
+        onChange={(e) => setKraeplinTestId(e.target.value)}
+        className="select select-bordered"
+      >
+        <option value="" disabled>
+          Select a test
+        </option>
+        {Array.isArray(kraeplinTests) && kraeplinTests.length > 0 ? (
+          kraeplinTests.map((test) => (
+            <option key={test.id} value={test.id}>
+              {test.description}
+            </option>
+          ))
+        ) : (
+          <option disabled>No tests available</option>
+        )}
+      </select>
+    </div>
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Question Text</span>
@@ -343,7 +392,8 @@ const QuestionManager = () => {
                     className="btn btn-outline btn-error"
                     onClick={() => removeAnswerOption(index)}
                   >
-                    Remove
+                                        <i className="fa fa-trash"></i>
+
                   </button>
                 </div>
               ))}
@@ -367,7 +417,8 @@ const QuestionManager = () => {
                     className="btn btn-outline btn-error"
                     onClick={() => removeCorrectAnswerOption(index)}
                   >
-                    Remove
+                                                            <i className="fa fa-trash"></i>
+
                   </button>
                 </div>
               ))}

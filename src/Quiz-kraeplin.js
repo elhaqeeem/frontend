@@ -22,19 +22,18 @@ const TimerComponent = ({ timer, initialTime }) => {
     const progress = ((initialTime - timer) / initialTime) * 100;
 
     return (
-        <div className="flex flex-col items-center mb-4">
-            <span className="badge badge-warning">
-                <FaStopwatch className="mr-4" />
-                Time left: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')}
-            </span>
-            <div className="w-full mt-2">
-                <progress className="progress progress-info" value={progress} max="100"></progress>
+        <div className="fixed top-20 right-4 flex flex-col items-center mb-4 bg-gray-100 text-white p-4 rounded-full shadow-lg">
+            <div className="radial-progress text-yellow-400" style={{ "--value": progress, "--size": "3rem", "--thickness": "4px" }}>
+                <span className="text-sm text-gray-800 font-semibold">
+                    {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')}
+                </span>
             </div>
         </div>
     );
 };
 
-const QuizKraeplin = () => {
+
+const Quiz = () => {
     const [questions, setQuestions] = useState([]);
     const [answers, setAnswers] = useState({});
     const [timer, setTimer] = useState(null);
@@ -42,8 +41,9 @@ const QuizKraeplin = () => {
     const [userTestId, setUserTestId] = useState(null);
     const [hasPreviousAnswers, setHasPreviousAnswers] = useState(false);
     const [storedTestId, setStoredTestId] = useState(null);
-    const [idToSubmit, setIdToSubmit] = useState(null);// eslint-disable-next-line
+    const [idToSubmit, setIdToSubmit] = useState(null);
     const [initialTime, setInitialTime] = useState(300); // Default waktu 5 menit
+    const [deretAngka, setDeretAngka] = useState([]);
 
     // Mendapatkan test ID dari localStorage
     useEffect(() => {
@@ -54,15 +54,58 @@ const QuizKraeplin = () => {
             toast.error('Test ID tidak ditemukan di local storage.');
         }
     }, []);
-// eslint-disable-next-line
-    const handleAnswerChange = (questionId, answerIndex) => {
-        setAnswers(prevAnswers => ({
-            ...prevAnswers,
-            [questionId]: answerIndex
-        }));
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Retrieve the Bearer token from localStorage
+                const token = localStorage.getItem('token'); // Assuming token is stored under 'token' key
+
+                // Set up the request headers with Bearer token if available
+                const headers = new Headers({
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : '' // Only add Authorization header if token is available
+                });
+
+                const response = await fetch('/kraeplin-test-result', { headers });
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    const result = data[0].deret_angka; // Assuming you want the first entry
+                    setDeretAngka(JSON.parse(result)); // Parse the JSON string
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const handleAnswerChange = (questionId, answerIndex, isMultipleChoice) => {
+        setAnswers(prevAnswers => {
+            if (isMultipleChoice) {
+                const currentAnswers = prevAnswers[questionId] || [];
+                if (currentAnswers.includes(answerIndex)) {
+                    return {
+                        ...prevAnswers,
+                        [questionId]: currentAnswers.filter(index => index !== answerIndex),
+                    };
+                } else {
+                    return {
+                        ...prevAnswers,
+                        [questionId]: [...currentAnswers, answerIndex],
+                    };
+                }
+            } else {
+                return {
+                    ...prevAnswers,
+                    [questionId]: answerIndex,
+                };
+            }
+        });
     };
 
-    // Mengambil data user test dan pertanyaan dari kraeplin-test-result
+    // Mengambil data user test dan pertanyaan
     useEffect(() => {
         if (!storedTestId) return;
 
@@ -79,11 +122,11 @@ const QuizKraeplin = () => {
                 const idToSubmit = userTest.id;
                 setIdToSubmit(idToSubmit);
 
-                // Mengambil pertanyaan dari kraeplin-test-result
-                const questionResponse = await axios.get('/kraeplin-test-result');
+                const questionResponse = await axios.get('/questions');
+                const kraeplinTestId = userTest.kraeplin_test_id;
 
                 const matchingQuestions = questionResponse.data.filter(
-                    question => question.kraeplin_test_id === userTest.kraeplin_test_id
+                    question => question.kraeplin_test_id === kraeplinTestId
                 );
 
                 if (matchingQuestions.length === 0) {
@@ -103,6 +146,40 @@ const QuizKraeplin = () => {
         };
 
         fetchTestData();
+    }, [storedTestId]);
+
+    // Mengambil durasi dari Kraeplin test
+    useEffect(() => {
+        if (!storedTestId) return;
+
+        const fetchKraeplinTest = async () => {
+            try {
+                const userTestResponse = await axios.get('/user-tests');
+                const userTest = userTestResponse.data.find(test => test.user_id === parseInt(storedTestId));
+
+                if (!userTest) {
+                    toast.error('User test tidak ditemukan.');
+                    return;
+                }
+
+                const kraeplinTestId = userTest.kraeplin_test_id;
+                const response = await axios.get(`/kraeplin-tests/${kraeplinTestId}`);
+                const test = response.data;
+
+                if (test.id === kraeplinTestId) {
+                    const durationInSeconds = test.duration_minutes * 60;
+                    setTimer(durationInSeconds);
+                    setInitialTime(durationInSeconds);
+                } else {
+                    toast.error('Kraeplin test ID tidak cocok.');
+                }
+            } catch (error) {
+                toast.error('Gagal mengambil durasi dari Kraeplin test.');
+                console.error('Error:', error);
+            }
+        };
+
+        fetchKraeplinTest();
     }, [storedTestId]);
 
     // Timer countdown
@@ -131,15 +208,27 @@ const QuizKraeplin = () => {
 
         const testAnswers = questions.map((question) => {
             const selectedAnswerIndex = answers[question.id];
-            const selectedAnswer = question.deret_angka[selectedAnswerIndex] || [];
 
-            const isCorrect = selectedAnswer === question.correct_answer[0];
+            let selectedAnswer = [];
+            let isCorrect;
+
+            if (question.kraeplin_test_id === 7 || question.kraeplin_test_id === 9) {
+                const answer = question.answer_options[selectedAnswerIndex] || null;
+                if (answer) {
+                    selectedAnswer = [answer];
+                }
+                isCorrect = answer === question.correct_answer[0];
+            } else {
+                selectedAnswer = selectedAnswerIndex?.map(index => question.answer_options[index]) || [];
+                isCorrect = selectedAnswer.every(answer => question.correct_answer.includes(answer)) &&
+                    selectedAnswer.length === question.correct_answer.length;
+            }
 
             return {
                 user_test_id: parseInt(idToSubmit),
                 question_id: question.id,
                 kraeplin_test_id: question.kraeplin_test_id,
-                answer: [selectedAnswer],
+                answer: selectedAnswer,
                 is_correct: isCorrect,
                 answered_at: new Date().toISOString(),
             };
@@ -157,97 +246,130 @@ const QuizKraeplin = () => {
     return (
         <div className="container mx-auto p-4 bg-base-200 text-base-content">
             <ToastContainer />
-            <h2 className="text-2xl font-bold mb-4">Pretest</h2>
 
             {/* Timer */}
             {timer && <TimerComponent timer={timer} initialTime={initialTime} />}
 
             {!hasPreviousAnswers && !submitted && questions.length > 0 ? (
                 <>
-                    {questions.map((question) => (
-                        <div
-                            key={question.id}
-                            className="question-block mb-4 p-4 border border-base-300 rounded-lg bg-base-100 shadow-md"
-                        >
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">  {/* Grid for three columns: sidebar + 2 columns */}
 
-<div key={question.id} className="question-block mb-4 p-4 border border-base-300 rounded-lg bg-base-100 shadow-md">
-  <h2 className="text-sm font-semibold text-center">Kolom {question.column_number}</h2>
-  <div className="overflow-x-auto"> {/* Responsive wrapper */}
-    <table className="table-auto border-collapse border border-gray-400 w-full max-w-xl mt-4 mx-auto text-center">
-      <tbody>
-        {Array.isArray(question.deret_angka)
-          ? question.deret_angka.slice().reverse().map((num, index, arr) => (
-              <React.Fragment key={index}>
-                {/* Row with number and buttons */}
-                <tr className="border-b border-gray-300">
-                  <td className="p-2 text-center border border-gray-300" style={{ backgroundColor: '#f0f0f0' }}>{num}</td>
-                  {/* Create a button in the second column */}
-                  <td className="p-2 text-center border border-gray-300">
-                    <button className="bg-blue-500 text-white py-1 px-2 rounded w-full sm:w-auto">Tombol</button>
-                  </td>
-                  {/* Add 10 empty columns */}
-                  {[...Array(10)].map((_, colIndex) => (
-                    <td key={colIndex} className="p-2 text-center border border-gray-300">&nbsp;</td>
-                  ))}
-                </tr>
-                {/* Empty row (line break) */}
-                {index < arr.length - 1 && (
-                  <tr>
-                    <td className="p-2 text-center border border-gray-300">&nbsp;</td>
-                    {/* Button in the second column for empty row */}
-                    <td className="p-2 text-center border border-gray-300">
-                      <button className="bg-blue-500 text-white py-1 px-2 rounded w-full sm:w-auto">Tombol</button>
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            ))
-          : JSON.parse(question.deret_angka).slice().reverse().map((num, index, arr) => (
-              <React.Fragment key={index}>
-                {/* Row with number and buttons */}
-                <tr className="border-b border-black-300">
-                  <td className="p-2 text-center border border-gray-300" style={{ background: 'white', position: 'relative' }}>
-                    {num}
-                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', transform: 'rotate(45deg)', transformOrigin: 'center' }}></div>
-                  </td>
-                  {[...Array(10)].map((_, colIndex) => (
-                    <td key={colIndex} className="p-2 text-center border border-gray-300">&nbsp;</td>
-                  ))}
-                </tr>
-                {/* Empty row (line break) */}
-                {index < arr.length - 1 && (
-                  <tr>
-                    <td className="p-2 text-center border border-gray-300">&nbsp;</td>
-                    <td className="p-2 text-center border border-gray-300">
-                      <button className="btn btn-outline btn-warning text-white">0</button>
-                    </td>
-                    {[...Array(9)].map((_, colIndex) => (
-                      <td key={colIndex} className="p-2 text-center border border-gray-300">
-                        <button className="btn btn-outline btn-warning text-white">{colIndex + 1}</button>
-                      </td>
-                    ))}
-                  </tr>
-                )}
-              </React.Fragment>
-            ))
-        }
-      </tbody>
-    </table>
-  </div>
-</div>
+                        {/* Left Column (optional content like sidebar or other sections) */}
+                        <div className="col-span-1">
+                            {/* You can add any content here, like a sidebar, stats, etc. */}
+                            <div className="p-4 border border-base-300 rounded-lg bg-base-100 shadow-md">
+                                <div className="flex flex-col items-center mt-4">
+                                    <div className="border border-gray-300 rounded-lg p-4 bg-gray shadow-md">
+                                        <table className="table-auto border-collapse border border-gray-300 w-full sm:w-auto mx-auto" >
+                                            <tbody>
+                                                {deretAngka.length > 0 ? (
+                                                    // Reverse the order of deretAngka to display from bottom to top
+                                                    [...deretAngka].reverse().map((angka, index) => (
+                                                        <React.Fragment key={index}>
+                                                            {/* Number row */}
+                                                            <tr className="text-center">
+                                                                <td className="border border-gray-300 px-4 py-2 ">
+                                                                    <button className="btn btn-rounded btn-primary  w-full">
+                                                                        {angka}
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            {/* Empty row for spacing, except after the last number */}
+                                                            {index !== deretAngka.length - 1 && (
+                                                                <tr>
+                                                                    <td className="border border-gray-300">
+                                                                        <br></br>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                        </React.Fragment>
+                                                    ))
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan="1" className="text-center border px-4 py-2">
+                                                            Loading...
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
 
 
+                                        </table>
 
+                                    </div>
+                                </div>
+                            </div>
 
 
 
                         </div>
-                    ))}
 
-                    <div className="flex justify-end">
-                        <button className="btn btn-primary" onClick={handleSubmit}>
-                            Submit
+                        {/* Right Column: Questions */}
+                        <div className="col-span-2 flex flex-col-reverse">
+                            {questions.map((question) => (
+                                <div key={question.id} className="p-3 border border-base-300 rounded-lg bg-base-100 shadow-md text-center mb-4">
+                                    {/*  <h2 className="text-sm font-semibold">{question.question_text}</h2>  */}
+                                    <div className="overflow-x-auto">
+                                        <table className="table-auto border-collapse border border-gray-300 w-full sm:w-auto mx-auto">
+                                            <tbody>
+                                                <tr>
+                                                    {(question.kraeplin_test_id === 7 || question.kraeplin_test_id === 9) ? (
+                                                        question.answer_options.map((option, index) => (
+                                                            <td key={index} className="px-2 py-1 border border-gray-300">
+                                                                <button
+                                                                    onClick={() => handleAnswerChange(question.id, index, false)} // single-answer (false)
+                                                                    className={`btn ${answers[question.id] === index ? 'btn-warning' : 'btn-outline'} border border-gray-300`}
+                                                                    disabled={hasPreviousAnswers}
+                                                                >
+                                                                    {option}
+                                                                </button>
+                                                            </td>
+                                                        ))
+                                                    ) : (
+                                                        question.answer_options.map((option, index) => (
+                                                            <td key={index} className="px-2 py-1 border border-gray-300">
+                                                                <button
+                                                                    onClick={() => handleAnswerChange(question.id, index, true)} // multiple-answer (true)
+                                                                    className={`btn ${answers[question.id]?.includes(index) ? 'btn-warning' : 'btn-outline'} border border-gray-300`}
+                                                                    disabled={hasPreviousAnswers}
+                                                                >
+                                                                    {option}
+                                                                </button>
+                                                            </td>
+                                                        ))
+                                                    )}
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+
+                    </div>
+
+                    <div className="flex justify-end mt-4">
+                        <button className="btn btn-info floating-btn" onClick={handleSubmit}>
+                            <i className="fa fa-paper-plane" aria-hidden="true"> Submit</i>
                         </button>
+
+                        <style jsx>{`
+                        .floating-btn {
+                            position: fixed;
+                            bottom: 60px;
+                            right: 20px;
+                            z-index: 1000;
+                            padding: 10px 20px;
+                            border-radius: 50px;
+                            color: white;
+                            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+    
+                        .floating-btn:hover {
+                            cursor: pointer;
+                        }
+                    `}</style>
                     </div>
                 </>
             ) : (
@@ -256,7 +378,9 @@ const QuizKraeplin = () => {
                 </p>
             )}
         </div>
+
+
     );
 };
 
-export default QuizKraeplin;
+export default Quiz;

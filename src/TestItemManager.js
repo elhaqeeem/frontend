@@ -12,7 +12,7 @@ const TestItemManager = () => {
     const [testItemData, setTestItemData] = useState({
         kraeplin_test_id: '',
         deret_angka: [],
-        sequence_number: '',
+        sequence_number: [],
         column_number: '',
         answer: ''
     });
@@ -44,6 +44,10 @@ const TestItemManager = () => {
     const saveTestItem = async () => {
         const { kraeplin_test_id, deret_angka, sequence_number, column_number, answer } = testItemData;
         const kraeplinTestIDInt = parseInt(kraeplin_test_id, 10);
+        const columnnumber = parseInt(column_number, 10);
+        const answerOptions = parseInt(answer, 10);
+
+
 
         // Ensure deret_angka is an array of integers
         if (!Array.isArray(deret_angka) || deret_angka.some(num => isNaN(num))) {
@@ -60,8 +64,8 @@ const TestItemManager = () => {
             kraeplin_test_id: kraeplinTestIDInt,
             deret_angka,
             sequence_number,
-            column_number,
-            answer
+            column_number:columnnumber,
+            answer:columnnumber
         };
 
         try {
@@ -87,7 +91,7 @@ const TestItemManager = () => {
         setTestItemData({
             kraeplin_test_id: item.kraeplin_test_id,
             deret_angka: Array.isArray(item.deret_angka) ? item.deret_angka : JSON.parse(item.deret_angka), // Convert to array
-            sequence_number: item.sequence_number,
+            sequence_number: Array.isArray(item.sequence_number) ? item.sequence_number : JSON.parse(item.sequence_number), // Convert to array
             column_number: item.column_number,
             answer: item.answer,
         });
@@ -121,7 +125,7 @@ const TestItemManager = () => {
         setTestItemData({
             kraeplin_test_id: '',
             deret_angka: [],
-            sequence_number: '',
+            sequence_number:  [],
             column_number: '',
             answer: ''
         });
@@ -140,14 +144,14 @@ const TestItemManager = () => {
             return {
                 kraeplin_test_id: Number(parts[0]),
                 deret_angka: JSON.parse(parts[1]), // Parse as array
-                sequence_number: parts[2],
+                sequence_number: JSON.parse(parts[2]), // Parse as array
                 column_number: parts[3],
                 answer: parts[4],
             };
         });
 
         try {
-            await axios.post('/test-items/bulk-import-text', { testItems: testItemsArray });
+            await axios.post('/testitems/bulk', { testItems: testItemsArray });
             toast.success('Test items imported successfully.');
             fetchTestItems();
         } catch (error) {
@@ -173,7 +177,7 @@ const TestItemManager = () => {
 
         if (result.isConfirmed) {
             try {
-                await axios.delete('/test-items/bulk', {
+                await axios.delete('/testitems/bulk-delete', {
                     data: { ids: selectedRows.map(row => row.item_id) },
                 });
                 toast.success('Selected test items deleted successfully.');
@@ -203,7 +207,7 @@ const TestItemManager = () => {
         },
         {
             name: 'Sequence Number',
-            selector: (row) => row.sequence_number,
+            selector: (row) => row.sequence_number.join(', '), // Display deret angka as string
             sortable: true,
         },
         {
@@ -291,8 +295,10 @@ const TestItemManager = () => {
                                 type="text"
                                 placeholder="Sequence Number"
                                 value={testItemData.sequence_number}
-                                onChange={(e) => setTestItemData({ ...testItemData, sequence_number: e.target.value })}
-                                className="input input-bordered mb-2"
+                                onChange={(e) => setTestItemData({
+                                    ...testItemData,
+                                    sequence_number: e.target.value.split(',').map(Number) // Convert to array of numbers
+                                })}                                className="input input-bordered mb-2"
                             />
                             <input
                                 type="text"

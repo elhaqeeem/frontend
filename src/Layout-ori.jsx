@@ -379,12 +379,12 @@ const Layout = ({ children }) => {
                                                 </div>
                                                 <div className="flex flex-col justify-between h-full">
                                                     <button
-                                                        className="btn btn-rounded btn-primary" // Tambahkan margin bawah untuk memberi jarak
+                                                        className="btn btn-outline btn-primary" // Tambahkan margin bawah untuk memberi jarak
                                                         onClick={() => handleDeleteOrder(item.id)}>
                                                         <i className="fa fa-trash"></i>
                                                     </button>
                                                     <button
-                                                        className="btn btn-rounded btn-success"
+                                                        className="btn btn-outline btn-success"
                                                         onClick={() => handlePayment(item.id)}
 
                                                     >
