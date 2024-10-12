@@ -278,7 +278,11 @@ const Quiz = () => {
                                                             {index !== deretAngka.length - 1 && (
                                                                 <tr>
                                                                     <td className="border border-gray-300">
-                                                                        <br></br>
+                                                                    <div style={{ height: '30px' }}>
+                                                                        </div>
+
+                                                                       
+                                                                      
                                                                     </td>
                                                                 </tr>
                                                             )}

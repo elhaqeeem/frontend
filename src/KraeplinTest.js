@@ -6,11 +6,14 @@ import DataTable from 'react-data-table-component';
 import Swal from 'sweetalert2';
 
 const KraeplinTestResultManager = () => {
+  const [sequenceNumber, setSequenceNumber] = useState('');
+  const [columnNumber, setColumnNumber] = useState('');
+  const [waktu, setWaktu] = useState('');
   const [results, setResults] = useState([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false); // Bulk modal state
-  const [deretAngka, setDeretAngka] = useState([]); // Store the number sequence
+  const [deretAngka, setDeretAngka] = useState([]); // Already correct
   const [kraeplinTestId, setKraeplinTestId] = useState('');
   const [kraeplinTests, setKraeplinTests] = useState([]);
   const [selectedResult, setSelectedResult] = useState(null);
@@ -92,15 +95,21 @@ const KraeplinTestResultManager = () => {
   }, [search, results]);
 
   const saveResult = async () => {
-    if (!kraeplinTestId || !deretAngka) {
+    if (!kraeplinTestId || !deretAngka.length || !sequenceNumber || !columnNumber || !waktu) {
       toast.error('All fields are required.');
       return;
     }
 
     const resultData = {
-      kraeplin_test_id: Number(kraeplinTestId), // Convert to number
-      deret_angka: JSON.parse(deretAngka), // Parse the number sequence
+      id: resultId,  // Include the ID in the body
+      kraeplin_test_id: Number(kraeplinTestId),
+      sequence_number: Number(sequenceNumber),
+      deret_angka: JSON.stringify(deretAngka),  // Converts array to string like "[1, 2, 3, 4]"
+      column_number: Number(columnNumber),
+      waktu: Number(waktu),
     };
+
+
 
     try {
       if (selectedResult) {
@@ -129,13 +138,20 @@ const KraeplinTestResultManager = () => {
     }
   };
 
+
   const handleEdit = (result) => {
     setSelectedResult(result);
     setResultId(result.id);
     setKraeplinTestId(result.kraeplin_test_id);
-    setDeretAngka(JSON.stringify(result.deret_angka));
+    // Ensure deret_angka is treated as an array
+    setDeretAngka(Array.isArray(result.deret_angka) ? result.deret_angka : JSON.parse(result.deret_angka));
+    setColumnNumber(result.column_number);
+    setSequenceNumber(result.sequence_number);
+    setWaktu(result.waktu);
+
     setIsModalOpen(true);
   };
+
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -162,10 +178,14 @@ const KraeplinTestResultManager = () => {
   const resetForm = () => {
     setSelectedResult(null);
     setKraeplinTestId('');
-    setDeretAngka('');
+    setSequenceNumber('');
+    setColumnNumber('');
+    setWaktu('');
+    setDeretAngka([]);  // Ensure this is reset to an empty array, not an empty string
     setResultId('');
     setIsModalOpen(false);
   };
+
 
   const handleBulkTextChange = (e) => {
     setBulkText(e.target.value);
@@ -177,25 +197,46 @@ const KraeplinTestResultManager = () => {
       return;
     }
 
-    const textArray = bulkText.split('\n').filter((line) => line.trim());
+    const textArray = bulkText.split('\n').filter((line) => line.trim()); // Split by line
+
     const resultsArray = textArray.map((line) => {
-      const parts = line.split(',').map((part) => part.trim());
+      const parts = line.split(',').map((part) => part.trim()); // Split each line by commas and trim spaces
+
+      // Convert deret_angka from a space-separated string into an array of numbers
+      const deretAngkaArray = parts[2].split(' ').map(Number).filter(n => !isNaN(n)); // Remove invalid numbers (NaN)
+
       return {
-        kraeplin_test_id: Number(parts[0]), // Convert to number
-        deret_angka: JSON.parse(parts[1]), // Parse the number sequence
+        kraeplin_test_id: Number(parts[0]),  // kraeplin_test_id as a number
+        sequence_number: Number(parts[1]),   // sequence_number as a number
+        deret_angka: JSON.stringify(deretAngkaArray), // Convert array to valid JSON format
+        column_number: Number(parts[3]),     // column_number as a number
+        waktu: parts[4] ? Number(parts[4]) : null, // waktu as a number (nullable)
+        created_at: new Date().toISOString() // Automatically add current timestamp
       };
     });
 
+    // Filter out any undefined or empty lines
+    const validResultsArray = resultsArray.filter((item) => item !== undefined && item !== null);
+
+    if (validResultsArray.length === 0) {
+      toast.error('No valid data to import.');
+      return;
+    }
+
     try {
-      await axios.post('/kraeplin-test-results/bulk-import-text', { results: resultsArray });
+      // Simulating an API post request with axios (replace with actual endpoint)
+      await axios.post('/kraeplin-test-result/bulk', validResultsArray);
       toast.success('Results imported successfully from text.');
-      fetchResults();
-      setIsBulkModalOpen(false); // Close modal after import
+      fetchResults();  // Assuming this function fetches the updated results
+      setIsBulkModalOpen(false);  // Close modal after import
     } catch (error) {
       toast.error('Failed to import results from text.');
       console.error('Error importing text results:', error);
     }
   };
+
+
+
 
   const handleBulkDelete = async () => {
     if (selectedRows.length === 0) {
@@ -214,7 +255,7 @@ const KraeplinTestResultManager = () => {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete('/kraeplin-test-results/bulk', {
+        await axios.delete('/kraeplin-test-result/bulk', {
           data: { ids: selectedRows.map(row => row.id) },
         });
         toast.success('Selected results deleted successfully.');
@@ -292,9 +333,11 @@ const KraeplinTestResultManager = () => {
         onSelectedRowsChange={({ selectedRows }) => setSelectedRows(selectedRows)}
       />
       {/* Modal for creating/editing result */}
-      <div className={`modal ${isModalOpen ? 'modal-open' : ''}`}>
-        <div className="modal-box">
-          <h2 className="text-xl font-bold mb-4">Kraeplin Test Result</h2>
+      {isModalOpen && (  <div className="modal modal-open">
+      <div className="modal-box">
+      <h2 className="text-xl font-bold mb-4">Kraeplin Test Result</h2>
+
+          {/* Select untuk Kraeplin Test */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Kraeplin Test</span>
@@ -304,10 +347,8 @@ const KraeplinTestResultManager = () => {
               onChange={(e) => setKraeplinTestId(e.target.value)}
               className="select select-bordered"
             >
-              <option value="" disabled>
-                Select a test
-              </option>
-              {Array.isArray(kraeplinTests) && kraeplinTests.length > 0 ? (
+              <option value="" disabled>Select a test</option>
+              {kraeplinTests?.length > 0 ? (
                 kraeplinTests.map((test) => (
                   <option key={test.id} value={test.id}>
                     {test.description}
@@ -319,10 +360,10 @@ const KraeplinTestResultManager = () => {
             </select>
           </div>
 
-
+          {/* Input untuk Deret Angka */}
           <div className="form-control">
             <label className="label">
-              <span className="label-text">Answer Options</span>
+              <span className="label-text">Deret Angka</span>
             </label>
             {deretAngka.map((option, index) => (
               <div key={index} className="flex space-x-2 mb-2">
@@ -337,16 +378,58 @@ const KraeplinTestResultManager = () => {
                   onClick={() => removeAnswerOption(index)}
                 >
                   <i className="fa fa-trash"></i>
-
                 </button>
               </div>
             ))}
-            <button className="btn btn-outline btn-primary" onClick={addAnswerOption}>
-              Add Answer Option
+            <button className="btn btn-rounded btn-primary" onClick={addAnswerOption}>
+              Add Deret Angka Option
             </button>
           </div>
 
-          <div className="flex justify-end space-x-2">
+          {/* Input untuk Sequence Number */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Sequence Number</span>
+            </label>
+            <input
+              type="number"
+              value={sequenceNumber}
+              onChange={(e) => setSequenceNumber(e.target.value)}
+              className="input input-bordered"
+              placeholder="Enter sequence number"
+            />
+          </div>
+
+          {/* Input untuk Column Number */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Column Number</span>
+            </label>
+            <input
+              type="number"
+              value={columnNumber}
+              onChange={(e) => setColumnNumber(e.target.value)}
+              className="input input-bordered"
+              placeholder="Enter column number"
+            />
+          </div>
+
+          {/* Input untuk Waktu */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Waktu</span>
+            </label>
+            <input
+              type="number"
+              value={waktu}
+              onChange={(e) => setWaktu(e.target.value)}
+              className="input input-bordered"
+              placeholder="Enter waktu (in minutes)"
+            />
+          </div>
+
+          {/* Tombol Aksi */}
+          <div className="modal-action">
             <button className="btn btn-outline btn-secondary" onClick={resetForm}>
               Cancel
             </button>
@@ -355,7 +438,9 @@ const KraeplinTestResultManager = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div>  )}
+     
+
       {/* Bulk Import Modal */}
       <div className={`modal ${isBulkModalOpen ? 'modal-open' : ''}`}>
         <div className="modal-box">
