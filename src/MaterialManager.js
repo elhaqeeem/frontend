@@ -6,19 +6,52 @@ import DataTable from 'react-data-table-component';
 import Swal from 'sweetalert2';
 
 const MaterialManager = () => {
+  const [courses, setCourses] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [filteredMaterials, setFilteredMaterials] = useState([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [materialData, setMaterialData] = useState({
-    course_id: '',  // Diubah jadi angka di input
+    course_id: '', // Diubah jadi angka di input
     title: '',
     content: '',
     id: ''
   });
   const [selectedRows, setSelectedRows] = useState([]);
 
+  const fetchCourses = async () => {
+    try {
+      const token = localStorage.getItem('token'); // Ambil token dari localStorage
+      const response = await fetch('/courses', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`, // Tambahkan Bearer token ke header
+          'Content-Type': 'application/json', // Jika perlu, tambahkan header ini
+        },
+      });
+
+      const data = await response.json();
+      if (data.courses) {
+        setCourses(data.courses);
+      } else {
+        console.error('Courses data is not available in the response.');
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+    }
+  };
+
+  const fetchMaterials = async () => {
+    try {
+      const response = await axios.get('/materials');
+      setMaterials(response.data.materials || []);
+    } catch (error) {
+      toast.error('Failed to fetch materials.');
+    }
+  };
+
   useEffect(() => {
+    fetchCourses(); // Tambahkan ini untuk mengambil daftar kursus
     fetchMaterials();
   }, []);
 
@@ -31,15 +64,6 @@ const MaterialManager = () => {
       );
     }
   }, [search, materials]);
-
-  const fetchMaterials = async () => {
-    try {
-      const response = await axios.get('/materials');
-      setMaterials(response.data.materials || []);
-    } catch (error) {
-      toast.error('Failed to fetch materials.');
-    }
-  };
 
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
@@ -171,8 +195,11 @@ const MaterialManager = () => {
       sortable: true,
     },
     {
-      name: 'Course ID',
-      selector: (row) => row.course_id,
+      name: 'Course',
+      selector: (row) => {
+        const course = courses.find(course => course.id === row.course_id);
+        return course ? course.title : 'N/A'; // Tampilkan nama kursus atau 'N/A' jika tidak ditemukan
+      },
       sortable: true,
     },
     {
@@ -194,63 +221,84 @@ const MaterialManager = () => {
       ),
     }
   ];
+  
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-4">
-        <input
+    <div className="container mx-auto p-4 bg-white text-black">
+      <div className="flex justify-between items-center mb-4">
+      <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>Add Material</button>
+      <button className="btn btn-danger" onClick={handleBulkDelete}>Bulk Delete</button>
+      <input
           type="text"
           placeholder="Search Materials"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="input input-bordered w-full"
+          className="input input-bordered w-full max-w-xs pl-10"
         />
       </div>
       <DataTable
+      title="Material List"
         columns={columns}
         data={filteredMaterials}
         selectableRows
+        pagination
         onSelectedRowsChange={({ selectedRows }) => setSelectedRows(selectedRows.map(row => row.id))}
+        className="rounded-lg shadow-lg bg-white"
+
       />
-      <div className="flex justify-between mt-4">
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>Add Material</button>
-        <button className="btn btn-danger" onClick={handleBulkDelete}>Bulk Delete</button>
-      </div>
+     
 
       {/* Modal for Create/Edit Material */}
-      <div className={`modal ${isModalOpen ? 'modal-open' : ''}`}>
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">{materialData.id ? 'Edit' : 'Create'} Material</h3>
-          <div className="py-4">
-            <input
-              type="number"  // Ubah type menjadi number agar input selalu angka
-              placeholder="Course ID"
-              value={materialData.course_id}
-              onChange={(e) => setMaterialData({ ...materialData, course_id: e.target.value })}
-              className="input input-bordered w-full mb-2"
-            />
-            <input
-              type="text"
-              placeholder="Title"
-              value={materialData.title}
-              onChange={(e) => setMaterialData({ ...materialData, title: e.target.value })}
-              className="input input-bordered w-full mb-2"
-            />
+      {isModalOpen && (
+        <div className="modal modal-open">
+         <div className="modal-box">
+         <div className="form-control mt-4">
+         <label className="label">
+           <span className="label-text">{materialData.id ? 'Edit' : 'Create'} Material</span>
+           </label>
+           <input
+               type="text"
+               placeholder="Title"
+               value={materialData.title}
+               onChange={(e) => setMaterialData({ ...materialData, title: e.target.value })}
+               className="input input-bordered w-full mb-2"
+             />
+
            
-           <div className="form-control mt-4">
-        <label className="label">Upload file material</label>
-        <input 
-            type="file" 
-            onChange={handleImageUpload} // Pass the event directly
-        />
-    </div>
-          </div>
-          <div className="modal-action">
-            <button className="btn btn-primary" onClick={handleCreateOrUpdate}>Save</button>
-            <button className="btn" onClick={resetForm}>Cancel</button>
-          </div>
-        </div>
-      </div>
+              </div>
+              <div className="form-control mt-4">
+              <select
+               value={materialData.course_id}
+               onChange={(e) => setMaterialData({ ...materialData, course_id: e.target.value })}
+               className="input input-bordered w-full mb-2"
+             >
+               <option value="">Select a Course</option>
+               {courses.map((course) => (
+                 <option key={course.id} value={course.id}>
+                   {course.title}
+                 </option>
+               ))}
+             </select>
+             <div className="form-control mt-4">
+               <label className="label">Upload file material</label>
+               <input 
+                 type="file" 
+                 onChange={handleImageUpload} // Pass the event directly
+                 className="file-input w-full"
+               />
+             </div>
+           </div>
+           <div className="modal-action">
+             <button className="btn btn-primary" onClick={handleCreateOrUpdate}>Save</button>
+             <button className="btn" onClick={resetForm}>Cancel</button>
+           </div>
+         </div>
+       </div>
+      
+      )}
+
+
+     
 
       <ToastContainer />
     </div>

@@ -184,7 +184,7 @@ function Dashboard() {
 
                             myImage
                                 .resize(scale().width(1000)) // Resize gambar sesuai kebutuhan
-                                .delivery(quality('auto')) // Optimasi kualitas otomatis
+                                .delivery(quality('auto:low')) // Optimasi kualitas otomatis
                                 .delivery(format('auto')); // Pilih format gambar otomatis
 
                             return (

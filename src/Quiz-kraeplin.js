@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from './axiosInstance'; // Make sure the path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { FaStopwatch } from 'react-icons/fa';
 
 // Fungsi checkPreviousAnswers dideklarasikan di luar komponen
 const checkPreviousAnswers = async (userTestId, setHasPreviousAnswers) => {

@@ -25,6 +25,8 @@ import TestItemManager from './TestItemManager';
 import ImageManager from './ImageManager';
 import KraeplinTestResultManager from './KraeplinTest';
 import { ToastContainer } from 'react-toastify';
+import Register from './register';
+import Materialsdata from './materialdata';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -45,6 +47,7 @@ function App() {
                 <ToastContainer />
                 <Routes>
                     <Route path="/login" element={<Login onLogin={() => setIsAuthenticated(true)} />} />
+                    <Route path="/register" element={<Register onLogin={() => setIsAuthenticated(true)} />} />
                     <Route 
                         path="/" 
                         element={<PrivateRoute element={<Layout>
@@ -135,6 +138,10 @@ function App() {
                     <Route 
                         path="/Kraeplin-Manager" 
                         element={<PrivateRoute element={<Layout><KraeplinTestResultManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/material-data" 
+                        element={<PrivateRoute element={<Layout><Materialsdata /></Layout>} />} 
                     />
                   
                 </Routes>
