@@ -4,6 +4,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
 import Swal from 'sweetalert2';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'; // Import the styles
 
 const MaterialManager = () => {
   const [courses, setCourses] = useState([]);
@@ -254,15 +256,16 @@ const MaterialManager = () => {
          <div className="modal-box">
          <div className="form-control mt-4">
          <label className="label">
-           <span className="label-text">{materialData.id ? 'Edit' : 'Create'} Material</span>
+           <strong className="label-text-lg">{materialData.id ? 'Edit' : 'Create'} Material</strong>
            </label>
-           <input
-               type="text"
-               placeholder="Title"
-               value={materialData.title}
-               onChange={(e) => setMaterialData({ ...materialData, title: e.target.value })}
-               className="input input-bordered w-full mb-2"
-             />
+           <br></br>
+           <ReactQuill
+        theme="snow"
+        placeholder="Title"
+        value={materialData.title}
+        onChange={(value) => setMaterialData({ ...materialData, title: value })}
+        className="mb-2"
+      />
 
            
               </div>
@@ -270,8 +273,7 @@ const MaterialManager = () => {
               <select
                value={materialData.course_id}
                onChange={(e) => setMaterialData({ ...materialData, course_id: e.target.value })}
-               className="input input-bordered w-full mb-2"
-             >
+               className="select select-success w-full max-w-lg"             >
                <option value="">Select a Course</option>
                {courses.map((course) => (
                  <option key={course.id} value={course.id}>
@@ -284,8 +286,7 @@ const MaterialManager = () => {
                <input 
                  type="file" 
                  onChange={handleImageUpload} // Pass the event directly
-                 className="file-input w-full"
-               />
+                 className="file-input file-input-bordered w-full max-w-lg"               />
              </div>
            </div>
            <div className="modal-action">

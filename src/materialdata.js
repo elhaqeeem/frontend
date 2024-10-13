@@ -3,11 +3,20 @@ import axios from './axiosInstance'; // Ganti dengan path axiosInstance yang ben
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { CloudinaryContext } from 'cloudinary-react'; // Import CloudinaryContext
+import { Worker, Viewer } from '@react-pdf-viewer/core';
+import '@react-pdf-viewer/core/lib/styles/index.css'; // React PDF viewer styles
+import '@react-pdf-viewer/default-layout/lib/styles/index.css'; // Layout plugin styles
+import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'; // Import the styles
 
 const Materialsdata = () => {
     const [materials, setMaterials] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);// eslint-disable-next-line
     const [contentUrl, setContentUrl] = useState(null); // State for content URL
+    const [openMaterialId, setOpenMaterialId] = useState(null); // Track which material is open
+    const [materialContents, setMaterialContents] = useState({}); // eslint-disable-next-line
+    const defaultLayoutPluginInstance = defaultLayoutPlugin(); // Initialize the layout plugin
 
     useEffect(() => {
         const fetchMaterials = async () => {
@@ -40,85 +49,95 @@ const Materialsdata = () => {
     const fetchContent = async (material) => {
         const token = localStorage.getItem('token'); // Get token
         const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    
-        try {
+
+        try {// eslint-disable-next-line
             const response = await axios.get(material.content, {
                 headers: {
                     Authorization: `Bearer ${token}`, // Include the token in the request
                     'Cloud-Name': cloudName, // Optional: Remove this if unnecessary
                 },
             });
-            setContentUrl(material.content);
-        } catch (error) {
+            setMaterialContents((prevContents) => ({
+                ...prevContents,
+                [material.id]: material.content, // Store the content for this specific material
+            }));
+                } catch (error) {
             console.error('Error fetching content:', error);
             toast.error('Failed to fetch content.');
         }
     };
-    
+
+    const handleAccordionClick = (material) => {
+        if (openMaterialId === material.id) {
+            setOpenMaterialId(null); // Close if clicked again
+        } else {
+            setOpenMaterialId(material.id); // Open the clicked accordion
+            if (!materialContents[material.id]) {
+                // Fetch content if not already fetched
+                fetchContent(material);
+            }
+        }
+    };
 
     if (loading) return <p>Loading...</p>; // Menampilkan loading indicator
 
     return (
         <CloudinaryContext cloudName={process.env.REACT_APP_CLOUD_NAME}>
-            <div className="flex flex-col items-center min-h-screen bg-base-200 p-4">
-                <ToastContainer />
-                <h2 className="text-2xl font-bold mb-4">Materials</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="flex flex-col items-center min-h-screen bg-base-200 p-4">
+            <ToastContainer />
+            <h2 className="text-3xl font-bold mb-4">Materials</h2>
+
+            <div className="w-full">
+                <div className="grid grid-cols-1 gap-6">
                     {materials.map((material) => (
-                        <div key={material.id} className="card card-compact bg-base-50 w-50 shadow-xl">
-                            <h2 className="accordion-header">
-                                <button
-                                    className="accordion-button"
-                                    data-accordion-target={`#accordion-collapse-${material.id}`}
-                                    aria-expanded="false"
-                                    aria-controls={`accordion-collapse-${material.id}`}
-                                    onClick={() => fetchContent(material)} // Fetch content on click
-                                >
-                                    {material.title}
-                                </button>
-                            </h2>
-                            <div id={`accordion-collapse-${material.id}`} className="accordion-body collapse">
-                                {/* Check if contentUrl is set */}
-                                {contentUrl ? (
-    contentUrl.endsWith('.pdf') ? (
-        <>
-            {/* Log the contentUrl and material details */}
-            {console.log('Loading PDF content:', contentUrl)}
-            {console.log('Material context:', material)}
-
-            <iframe
-                src={contentUrl} // Use the content URL from state
-                width="auto"
-                height="500px"
-                title={material.title}
-                className="border border-gray-300"
-            >
-                This browser does not support PDFs. Please download the PDF to view it: <a href={contentUrl}>Download PDF</a>
-            </iframe>
-        </>
-    ) : (
-        <>
-            {/* Log unsupported content type */}
-            {console.log('Unsupported content type for:', contentUrl)}
-            <p>Unsupported content type</p>
-        </>
-    )
-) : (
-    <>
-        {/* Log when no content is available */}
-        {console.log('No content available for this material:', material)}
-        <p>No content available</p>
-    </>
-)}
-
-                                <p>Created At: {new Date(material.created_at).toLocaleString()}</p>
-                                <p>Updated At: {new Date(material.updated_at).toLocaleString()}</p>
-                            </div>
-                        </div>
+                       <div
+                       className={`collapse collapse-arrow border border-base-300 bg-base-100 rounded-box ${openMaterialId === material.id ? 'collapse-open' : ''}`}
+                   >
+                       {/* Accordion Title */}
+                       <div
+                           className="collapse-title text-xl font-medium cursor-pointer" // tambahkan cursor-pointer untuk memberikan indikasi klik
+                           onClick={() => handleAccordionClick(material)} // Handle accordion click
+                       >
+                           <ReactQuill
+                               value={material.title}
+                               readOnly={true} // Set the editor to read-only
+                               theme="bubble" // Use a theme that fits better for read-only display
+                               modules={{ toolbar: false }} // Disable the toolbar
+                           />
+                       </div>
+                   
+                       {/* Accordion Content */}
+                       {openMaterialId === material.id && (
+                           <div className="collapse-content">
+                           {materialContents[material.id] ? (
+                               materialContents[material.id].endsWith('.pdf') ? (
+                                   <div className="pdf-viewer w-full h-[80vh]"> {/* Adjust height for desktop */}
+                                       <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
+                                           <Viewer
+                                               fileUrl={materialContents[material.id]} // Load specific material content
+                                               // Hilangkan plugin untuk menghapus toolbar
+                                           />
+                                       </Worker>
+                                   </div>
+                               ) : (
+                                   <p>Unsupported content type</p>
+                               )
+                           ) : (
+                               <p>Loading content...</p>
+                           )}
+                       
+                          
+                       </div>
+                       
+                       )}
+                   </div>
+                   
                     ))}
                 </div>
             </div>
-        </CloudinaryContext>
+        </div>
+    </CloudinaryContext>
+
     );
 };
 

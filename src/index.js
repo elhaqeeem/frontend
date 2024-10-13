@@ -12,6 +12,11 @@ root.render(
   </React.StrictMode>
 );
 
+if (window.location.protocol !== "https:") {
+  window.location.href = `https://${window.location.host}${window.location.pathname}`;
+}
+
+
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals

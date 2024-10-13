@@ -44,7 +44,7 @@ const TestItemManager = () => {
     const saveTestItem = async () => {
         const { kraeplin_test_id, deret_angka, sequence_number, column_number, answer } = testItemData;
         const kraeplinTestIDInt = parseInt(kraeplin_test_id, 10);
-        const columnnumber = parseInt(column_number, 10);
+        const columnnumber = parseInt(column_number, 10);// eslint-disable-next-line
         const answerOptions = parseInt(answer, 10);
 
 

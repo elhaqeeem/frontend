@@ -9,7 +9,7 @@ import DataTable from 'react-data-table-component';
 const UserDataTable = () => {
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);// eslint-disable-next-line
     const [error, setError] = useState(null);
     const [searchText, setSearchText] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
