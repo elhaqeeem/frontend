@@ -191,7 +191,8 @@ const Layout = ({ children }) => {
                 const user_id = localStorage.getItem('id'); // Ambil user_id dari localStorage
                 const token = localStorage.getItem('token');
 
-                const response = await axios.get(`/orders?user_id=${user_id}`, {
+                const response = await axios.get(`/orders/user/${user_id}`, {
+                   
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

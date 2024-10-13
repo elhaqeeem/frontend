@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logout from './Logout';
-import axios from 'axios';
+import axios from './axiosInstance'; // Import axios instance with base URL
 import Joyride from 'react-joyride';
+import axiosInstance from './axiosInstance';
 
 const Layout = ({ children }) => {
     const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
@@ -90,28 +91,40 @@ const Layout = ({ children }) => {
         setCurrentTheme(e.target.value); // Update current theme based on dropdown selection
     };
 
-    // Fetch Cart Items from API
     useEffect(() => {
         const fetchCartItems = async () => {
             try {
-                const user_id = localStorage.getItem('id');  // Ambil user_id dari localStorage
+                const id = localStorage.getItem('id');  // Ambil user_id dari localStorage
                 const token = localStorage.getItem('token');
-
-                // Menggunakan query parameter untuk mengirim user_id sebagai filter
-                const response = await axios.get(`/orders?user_id=${user_id}`, {
+        
+                // Tambahkan log untuk memeriksa nilai id dan token
+                console.log("User ID from localStorage:", id);
+                console.log("Token from localStorage:", token);
+        
+                // Menggunakan user_id di dalam URL
+                const response = await axiosInstance.get(`/orders/user/${id}`, { // Pastikan endpointnya benar
+                    params: {
+                        payment_status: 'pending'  // Filter jika perlu
+                    },
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${token}`, // Pastikan token dikirim dengan benar
                     },
                 });
-
+        
+                // Log response dari server untuk memeriksa data yang diterima
+                console.log("Response from API:", response.data);
+        
                 setCartItems(response.data); // Simpan data pesanan ke state
             } catch (error) {
+                // Log error jika terjadi masalah dalam pengambilan data
                 console.error('Error fetching cart items:', error);
             }
         };
-
+    
         fetchCartItems();
     }, []); // Dependency array kosong agar hanya berjalan sekali saat komponen dimount
+    
+
 
     const toggleCartModal = () => {
         setIsCartModalOpen(!isCartModalOpen); // Toggle modal keranjang

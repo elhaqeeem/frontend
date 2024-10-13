@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from './axiosInstance'; // Pastikan path ini benar
+import axios from './axiosInstance'; // Ensure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
@@ -18,6 +18,7 @@ const ClassManager = () => {
   });
   const [selectedRows, setSelectedRows] = useState([]);
 
+  // Fetch all classes from the API
   const fetchClasses = async () => {
     try {
       const response = await axios.get('/classes');
@@ -28,9 +29,10 @@ const ClassManager = () => {
   };
 
   useEffect(() => {
-    fetchClasses();
+    fetchClasses(); // Fetch classes on initial load
   }, []);
 
+  // Filter classes based on search input
   useEffect(() => {
     if (Array.isArray(classes)) {
       setFilteredClasses(
@@ -41,6 +43,7 @@ const ClassManager = () => {
     }
   }, [search, classes]);
 
+  // Handle create or update class
   const handleCreateOrUpdate = async () => {
     const { course_id, title, schedule, id } = classData;
 
@@ -80,6 +83,7 @@ const ClassManager = () => {
     }
   };
 
+  // Open modal with class data for editing
   const handleEdit = (classItem) => {
     setClassData({
       course_id: classItem.course_id,
@@ -90,6 +94,7 @@ const ClassManager = () => {
     setIsModalOpen(true);
   };
 
+  // Handle delete single class
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: 'Are you sure?',
@@ -111,6 +116,7 @@ const ClassManager = () => {
     }
   };
 
+  // Handle bulk delete of selected classes
   const handleBulkDelete = async () => {
     if (selectedRows.length === 0) {
       toast.error('No classes selected for deletion.');
@@ -140,11 +146,13 @@ const ClassManager = () => {
     }
   };
 
+  // Reset the form after creation or editing
   const resetForm = () => {
     setClassData({ course_id: '', title: '', schedule: '', id: '' });
     setIsModalOpen(false);
   };
 
+  // Define table columns
   const columns = [
     {
       name: 'Title',
