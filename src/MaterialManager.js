@@ -193,7 +193,13 @@ const MaterialManager = () => {
   const columns = [
     {
       name: 'Title',
-      selector: (row) => row.title,
+      selector: (row) => (
+        <ReactQuill
+          value={row.title}
+          readOnly={true} // Membuat editor hanya sebagai tampilan
+          theme="bubble" // Menggunakan tema bubble untuk tampilan readOnly yang sederhana
+        />
+      ),
       sortable: true,
     },
     {

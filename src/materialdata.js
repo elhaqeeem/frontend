@@ -47,13 +47,13 @@ const Materialsdata = () => {
     }, []);
 
     const fetchContent = async (material) => {
-        const token = localStorage.getItem('token'); // Get token
+       // const token = localStorage.getItem('token'); // Get token
         const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
 
         try {// eslint-disable-next-line
             const response = await axios.get(material.content, {
                 headers: {
-                    Authorization: `Bearer ${token}`, // Include the token in the request
+                    //Authorization: `Bearer ${token}`, // Include the token in the request
                     'Cloud-Name': cloudName, // Optional: Remove this if unnecessary
                 },
             });
@@ -82,7 +82,7 @@ const Materialsdata = () => {
     if (loading) return <p>Loading...</p>; // Menampilkan loading indicator
 
     return (
-        <CloudinaryContext cloudName={process.env.REACT_APP_CLOUD_NAME}>
+        <CloudinaryContext cloudName={process.env.CLOUDINARY_CLOUD_NAME}>
         <div className="flex flex-col items-center min-h-screen bg-base-200 p-4">
             <ToastContainer />
             <h2 className="text-3xl font-bold mb-4">Materials</h2>

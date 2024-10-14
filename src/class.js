@@ -6,6 +6,7 @@ import DataTable from 'react-data-table-component';
 import Swal from 'sweetalert2';
 
 const ClassManager = () => {
+  const [courses, setCourses] = useState([]);
   const [classes, setClasses] = useState([]);
   const [filteredClasses, setFilteredClasses] = useState([]);
   const [search, setSearch] = useState('');
@@ -28,7 +29,29 @@ const ClassManager = () => {
     }
   };
 
+  const fetchCourses = async () => {
+    try {
+      const token = localStorage.getItem('token'); // Ambil token dari localStorage
+      const response = await fetch('/courses', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`, // Tambahkan Bearer token ke header
+          'Content-Type': 'application/json', // Jika perlu, tambahkan header ini
+        },
+      });
+
+      const data = await response.json();
+      if (data.courses) {
+        setCourses(data.courses);
+      } else {
+        console.error('Courses data is not available in the response.');
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+    }
+  };
   useEffect(() => {
+    fetchCourses(); // Tambahkan ini untuk mengambil daftar kursus
     fetchClasses(); // Fetch classes on initial load
   }, []);
 
@@ -52,10 +75,13 @@ const ClassManager = () => {
       return;
     }
 
+    const formattedSchedule = new Date(schedule).toISOString();
+
     const classPayload = { 
-      course_id, 
+      course_id: parseInt(course_id, 10),  // Ensure course_id is an integer
       title, 
-      schedule 
+      schedule: formattedSchedule // use formatted schedule
+ 
     };
 
     const confirmationText = id ? 'update this class!' : 'create a new class!';
@@ -160,8 +186,11 @@ const ClassManager = () => {
       sortable: true,
     },
     {
-      name: 'Course ID',
-      selector: (row) => row.course_id,
+      name: 'Course',
+      selector: (row) => {
+        const course = courses.find(course => course.id === row.course_id);
+        return course ? course.title : 'N/A'; // Tampilkan nama kursus atau 'N/A' jika tidak ditemukan
+      },
       sortable: true,
     },
     {
@@ -224,13 +253,20 @@ const ClassManager = () => {
               />
             </div>
             <div className="form-control mt-4">
-              <input
-                type="number"
-                value={classData.course_id}
-                onChange={(e) => setClassData({ ...classData, course_id: e.target.value })}
-                placeholder="Course ID"
-                className="input input-bordered w-full mb-2"
-              />
+            <select
+               value={classData.course_id}
+               onChange={(e) => setClassData({ ...classData, course_id: e.target.value })}
+               className="select select-success w-full max-w-lg"             >
+               <option value="">Select a Course</option>
+               {courses.map((course) => (
+                 <option key={course.id} value={course.id}>
+                   {course.title}
+                 </option>
+               ))}
+             </select>
+             </div>
+             <div className="form-control mt-4">
+
               <input
                 type="datetime-local"
                 value={classData.schedule}
@@ -238,7 +274,7 @@ const ClassManager = () => {
                 placeholder="Schedule"
                 className="input input-bordered w-full mb-2"
               />
-            </div>
+              </div>
             <div className="modal-action">
               <button className="btn btn-primary" onClick={handleCreateOrUpdate}>Save</button>
               <button className="btn" onClick={resetForm}>Cancel</button>
