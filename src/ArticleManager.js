@@ -22,11 +22,14 @@ const ArticleManager = () => {
   const [selectAll, setSelectAll] = useState(false); // State for select all checkbox
   const [permissions, setPermissions] = useState([]); // State to track permissions
   const [userId, setUserId] = useState(null); // State to hold user ID
+  const [firstName, setFirstName] = useState(''); // Add useState for firstName
 
   useEffect(() => {
     // Retrieve userId from local storage
     const storedUserId = localStorage.getItem('id');
     setUserId(storedUserId); // Store userId in state
+    const storedFirstName = localStorage.getItem('firstName'); // Retrieve firstName
+    setFirstName(storedFirstName); // Store firstName in state
 
     fetchArticles();
     if (storedUserId) {
@@ -232,9 +235,10 @@ const ArticleManager = () => {
     },
     {
       name: 'Author',
-      selector: (row) => row.author_id,
+      selector: (row) => row.author_id === parseInt(userId) ? firstName : row.author_id, // Use firstName if userId matches
       sortable: true,
     },
+    
     {
       name: 'Tags',
       selector: (row) => row.tags,
