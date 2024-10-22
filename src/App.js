@@ -11,7 +11,7 @@ import MenuManager from './MenuManager';
 import ArticleManager from './ArticleManager';
 import RoleMenuDataTable from './RoleMenuDataTable';
 import MenuIconManager from './MenuIconManager';
-import KraeplinTestManager from './KraeplinTestManager';
+import CreateKraeplin from './KraeplinTestManager';
 import QuestionManager from './QuestionManager';
 import UserTestManager from './UserTestManager';
 import TestAnswerManager from './TestAnswers';
@@ -90,7 +90,7 @@ function App() {
                     />
                     <Route 
                         path="/kreaeplin" 
-                        element={<PrivateRoute element={<Layout><KraeplinTestManager /></Layout>} />} 
+                        element={<PrivateRoute element={<Layout><CreateKraeplin /></Layout>} />} 
                     />
                     <Route 
                         path="/questions" 
@@ -148,6 +148,7 @@ function App() {
                         path="/Class-data" 
                         element={<PrivateRoute element={<Layout><ClassManager /></Layout>} />} 
                     />
+                    
                   
                 </Routes>
             </Router>

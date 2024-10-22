@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
 import Swal from 'sweetalert2';
 
-const KraeplinTestManager = () => {
+const CreateKraeplin = () => {
   const [tests, setTests] = useState([]);
   const [filteredTests, setFilteredTests] = useState([]);
   const [search, setSearch] = useState('');
@@ -15,9 +15,10 @@ const KraeplinTestManager = () => {
   const [description, setDescription] = useState('');
   const [selectedTest, setSelectedTest] = useState(null);
   const [testId, setTestId] = useState(''); // State to hold the test ID
+  const token = localStorage.getItem("token"); // Ambil token dari localStorage
 
   useEffect(() => {
-    fetchTests();
+    fetchKraeplinTests();// eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -27,20 +28,33 @@ const KraeplinTestManager = () => {
     setFilteredTests(result);
   }, [search, tests]);
 
-  const fetchTests = async () => {
+  const fetchKraeplinTests = async () => {
     try {
-      const token = localStorage.getItem('token'); // Ganti 'yourTokenKey' dengan kunci yang sesuai
-      const response = await axios.get('/kraeplin-tests', {
+      const response = await fetch("/kraeplin-tests", {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
-      setTests(response.data || []);
-      setFilteredTests(response.data || []);
+
+      if (response.status === 401) {
+        console.error("Authorization header required");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setTests(data);
+      } else {
+        console.error("Data format is not an array:", data);
+      }
     } catch (error) {
-      toast.error('Failed to fetch tests.');
+      console.error("Error fetching kraeplin tests:", error);
     }
   };
+  
+  
   
 
   const handleCreateOrUpdate = async () => {
@@ -77,7 +91,7 @@ const KraeplinTestManager = () => {
         await axios.post('/kraeplin-tests', testData);
         toast.success('Test created successfully.');
       }
-      fetchTests();
+      fetchKraeplinTests();
       resetForm();
     } catch (error) {
       toast.error('Failed to save test.');
@@ -109,7 +123,7 @@ const KraeplinTestManager = () => {
       try {
         await axios.delete(`/kraeplin-tests/${id}`);
         toast.success('Test deleted successfully.');
-        fetchTests();
+        fetchKraeplinTests();
       } catch (error) {
         toast.error('Failed to delete test.');
       }
@@ -237,4 +251,4 @@ const KraeplinTestManager = () => {
   );
 };
 
-export default KraeplinTestManager;
+export default CreateKraeplin;

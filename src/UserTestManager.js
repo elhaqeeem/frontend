@@ -19,11 +19,12 @@ const UserTestManager = () => {
   const [selectedTest, setSelectedTest] = useState(null);
   const [users, setUsers] = useState([]);
   const [kraeplinTests, setKraeplinTests] = useState([]);
+  const token = localStorage.getItem("token"); // Ambil token dari localStorage
 
   useEffect(() => {
     fetchUserTests();
     fetchUsers();
-    fetchKraeplinTests();
+    fetchKraeplinTests();// eslint-disable-next-line
   }, []);
 
   const fetchUserTests = async () => {
@@ -51,16 +52,28 @@ const UserTestManager = () => {
   };
 
   const fetchKraeplinTests = async () => {
-    const token = localStorage.getItem('token'); // Get the token from local storage
     try {
-      const response = await axios.get('/kraeplin-tests', {
-        headers: { Authorization: `Bearer ${token}` }, // Add Authorization header
+      const response = await fetch("/kraeplin-tests", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
-      setKraeplinTests(response.data || []);
+
+      if (response.status === 401) {
+        console.error("Authorization header required");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setKraeplinTests(data);
+      } else {
+        console.error("Data format is not an array:", data);
+      }
     } catch (error) {
-      toast.error('Failed to fetch kraeplin tests.');
-      console.error('Error fetching kraeplin tests:', error);
-      setKraeplinTests([]);
+      console.error("Error fetching kraeplin tests:", error);
     }
   };
 
