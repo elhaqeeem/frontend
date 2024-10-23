@@ -1,56 +1,65 @@
 import React, { useEffect, useState } from 'react';
-import axios from './axiosInstance'; // Pastikan path ini benar
+import axios from './axiosInstance'; // Make sure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import DataTable from 'react-data-table-component';
 
 const MenuManager = () => {
   const [menus, setMenus] = useState([]);
-  const [filteredMenus, setFilteredMenus] = useState([]); // Untuk menyimpan hasil pencarian
-  const [search, setSearch] = useState(''); // State untuk input pencarian
+  const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [menuName, setMenuName] = useState('');
-  const [iconName, setIconName] = useState(''); // Tambahkan icon_name
+  const [iconName, setIconName] = useState('');
   const [url, setUrl] = useState('');
   const [parentId, setParentId] = useState(null);
   const [roleId, setRoleId] = useState(null);
   const [iconId, setIconId] = useState(null);
   const [selectedMenu, setSelectedMenu] = useState(null);
+  const [expandedMenus, setExpandedMenus] = useState({}); // New state for expanded/collapsed menus
 
   useEffect(() => {
-    fetchMenus();
+    fetchMenus();// eslint-disable-next-line
   }, []);
-
-  useEffect(() => {
-    const result = menus.filter(menu => 
-      menu.menu_name.toLowerCase().includes(search.toLowerCase()) ||
-      menu.url.toLowerCase().includes(search.toLowerCase()) ||
-      (menu.icon_name && menu.icon_name.toLowerCase().includes(search.toLowerCase())) // Filter by icon_name
-    );
-    setFilteredMenus(result);
-  }, [search, menus]);
 
   const fetchMenus = async () => {
     try {
       const response = await axios.get('/menus');
       if (response.data && Array.isArray(response.data.menus)) {
-        setMenus(response.data.menus);
-        setFilteredMenus(response.data.menus);
+        const structuredMenus = structureMenus(response.data.menus);
+        setMenus(structuredMenus);
       } else {
         setMenus([]);
-        setFilteredMenus([]);
       }
     } catch (error) {
       toast.error('Failed to fetch menus.');
       setMenus([]);
-      setFilteredMenus([]);
     }
+  };
+
+  const structureMenus = (menus) => {
+    const menuMap = {};
+    const tree = [];
+
+    // Create a map with each menu item by its ID
+    menus.forEach(menu => {
+      menuMap[menu.id] = { ...menu, children: [] };
+    });
+
+    // Build the tree structure
+    menus.forEach(menu => {
+      if (menu.parent_id) {
+        menuMap[menu.parent_id].children.push(menuMap[menu.id]);
+      } else {
+        tree.push(menuMap[menu.id]);
+      }
+    });
+
+    return tree;
   };
 
   const handleCreateOrUpdate = async () => {
     const menuData = {
       menu_name: menuName,
-      icon_name: iconName, // Tambahkan icon_name
+      icon_name: iconName,
       url,
       parent_id: parentId,
       role_id: roleId,
@@ -59,11 +68,9 @@ const MenuManager = () => {
 
     try {
       if (selectedMenu) {
-        // Update existing menu
         await axios.put(`/menus/${selectedMenu.id}`, menuData);
         toast.success('Menu updated successfully.');
       } else {
-        // Create new menu
         await axios.post('/menus', menuData);
         toast.success('Menu created successfully.');
       }
@@ -77,12 +84,11 @@ const MenuManager = () => {
   const handleEdit = (menu) => {
     setSelectedMenu(menu);
     setMenuName(menu.menu_name);
-    setIconName(menu.icon_name || ''); // Tambahkan icon_name
+    setIconName(menu.icon_name || '');
     setUrl(menu.url);
     setParentId(menu.parent_id || null);
     setRoleId(menu.role_id || null);
     setIconId(menu.icon_id || null);
-
     setIsModalOpen(true);
   };
 
@@ -99,7 +105,7 @@ const MenuManager = () => {
   const resetForm = () => {
     setSelectedMenu(null);
     setMenuName('');
-    setIconName(''); // Reset icon_name
+    setIconName('');
     setUrl('');
     setParentId(null);
     setRoleId(null);
@@ -107,58 +113,93 @@ const MenuManager = () => {
     setIsModalOpen(false);
   };
 
-  const columns = [
-    {
-      name: 'Menu ID',
-      selector: (row) => row.id,
-      sortable: true,
-    },
-    {
-      name: 'Menu Name',
-      selector: (row) => row.menu_name,
-      sortable: true,
-    },
-    {
-      name: 'Icon Name', // Kolom icon_name baru
-      selector: (row) => row.icon_name || 'None', // Tampilkan 'None' jika null
-      sortable: true,
-    },
-    {
-      name: 'URL',
-      selector: (row) => row.url,
-      sortable: true,
-    },
-    {
-      name: 'Parent ID',
-      selector: (row) => row.parent_id !== null ? row.parent_id : 'None',
-      sortable: true,
-    },
-    {
-      name: 'Icon ID',
-      selector: (row) => row.icon_id !== null ? row.icon_id : 'None',
-      sortable: true,
-    },
-    {
-      name: 'Actions',
-      cell: (row) => (
-        <div className="flex space-x-2">
-          <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
-            <i className="fa fa-pencil" aria-hidden="true"></i>
-          </button>
-          <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
-            <i className="fa fa-trash" aria-hidden="true"></i>
-          </button>
-        </div>
-      ),
-    },
-  ];
+  const toggleExpand = (menuId) => {
+    setExpandedMenus(prevState => ({
+      ...prevState,
+      [menuId]: !prevState[menuId], // Toggle the expansion state
+    }));
+  };
+
+  const filterMenus = (menus) => {
+    return menus
+      .filter(menu =>
+        menu.menu_name.toLowerCase().includes(search.toLowerCase()) ||
+        menu.url.toLowerCase().includes(search.toLowerCase()) ||
+        (menu.icon_name && menu.icon_name.toLowerCase().includes(search.toLowerCase()))
+      )
+      .map(menu => ({
+        ...menu,
+        children: filterMenus(menu.children || []),
+      }));
+  };
+
+  const renderMenuTree = (menus, level = 0, isLastChild = false) => {
+    return (
+      <ul className="menu-tree pl-4">
+        {menus.map((menu, index) => {
+          const isLastItem = index === menus.length - 1;
+          return (
+            <li key={menu.id} className={`menu-item mb-2 ${level > 0 ? 'ml-1 border-l-2 pl-1 border-gray-200' : ''}`}>
+              <div className="flex justify-between items-center p-1 hover:bg-gray-100 rounded-md">
+                <div className="flex items-center space-x-2">
+                  {/* Simbol hirarki berdasarkan level */}
+                  <span style={{ fontFamily: 'roboto', whiteSpace: 'pre', color: '#888' }}>
+                    {level > 0 && (isLastChild ? '──' : '──')}
+                    {isLastItem ? '' : ''}
+                  </span>
+                  {menu.children.length > 0 && (
+                    <button
+                      onClick={() => toggleExpand(menu.id)}
+                      className="text-red-500 hover:text-blue-700"
+                    >
+                      {expandedMenus[menu.id] ? (
+                        <i className="fa fa-minus-square-o"></i>
+                      ) : (
+                        <i className="fa fa-plus-square-o"></i>
+                      )} {/* Ikon collapse/expand */}
+                    </button>
+                  )}
+                 <span className="font-normal text-sm">{menu.menu_name}</span>
+
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    className="btn btn-outline btn-sm btn-primary hover:bg-blue-600"
+                    onClick={() => handleEdit(menu)}
+                  >
+                    <i className="fa fa-pencil"></i>
+                  </button>
+                  <button
+                    className="btn btn-outline btn-sm btn-error hover:bg-red-600"
+                    onClick={() => handleDelete(menu.id)}
+                  >
+                    <i className="fa fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+              {expandedMenus[menu.id] && menu.children.length > 0 && (
+                <div className="ml-4 border-l-2 pl-2 border-gray-200">
+                  {renderMenuTree(menu.children, level + 1, isLastItem)}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    );
+  };
+
+
+
+  const filteredMenus = filterMenus(menus);
 
   return (
     <div className="container mx-auto p-4 bg-white text-black">
       <ToastContainer />
       <div className="flex justify-between items-center mb-4">
-        <button className="btn btn-outline btn-primary" onClick={() => setIsModalOpen(true)}>
-          Add Menu
+        <button className="btn btn-rounded btn-primary" onClick={() => setIsModalOpen(true)}>
+        Add Menu
+       
         </button>
         <div className="relative">
           <input
@@ -168,23 +209,19 @@ const MenuManager = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="input input-bordered w-full max-w-xs pl-10"
           />
-          <i className="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+         
         </div>
       </div>
 
-      <DataTable
-        title="Menu List"
-        columns={columns}
-        data={filteredMenus}
-        noDataComponent="No menus available"
-        pagination
-        className="rounded-lg shadow-lg bg-white"
-      />
+      <div className="bg-white rounded-lg shadow-lg p-4">
+        {filteredMenus.length > 0 ? renderMenuTree(filteredMenus) : 'No menus available'}
+      </div>
 
       {isModalOpen && (
         <div className="modal modal-open">
           <div className="modal-box">
             <h2 className="font-bold text-lg">{selectedMenu ? 'Edit Menu' : 'Add Menu'}</h2>
+
             <input
               type="text"
               placeholder="Menu Name"
@@ -195,7 +232,7 @@ const MenuManager = () => {
             />
             <input
               type="text"
-              placeholder="Icon Name" // Input untuk icon_name
+              placeholder="Icon Name"
               value={iconName}
               onChange={(e) => setIconName(e.target.value)}
               className="input input-bordered w-full mb-2"
@@ -207,13 +244,21 @@ const MenuManager = () => {
               onChange={(e) => setUrl(e.target.value)}
               className="input input-bordered w-full mb-2"
             />
-            <input
-              type="number"
-              placeholder="Parent ID"
+
+            {/* Dropdown untuk Parent Menu */}
+            <select
               value={parentId || ''}
               onChange={(e) => setParentId(e.target.value ? parseInt(e.target.value) : null)}
               className="input input-bordered w-full mb-2"
-            />
+            >
+              <option value="">Select Parent Menu</option>
+              {menus.map((menu) => (
+                <option key={menu.id} value={menu.id}>
+                  {menu.menu_name}
+                </option>
+              ))}
+            </select>
+
             <input
               type="number"
               placeholder="Role ID"
@@ -228,6 +273,7 @@ const MenuManager = () => {
               onChange={(e) => setIconId(e.target.value ? parseInt(e.target.value) : null)}
               className="input input-bordered w-full mb-2"
             />
+
             <div className="modal-action">
               <button className="btn" onClick={handleCreateOrUpdate}>
                 {selectedMenu ? 'Update' : 'Create'}
@@ -239,6 +285,7 @@ const MenuManager = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };
