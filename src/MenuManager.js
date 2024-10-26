@@ -218,73 +218,91 @@ const MenuManager = () => {
       </div>
 
       {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h2 className="font-bold text-lg">{selectedMenu ? 'Edit Menu' : 'Add Menu'}</h2>
+  <div className="modal modal-open">
+    <div className="modal-box">
+      <h2 className="font-bold text-lg">{selectedMenu ? 'Edit Menu' : 'Add Menu'}</h2>
 
-            <input
-              type="text"
-              placeholder="Menu Name"
-              value={menuName}
-              onChange={(e) => setMenuName(e.target.value)}
-              className="input input-bordered w-full mb-2"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Icon Name"
-              value={iconName}
-              onChange={(e) => setIconName(e.target.value)}
-              className="input input-bordered w-full mb-2"
-            />
-            <input
-              type="text"
-              placeholder="URL"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="input input-bordered w-full mb-2"
-            />
-
-            {/* Dropdown untuk Parent Menu */}
-            <select
-              value={parentId || ''}
-              onChange={(e) => setParentId(e.target.value ? parseInt(e.target.value) : null)}
-              className="input input-bordered w-full mb-2"
-            >
-              <option value="">Select Parent Menu</option>
-              {menus.map((menu) => (
-                <option key={menu.id} value={menu.id}>
-                  {menu.menu_name}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="number"
-              placeholder="Role ID"
-              value={roleId || ''}
-              onChange={(e) => setRoleId(e.target.value ? parseInt(e.target.value) : null)}
-              className="input input-bordered w-full mb-2"
-            />
-            <input
-              type="number"
-              placeholder="Icon ID"
-              value={iconId || ''}
-              onChange={(e) => setIconId(e.target.value ? parseInt(e.target.value) : null)}
-              className="input input-bordered w-full mb-2"
-            />
-
-            <div className="modal-action">
-              <button className="btn" onClick={handleCreateOrUpdate}>
-                {selectedMenu ? 'Update' : 'Create'}
-              </button>
-              <button className="btn" onClick={resetForm}>
-                Cancel
-              </button>
-            </div>
-          </div>
+      {/* Layout 2 kolom */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="form-control">
+          <input
+            type="text"
+            placeholder="Menu Name"
+            value={menuName}
+            onChange={(e) => setMenuName(e.target.value)}
+            className="input input-bordered w-full mb-2"
+            required
+          />
         </div>
-      )}
+
+        <div className="form-control">
+          <input
+            type="text"
+            placeholder="Icon Name"
+            value={iconName}
+            onChange={(e) => setIconName(e.target.value)}
+            className="input input-bordered w-full mb-2"
+          />
+        </div>
+
+        <div className="form-control">
+          <input
+            type="text"
+            placeholder="URL"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="input input-bordered w-full mb-2"
+          />
+        </div>
+
+        <div className="form-control">
+          <select
+            value={parentId || ''}
+            onChange={(e) => setParentId(e.target.value ? parseInt(e.target.value) : null)}
+            className="select select-accent w-full mb-2"
+          >
+            <option value="">Select Parent Menu</option>
+            {menus.map((menu) => (
+              <option key={menu.id} value={menu.id}>
+                {menu.menu_name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-control">
+          <input
+            type="number"
+            placeholder="Role ID"
+            value={roleId || ''}
+            onChange={(e) => setRoleId(e.target.value ? parseInt(e.target.value) : null)}
+            className="input input-bordered w-full mb-2"
+          />
+        </div>
+
+        <div className="form-control">
+          <input
+            type="number"
+            placeholder="Icon ID"
+            value={iconId || ''}
+            onChange={(e) => setIconId(e.target.value ? parseInt(e.target.value) : null)}
+            className="input input-bordered w-full mb-2"
+          />
+        </div>
+      </div>
+
+      <div className="modal-action mt-4">
+        <button className="btn btn-primary" onClick={handleCreateOrUpdate}>
+          {selectedMenu ? 'Update' : 'Create'}
+        </button>
+        <button className="btn btn-secondary" onClick={resetForm}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
     </div>
   );

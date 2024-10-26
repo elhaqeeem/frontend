@@ -232,32 +232,35 @@ const Quiz = () => {
               key={question.id}
               className="question-block mb-4 p-4 border border-base-300 rounded-lg bg-base-100 shadow-md"
             >
-              <h2 className="text-sm font-semibold">{question.question_text}</h2>
-              <div className="flex flex-wrap space-x-4 mt-5">
-                {(question.kraeplin_test_id === 7 || question.kraeplin_test_id === 9) ? (
-                  question.answer_options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleAnswerChange(question.id, index, false)} // single-answer (false)
-                      className={`btn mr-2 mb-2 ${answers[question.id] === index ? 'btn-warning' : 'btn btn-outline'}`}
-                      disabled={hasPreviousAnswers}
-                    >
-                      {option}
-                    </button>
-                  ))
-                ) : (
-                  question.answer_options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleAnswerChange(question.id, index, true)} // multiple-answer (true)
-                      className={`btn mr-2 mb-2 ${answers[question.id]?.includes(index) ? 'btn-warning' : 'btn btn-outline'}`}
-                      disabled={hasPreviousAnswers}
-                    >
-                      {option}
-                    </button>
-                  ))
-                )}
-              </div>
+<strong>
+  <h1 className="text-lg font-semibold text-center text-orange-500">{question.question_text}</h1>
+</strong>
+              <div className="flex flex-wrap justify-center items-center space-x-4 mt-5">
+  {(question.kraeplin_test_id === 7 || question.kraeplin_test_id === 9) ? (
+    question.answer_options.map((option, index) => (
+      <button
+        key={index}
+        onClick={() => handleAnswerChange(question.id, index, false)} // single-answer (false)
+        className={`btn mr-2 mb-2 ${answers[question.id] === index ? 'btn-warning' : 'btn btn-outline'}`}
+        disabled={hasPreviousAnswers}
+      >
+        {option}
+      </button>
+    ))
+  ) : (
+    question.answer_options.map((option, index) => (
+      <button
+        key={index}
+        onClick={() => handleAnswerChange(question.id, index, true)} // multiple-answer (true)
+        className={`btn mr-2 mb-2 ${answers[question.id]?.includes(index) ? 'btn-warning' : 'btn btn-outline'}`}
+        disabled={hasPreviousAnswers}
+      >
+        {option}
+      </button>
+    ))
+  )}
+</div>
+
             </div>
           ))}
 

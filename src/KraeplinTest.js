@@ -335,12 +335,12 @@ const KraeplinTestResultManager = () => {
       {/* Modal for creating/editing result */}
       {isModalOpen && (  <div className="modal modal-open">
       <div className="modal-box">
-      <h2 className="text-xl font-bold mb-4">Kraeplin Test Result</h2>
+      <h2 className="text-xl font-bold mb-4">Kraepelin Test Result</h2>
 
           {/* Select untuk Kraeplin Test */}
           <div className="form-control">
             <label className="label">
-              <span className="label-text">Kraeplin Test</span>
+              <span className="label-text">Kraepelin Test</span>
             </label>
             <select
               value={kraeplinTestId}
