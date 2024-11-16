@@ -1,7 +1,8 @@
+// src/axiosInstance.js
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: process.env.REACT_APP_API_URL, // Menggunakan environment variable
+    baseURL: 'http://delighted-merla-vsampeu-735ae421.koyeb.app', // Update with your API URL
 });
 
 // Add a request interceptor
