@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
+import axiosInstance from './axiosInstance';
 
 const FeatureList = () => {
   const features = [
@@ -36,7 +36,7 @@ const LoginForm = ({ onLogin }) => {
     e.preventDefault();
     setError('');
 
-    axios.post('/login', { username, password })
+    axiosInstance.post('/login', { username, password })
       .then(response => {
         toast.success('Login successful!');
         localStorage.setItem('roleID', response.data.role_id);
