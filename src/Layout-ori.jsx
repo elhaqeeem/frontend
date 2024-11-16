@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logout from './Logout';
-import axios from 'axios';
 import Joyride from 'react-joyride';
+import axiosInstance from './axiosInstance';
 
 const Layout = ({ children }) => {
     const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
@@ -35,7 +35,7 @@ const Layout = ({ children }) => {
 
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`/role/${roleId}/menus`, {
+                const response = await axiosInstance.get(`/role/${roleId}/menus`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -119,7 +119,7 @@ const Layout = ({ children }) => {
                 email: email,
             };
 
-            const response = await axios.post(
+            const response = await axiosInstance.post(
                 '/payment',
                 {
                     orders: cartItems,
@@ -191,7 +191,7 @@ const Layout = ({ children }) => {
                 const user_id = localStorage.getItem('id'); // Ambil user_id dari localStorage
                 const token = localStorage.getItem('token');
 
-                const response = await axios.get(`/orders/user/${user_id}`, {
+                const response = await axiosInstance.get(`/orders/user/${user_id}`, {
                    
                     headers: {
                         Authorization: `Bearer ${token}`,

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import stylesheet toastify
-import axios from './axiosInstance'; // Pastikan path ini benar
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; // Import stylesheet ReactQuill
 import { AdvancedImage } from '@cloudinary/react'; // Import AdvancedImage
@@ -9,6 +8,7 @@ import { Cloudinary } from '@cloudinary/url-gen'; // Import Cloudinary for image
 import { scale } from '@cloudinary/url-gen/actions/resize'; // Import action for resizing
 import { quality, format } from '@cloudinary/url-gen/actions/delivery'; // Import actions for quality and format
 import 'daisyui/dist/full.css'; // Import DaisyUI styles
+import axiosInstance from './axiosInstance';
 
 function Dashboard() {
     const [courses, setCourses] = useState([]);
@@ -68,7 +68,7 @@ function Dashboard() {
     const fetchCourses = async () => {
         setIsCoursesLoading(true); // Set loading state to true
         try {
-            const response = await axios.get('/courses'); // Endpoint API untuk mendapatkan courses
+            const response = await axiosInstance.get('/courses'); // Endpoint API untuk mendapatkan courses
             setCourses(response.data.courses || []);
         } catch (error) {
             console.error('Failed to fetch courses:', error);
@@ -117,7 +117,7 @@ function Dashboard() {
 
         try {
             setIsLoading(true); // eslint-disable-next-line
-            const response = await axios.post('/orders', orderData);
+            const response = await axiosInstance.post('/orders', orderData);
             toast.success('Order created successfully!');
             window.location.reload(); 
             closeModal();
