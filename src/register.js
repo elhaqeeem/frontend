@@ -69,23 +69,36 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const userData = {
       ...formData,
       role_id: 2,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-
+  
     try {
       const response = await axios.post('/users', userData);
       toast.success('User registered successfully!');
       navigate('/login');
     } catch (error) {
-      console.error('Error registering user:', error);
-      toast.error('Failed to register user.');
+      if (error.response) {
+        // Pesan error dari server
+        const serverMessage = error.response.data.message || 'Failed to register user.';
+        console.error('Server Error:', serverMessage);
+        toast.error(serverMessage);
+      } else if (error.request) {
+        // Tidak ada respons dari server
+        console.error('No response received:', error.request);
+        toast.error('No response from server. Please try again later.');
+      } else {
+        // Error saat konfigurasi request
+        console.error('Request Error:', error.message);
+        toast.error('An error occurred. Please try again.');
+      }
     }
   };
+  
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
