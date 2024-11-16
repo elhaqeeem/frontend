@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from './axiosInstance'; // Ganti dengan path axiosInstance yang benar
+import axios from './axiosInstance';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
@@ -13,12 +13,14 @@ const Register = () => {
     last_name: '',
     picture: {
       String: '',
-      Valid: true
+      Valid: true,
     },
   });
 
   const [step, setStep] = useState(1);
-  const [imageFile, setImageFile] = useState(null); // Tambahkan state untuk file gambar
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null); // Untuk pratinjau gambar
+  const [isUploading, setIsUploading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -29,28 +31,29 @@ const Register = () => {
     }));
   };
 
-  // Fungsi untuk menangani perubahan file
   const handleFileChange = (e) => {
-    setImageFile(e.target.files[0]);
+    const file = e.target.files[0];
+    setImageFile(file);
+    setPreviewUrl(URL.createObjectURL(file)); // Buat URL untuk pratinjau gambar
   };
 
-  // Fungsi untuk mengupload gambar
   const handleImageUpload = async () => {
     if (!imageFile) {
       toast.error('Please select an image file.');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', imageFile);
+    setIsUploading(true); // Tampilkan loader saat upload
+    const uploadData = new FormData();
+    uploadData.append('file', imageFile);
 
     try {
-      const response = await axios.post('/upload', formData, {
+      const response = await axios.post('/upload', uploadData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      const imageUrl = response.data.url; // Asumsikan respons mengandung URL gambar
+      const imageUrl = response.data.url;
       setFormData((prevData) => ({
         ...prevData,
         picture: { String: imageUrl, Valid: true },
@@ -59,6 +62,8 @@ const Register = () => {
     } catch (error) {
       console.error('Error uploading image:', error);
       toast.error('Failed to upload image.');
+    } finally {
+      setIsUploading(false); // Sembunyikan loader setelah upload selesai
     }
   };
 
@@ -75,7 +80,6 @@ const Register = () => {
     try {
       const response = await axios.post('/users', userData);
       toast.success('User registered successfully!');
-      console.log('Response:', response.data);
       navigate('/login');
     } catch (error) {
       console.error('Error registering user:', error);
@@ -93,7 +97,7 @@ const Register = () => {
         <div className="card-body">
           <h2 className="text-center text-2xl font-bold">Register</h2>
 
-          {/* Steps progress bar */}
+          {/* Progress bar */}
           <ul className="steps w-full">
             <li className={`step ${step >= 1 ? 'step-primary' : ''}`}>Account Info</li>
             <li className={`step ${step >= 2 ? 'step-primary' : ''}`}>Personal Info</li>
@@ -101,14 +105,11 @@ const Register = () => {
           </ul>
 
           <form onSubmit={handleSubmit}>
-
             {/* Step 1 */}
             {step === 1 && (
               <>
                 <div className="form-control mt-4">
-                  <label className="label">
-                    <span className="label-text">Username</span>
-                  </label>
+                  <label className="label">Username</label>
                   <input
                     type="text"
                     name="username"
@@ -119,9 +120,7 @@ const Register = () => {
                   />
                 </div>
                 <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Email</span>
-                  </label>
+                  <label className="label">Email</label>
                   <input
                     type="email"
                     name="email"
@@ -143,9 +142,7 @@ const Register = () => {
             {step === 2 && (
               <>
                 <div className="form-control mt-4">
-                  <label className="label">
-                    <span className="label-text">Password</span>
-                  </label>
+                  <label className="label">Password</label>
                   <input
                     type="password"
                     name="password"
@@ -156,9 +153,7 @@ const Register = () => {
                   />
                 </div>
                 <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">First Name</span>
-                  </label>
+                  <label className="label">First Name</label>
                   <input
                     type="text"
                     name="first_name"
@@ -169,9 +164,7 @@ const Register = () => {
                   />
                 </div>
                 <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Last Name</span>
-                  </label>
+                  <label className="label">Last Name</label>
                   <input
                     type="text"
                     name="last_name"
@@ -192,13 +185,11 @@ const Register = () => {
               </>
             )}
 
-            {/* Step 3 - Upload Picture */}
+            {/* Step 3 */}
             {step === 3 && (
               <>
                 <div className="form-control mt-4">
-                  <label className="label">
-                    <span className="label-text">Upload Picture</span>
-                  </label>
+                  <label className="label">Upload Picture</label>
                   <input
                     type="file"
                     accept="image/*"
@@ -207,9 +198,14 @@ const Register = () => {
                     required
                   />
                 </div>
+                {previewUrl && (
+                  <div className="mt-4">
+                    <img src={previewUrl} alt="Preview" className="w-32 h-32 object-cover mx-auto rounded-full" />
+                  </div>
+                )}
                 <div className="form-control mt-2">
                   <button type="button" onClick={handleImageUpload} className="btn btn-info">
-                    Upload Image
+                    {isUploading ? 'Uploading...' : 'Upload Image'}
                   </button>
                 </div>
                 <div className="modal-action">
