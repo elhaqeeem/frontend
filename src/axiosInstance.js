@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:8000', // Update with your API URL
+    baseURL: 'http://delighted-merla-vsampeu-735ae421.koyeb.app', // Update with your API URL
 });
 
 // Add a request interceptor

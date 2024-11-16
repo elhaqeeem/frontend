@@ -1,7 +1,7 @@
 {
   "name": "new-frontend",
   "version": "0.1.0",
-  "proxy": "http://localhost:8000",
+  "proxy": "http://delighted-merla-vsampeu-735ae421.koyeb.app",
   "private": true,
   "dependencies": {
     "@cloudinary/react": "^1.13.0",
