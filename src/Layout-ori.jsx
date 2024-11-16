@@ -142,16 +142,18 @@ const Layout = ({ children }) => {
         }
     };
 
+
     const handleDeleteOrder = async (orderId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`/orders/${orderId}`, {
+            const response = await axios.delete(`/orders/${orderId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
-                method: 'DELETE',
             });
-            if (response.ok) {
+            
+            // Cek jika respons berhasil
+            if (response.status === 200) {
                 // Remove the deleted order from cartItems
                 setCartItems(cartItems.filter(item => item.id !== orderId));
             }
@@ -159,22 +161,25 @@ const Layout = ({ children }) => {
             console.error("Failed to delete order:", error);
         }
     };
+    
 
     const handleBulkDelete = async () => {
         try {
             const orderIds = cartItems.map(item => item.id);
             const token = localStorage.getItem('token');
-
-            const response = await fetch('/orders/bulk-delete', {
-                method: 'DELETE',
+            
+            const response = await axios.delete('/orders/bulk-delete', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ ids: orderIds }),
+                data: {
+                    ids: orderIds, // Kirim daftar orderId yang akan dihapus
+                },
             });
-
-            if (response.ok) {
+    
+            // Cek jika respons berhasil
+            if (response.status === 200) {
                 setCartItems([]); // Hapus semua order dari keranjang jika berhasil
             } else {
                 console.error("Failed to bulk delete orders, status:", response.status);
@@ -183,6 +188,7 @@ const Layout = ({ children }) => {
             console.error("Failed to bulk delete orders:", error);
         }
     };
+    
 
     // Fetch Cart Items from API
     useEffect(() => {
