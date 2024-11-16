@@ -138,14 +138,32 @@ const LoginForm = ({ onLogin }) => {
 
 const Login = ({ onLogin }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center">
+    <div className="min-h-screen bg-gradient-to-b from-sky-400 via-blue-500 to-indigo-600 flex items-center">
       <div className="card mx-auto w-full max-w-5xl shadow-xl">
         <div className="grid md:grid-cols-2 grid-cols-1 bg-base-100 rounded-xl">
-          <div className="hero min-h-full rounded-l-xl bg-base-200">
+          {/* Left Side: Feature List */}
+          <div className="hero min-h-full rounded-l-xl bg-opacity-50 bg-gradient-to-r from-blue-400 to-blue-500 relative">
+            {/* Decorative Clouds */}
+            <div className="absolute top-0 left-1/3 transform -translate-x-1/2">
+              <img
+                src="https://img.icons8.com/emoji/96/000000/cloud.png"
+                alt="Cloud"
+                className="w-24 opacity-80 animate-bounce-slow"
+              />
+            </div>
+            <div className="absolute top-16 right-10">
+              <img
+                src="https://img.icons8.com/emoji/96/000000/cloud.png"
+                alt="Cloud"
+                className="w-16 opacity-60 animate-bounce-slower"
+              />
+            </div>
             <div className="hero-content py-12">
               <FeatureList />
             </div>
           </div>
+
+          {/* Right Side: Login Form */}
           <LoginForm onLogin={onLogin} />
         </div>
       </div>
@@ -153,5 +171,6 @@ const Login = ({ onLogin }) => {
     </div>
   );
 };
+
 
 export default Login;
