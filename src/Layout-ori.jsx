@@ -146,7 +146,7 @@ const Layout = ({ children }) => {
     const handleDeleteOrder = async (orderId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.delete(`/orders/${orderId}`, {
+            const response = await axiosInstance.delete(`/orders/${orderId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -168,7 +168,7 @@ const Layout = ({ children }) => {
             const orderIds = cartItems.map(item => item.id);
             const token = localStorage.getItem('token');
             
-            const response = await axios.delete('/orders/bulk-delete', {
+            const response = await axiosInstance.delete('/orders/bulk-delete', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
