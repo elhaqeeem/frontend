@@ -35,21 +35,25 @@ const LoginForm = ({ onLogin }) => {
   const handleLogin = (e) => {
     e.preventDefault();
     setError('');
-
+  
+    console.log("Login initiated with:", { username, password }); // Debug data login
+  
     axiosInstance.post('/login', { username, password })
       .then(response => {
+        console.log("Login successful:", response.data); // Debug respons sukses
         toast.success('Login successful!');
         localStorage.setItem('roleID', response.data.role_id);
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('id', response.data.id);
         localStorage.setItem('email', response.data.email);
         localStorage.setItem('firstName', response.data.firstName);
-
-
+  
         onLogin();
         navigate('/');
-      })
+        console.log("Navigation to '/' completed."); // Debug apakah navigasi berhasil
+              })
       .catch(error => {
+        console.log("Login failed:", error.response || error.message); // Debug error respons
         if (error.response) {
           setError(error.response.data.error);
           toast.error('Login Failed: ' + error.response.data.error);
@@ -59,6 +63,7 @@ const LoginForm = ({ onLogin }) => {
         }
       });
   };
+  
 
   return (
     <div className="py-24 px-10">
@@ -73,8 +78,11 @@ const LoginForm = ({ onLogin }) => {
             type="text"
             className="input input-bordered w-full"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
+            onChange={(e) => {
+              setUsername(e.target.value);
+              console.log("Username:", e.target.value); // Debug nilai username
+            }}
+                        required
           />
         </div>
 
@@ -87,8 +95,11 @@ const LoginForm = ({ onLogin }) => {
               type={showPassword ? 'text' : 'password'}
               className="input input-bordered w-full"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              onChange={(e) => {
+                setPassword(e.target.value);
+                console.log("Password:", e.target.value); // Debug nilai password
+              }}
+                            required
             />
             <button
               type="button"
