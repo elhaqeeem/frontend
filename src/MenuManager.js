@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from './axiosInstance'; // Make sure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axiosInstance from './axiosInstance';
 
 const MenuManager = () => {
   const [menus, setMenus] = useState([]);
@@ -22,7 +22,7 @@ const MenuManager = () => {
 
   const fetchMenus = async () => {
     try {
-      const response = await axios.get('/menus');
+      const response = await axiosInstance.get('/menus');
       if (response.data && Array.isArray(response.data.menus)) {
         const structuredMenus = structureMenus(response.data.menus);
         setMenus(structuredMenus);
@@ -68,10 +68,10 @@ const MenuManager = () => {
 
     try {
       if (selectedMenu) {
-        await axios.put(`/menus/${selectedMenu.id}`, menuData);
+        await axiosInstance.put(`/menus/${selectedMenu.id}`, menuData);
         toast.success('Menu updated successfully.');
       } else {
-        await axios.post('/menus', menuData);
+        await axiosInstance.post('/menus', menuData);
         toast.success('Menu created successfully.');
       }
       fetchMenus();
@@ -94,7 +94,7 @@ const MenuManager = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/menus/${id}`);
+      await axiosInstance.delete(`/menus/${id}`);
       toast.success('Menu deleted successfully.');
       fetchMenus();
     } catch (error) {

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosInstance from './axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import React from 'react';
 
@@ -6,7 +6,7 @@ function Logout() {
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        axios.post('/logout')
+        axiosInstance.post('/logout')
             .then(response => {
                 console.log(response.data.message);
                 // Handle successful logout, e.g., remove token from localStorage
