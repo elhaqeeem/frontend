@@ -3,8 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import Logout from './Logout';
 import Joyride from 'react-joyride';
 import axiosInstance from './axiosInstance';
-import 'react-toastify/dist/ReactToastify.css'; // Import stylesheet toastify
-import { ToastContainer, toast } from 'react-toastify';
 
 const Layout = ({ children }) => {
     const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
@@ -17,8 +15,6 @@ const Layout = ({ children }) => {
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false); // State untuk modal profile
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile menu state
     const location = useLocation();
-    const [isLoading, setIsLoading] = useState(false);
-
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -35,7 +31,11 @@ const Layout = ({ children }) => {
     useEffect(() => {
         const fetchAccessibleMenus = async () => {
             const roleId = localStorage.getItem('roleID');
-            if (!roleId) return;
+            if (!token || !roleId) {
+                console.warn('Token atau RoleID tidak ditemukan.');
+                return;
+            }
+
 
             try {
                 const token = localStorage.getItem('token');
@@ -104,13 +104,6 @@ const Layout = ({ children }) => {
         setCurrentTheme(e.target.value); // Update current theme based on dropdown selection
     };
 
-
-    
-    useEffect(() => {
-        fetchCartItems();
-    }, [fetchCartItems]);
-    
-
     // Fetch cart items on component mount
 
     const toggleProfileModal = () => {
@@ -158,49 +151,48 @@ const Layout = ({ children }) => {
         try {
             const token = localStorage.getItem('token');
             const response = await axiosInstance.delete(`/orders/${orderId}`, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             });
-    
+
+            // Cek jika respons berhasil
             if (response.status === 200) {
-                // Perbarui state tanpa reload halaman
-                setCartItems((prevItems) => prevItems.filter((item) => item.id !== orderId));
-                toast.success('Delete Course successfully!');
+                // Remove the deleted order from cartItems
+                setCartItems(cartItems.filter(item => item.id !== orderId));
             }
         } catch (error) {
             console.error("Failed to delete order:", error);
-            toast.error("Failed to delete order. Please try again.");
         }
     };
-    
-    
+
 
     const handleBulkDelete = async () => {
         try {
+            const orderIds = cartItems.map(item => item.id);
             const token = localStorage.getItem('token');
-            const orderIds = cartItems.map((item) => item.id);
-    
+
             const response = await axiosInstance.delete('/orders/bulk-delete', {
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
-                data: { ids: orderIds },
+                data: {
+                    ids: orderIds, // Kirim daftar orderId yang akan dihapus
+                },
             });
-    
+
+            // Cek jika respons berhasil
             if (response.status === 200) {
-                // Reset keranjang di state
-                setCartItems([]);
-                toast.success('Delete Bulk Courses successfully!');
+                setCartItems([]); // Hapus semua order dari keranjang jika berhasil
             } else {
                 console.error("Failed to bulk delete orders, status:", response.status);
             }
         } catch (error) {
             console.error("Failed to bulk delete orders:", error);
-            toast.error("Failed to bulk delete orders. Please try again.");
         }
     };
-    
-    
+
 
     // Fetch Cart Items from API
     useEffect(() => {
@@ -208,9 +200,13 @@ const Layout = ({ children }) => {
             try {
                 const user_id = localStorage.getItem('id'); // Ambil user_id dari localStorage
                 const token = localStorage.getItem('token');
+                if (!token || !user_id) {
+                    console.warn('Token atau User ID tidak ditemukan.');
+                    return;
+                }
 
                 const response = await axiosInstance.get(`/orders/user/${user_id}`, {
-                   
+
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -230,26 +226,22 @@ const Layout = ({ children }) => {
     };
 
     const renderMenu = (menu) => {
-        if (!menu || !menu.menu_name || !menu.url) {
-            return null;
-        }
-
-        const hasChildren = Array.isArray(menu.children) && menu.children.length > 0;
-
+        if (!menu?.menu_name || !menu.url) return null;
+    
         return (
             <li key={menu.id} className="dropdown dropdown-hover">
-               <div className="tooltip tooltip-left" data-tip={menu.menu_name}>
-    <Link
-      to={menu.url}
-      className={`transition-colors duration-200 ease-in-out ${location.pathname === menu.url ? 'text-gray underline' : 'badge:bg-yellow-100 badge:text-black'}`}
-    >
-      {/* Display only the icon */}
-      <i className={menu.icon_name} aria-hidden="true" style={{ color: 'gold' }}></i>
-    </Link>
-  </div>
-
-                {hasChildren && (
-                    <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                <div className="tooltip tooltip-left" data-tip={menu.menu_name}>
+                    <Link
+                        to={menu.url}
+                        className={`transition-colors duration-200 ease-in-out ${
+                            location.pathname === menu.url ? 'text-gray underline' : 'badge:bg-yellow-100 badge:text-black'
+                        }`}
+                    >
+                        <i className={menu.icon_name} aria-hidden="true" style={{ color: 'gold' }}></i>
+                    </Link>
+                </div>
+                {menu.children?.length > 0 && (
+                    <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
                         {menu.children.map((child) => (
                             <li key={child.id}>
                                 <Link
@@ -266,11 +258,10 @@ const Layout = ({ children }) => {
             </li>
         );
     };
+    
 
     return (
         <div className="min-h-screen flex flex-col overflow-x-hidden">
-                        <ToastContainer />
-
             <Joyride
                 steps={tourSteps}
                 run={runTour}
@@ -282,13 +273,13 @@ const Layout = ({ children }) => {
             />
 
             {/* Topbar navigation menu */}
-            <nav className={`navbar bg-primary text-primary-content sticky top-0 z-50 w-full ${currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} px-4 shadow-md flex items-center justify-between`}>
-                {/* Mobile Menu Toggle Button */}
+            <nav className="navbar bg-primary text-primary-content sticky top-0 z-50 w-full px-4 shadow-md flex items-center justify-between flex-wrap">
+            {/* Mobile Menu Toggle Button */}
 
 
                 <Link to="/">
                     <button className="text-2xl font-bold">
-                     <i className="fa fa-university" aria-hidden="true"></i>
+                        <i className="fa fa-university" aria-hidden="true"></i>
                         <i style={{ color: 'white' }}>Edu</i>
                         <i><strong style={{ color: 'orange' }}>LMS</strong></i>
                     </button>
@@ -317,15 +308,15 @@ const Layout = ({ children }) => {
                         <i className="fa fa-cart-plus text-lg"></i>
                         <span className="indicator-item badge badge-secondary text-white">{Array.isArray(cartItems) ? cartItems.length : 0}</span>
                     </button>
-                     {/* Floating Profile Button */}
-                     
-    <div className="menu menu-horizontal p-0 lg:flex">
-      {/* Ikon gear dengan efek melayang dan warna */}
-      <button className="btn btn-ghost" onClick={toggleProfileModal}><i className="fa fa-gear text-lg"></i>
-      </button>
-     
-    </div>
-  
+                    {/* Floating Profile Button */}
+
+                    <div className="menu menu-horizontal p-0 lg:flex">
+                        {/* Ikon gear dengan efek melayang dan warna */}
+                        <button className="btn btn-ghost" onClick={toggleProfileModal}><i className="fa fa-gear text-lg"></i>
+                        </button>
+
+                    </div>
+
 
 
                     {/* Left Sidebar Profile */}
