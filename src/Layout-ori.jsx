@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import Logout from './Logout';
 import Joyride from 'react-joyride';
 import axiosInstance from './axiosInstance';
+import 'react-toastify/dist/ReactToastify.css'; // Import stylesheet toastify
 
 const Layout = ({ children }) => {
     const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
