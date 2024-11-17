@@ -145,50 +145,98 @@ const Layout = ({ children }) => {
 
 
     const handleDeleteOrder = async (orderId) => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axiosInstance.delete(`/orders/${orderId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            // Cek jika respons berhasil
-            if (response.status === 200) {
-                // Remove the deleted order from cartItems
-                setCartItems(cartItems.filter(item => item.id !== orderId));
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        });
+    
+        if (result.isConfirmed) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axiosInstance.delete(`/orders/${orderId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+    
+                if (response.status === 200) {
+                    // Remove the deleted order from cartItems
+                    setCartItems(cartItems.filter(item => item.id !== orderId));
+                    Swal.fire(
+                        'Deleted!',
+                        'Your order has been deleted.',
+                        'success'
+                    );
+                }
+            } catch (error) {
+                console.error("Failed to delete order:", error);
+                Swal.fire(
+                    'Error!',
+                    'Failed to delete order. Please try again later.',
+                    'error'
+                );
             }
-        } catch (error) {
-            console.error("Failed to delete order:", error);
         }
     };
-
+    
 
     const handleBulkDelete = async () => {
-        try {
-            const orderIds = cartItems.map(item => item.id);
-            const token = localStorage.getItem('token');
-
-            const response = await axiosInstance.delete('/orders/bulk-delete', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                data: {
-                    ids: orderIds, // Kirim daftar orderId yang akan dihapus
-                },
-            });
-
-            // Cek jika respons berhasil
-            if (response.status === 200) {
-                setCartItems([]); // Hapus semua order dari keranjang jika berhasil
-            } else {
-                console.error("Failed to bulk delete orders, status:", response.status);
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "This will delete all items in your cart. This action cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete all!'
+        });
+    
+        if (result.isConfirmed) {
+            try {
+                const orderIds = cartItems.map(item => item.id);
+                const token = localStorage.getItem('token');
+    
+                const response = await axiosInstance.delete('/orders/bulk-delete', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    data: {
+                        ids: orderIds,
+                    },
+                });
+    
+                if (response.status === 200) {
+                    setCartItems([]);
+                    Swal.fire(
+                        'Deleted!',
+                        'All items in your cart have been deleted.',
+                        'success'
+                    );
+                } else {
+                    console.error("Failed to bulk delete orders, status:", response.status);
+                    Swal.fire(
+                        'Error!',
+                        'Failed to delete all orders. Please try again later.',
+                        'error'
+                    );
+                }
+            } catch (error) {
+                console.error("Failed to bulk delete orders:", error);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred while trying to delete the orders.',
+                    'error'
+                );
             }
-        } catch (error) {
-            console.error("Failed to bulk delete orders:", error);
         }
     };
+    
 
 
     // Fetch Cart Items from API
