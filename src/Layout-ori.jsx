@@ -167,13 +167,14 @@ const Layout = ({ children }) => {
                 });
     
                 if (response.status === 200) {
-                    // Remove the deleted order from cartItems
                     setCartItems(cartItems.filter(item => item.id !== orderId));
                     Swal.fire(
                         'Deleted!',
                         'Your order has been deleted.',
                         'success'
-                    );
+                    ).then(() => {
+                        window.location.reload(); // Reload halaman setelah sukses
+                    });
                 }
             } catch (error) {
                 console.error("Failed to delete order:", error);
@@ -219,7 +220,9 @@ const Layout = ({ children }) => {
                         'Deleted!',
                         'All items in your cart have been deleted.',
                         'success'
-                    );
+                    ).then(() => {
+                        window.location.reload(); // Reload halaman setelah sukses
+                    });
                 } else {
                     console.error("Failed to bulk delete orders, status:", response.status);
                     Swal.fire(
