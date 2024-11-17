@@ -158,7 +158,7 @@ const Layout = ({ children }) => {
             if (response.status === 200) {
                 // Remove the deleted order from cartItems
                 setCartItems(cartItems.filter(item => item.id !== orderId));
-                fetchCartItems();
+fetchCartItems
                 toast.success('Delete Courses successfully!');
             }
         } catch (error) {
@@ -185,7 +185,7 @@ const Layout = ({ children }) => {
             // Cek jika respons berhasil
             if (response.status === 200) {
                 setCartItems([]); 
-                fetchCartItems();
+fetchCartItems
                 toast.success('Delete Bulk Courses successfully!');
 
             } else {
