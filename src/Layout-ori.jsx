@@ -102,6 +102,27 @@ const Layout = ({ children }) => {
         setCurrentTheme(e.target.value); // Update current theme based on dropdown selection
     };
 
+    const fetchCartItems = useCallback(async () => {
+        try {
+            const userId = localStorage.getItem('id');
+            const token = localStorage.getItem('token');
+    
+            const response = await axiosInstance.get(`/orders/user/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+    
+            setCartItems(response.data);
+        } catch (error) {
+            console.error('Error fetching cart items:', error);
+            toast.error("Failed to fetch cart items. Please try again.");
+        }
+    }, []);
+    
+    useEffect(() => {
+        fetchCartItems();
+    }, [fetchCartItems]);
+    
+
     // Fetch cart items on component mount
 
     const toggleProfileModal = () => {
@@ -149,53 +170,48 @@ const Layout = ({ children }) => {
         try {
             const token = localStorage.getItem('token');
             const response = await axiosInstance.delete(`/orders/${orderId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
             });
-            
-            // Cek jika respons berhasil
+    
             if (response.status === 200) {
-                // Remove the deleted order from cartItems
-                window.location.reload(); 
-
-                setCartItems(cartItems.filter(item => item.id !== orderId));
-                toast.success('Delete Courses successfully!');
+                // Perbarui state tanpa reload halaman
+                setCartItems((prevItems) => prevItems.filter((item) => item.id !== orderId));
+                toast.success('Delete Course successfully!');
             }
         } catch (error) {
             console.error("Failed to delete order:", error);
+            toast.error("Failed to delete order. Please try again.");
         }
     };
+    
     
 
     const handleBulkDelete = async () => {
         try {
-            const orderIds = cartItems.map(item => item.id);
             const token = localStorage.getItem('token');
-            
+            const orderIds = cartItems.map((item) => item.id);
+    
             const response = await axiosInstance.delete('/orders/bulk-delete', {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
-                data: {
-                    ids: orderIds, // Kirim daftar orderId yang akan dihapus
-                },
+                data: { ids: orderIds },
             });
     
-            // Cek jika respons berhasil
             if (response.status === 200) {
-                setCartItems([]); 
+                // Reset keranjang di state
+                setCartItems([]);
                 toast.success('Delete Bulk Courses successfully!');
-                window.location.reload(); 
-
             } else {
                 console.error("Failed to bulk delete orders, status:", response.status);
             }
         } catch (error) {
             console.error("Failed to bulk delete orders:", error);
+            toast.error("Failed to bulk delete orders. Please try again.");
         }
     };
+    
     
 
     // Fetch Cart Items from API
