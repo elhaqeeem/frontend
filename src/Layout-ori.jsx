@@ -154,19 +154,21 @@ const Layout = ({ children }) => {
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
+            confirmButtonText: 'Yes, delete it!',
         });
     
         if (result.isConfirmed) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axiosInstance.delete(`/orders/${orderId}`, {
+    
+                const response = await fetch(`/orders/${orderId}`, {
+                    method: 'DELETE',
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
     
-                if (response.status === 200) {
+                if (response.ok) {
                     setCartItems(cartItems.filter(item => item.id !== orderId));
                     Swal.fire(
                         'Deleted!',
@@ -175,6 +177,13 @@ const Layout = ({ children }) => {
                     ).then(() => {
                         window.location.reload(); // Reload halaman setelah sukses
                     });
+                } else {
+                    console.error("Failed to delete order:", response.statusText);
+                    Swal.fire(
+                        'Error!',
+                        'Failed to delete order. Please try again later.',
+                        'error'
+                    );
                 }
             } catch (error) {
                 console.error("Failed to delete order:", error);
@@ -186,6 +195,7 @@ const Layout = ({ children }) => {
             }
         }
     };
+    
     
 
     const handleBulkDelete = async () => {
