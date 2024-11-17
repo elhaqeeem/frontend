@@ -17,6 +17,8 @@ const Layout = ({ children }) => {
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false); // State untuk modal profile
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile menu state
     const location = useLocation();
+    const [isLoading, setIsLoading] = useState(false);
+
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -102,21 +104,7 @@ const Layout = ({ children }) => {
         setCurrentTheme(e.target.value); // Update current theme based on dropdown selection
     };
 
-    const fetchCartItems = useCallback(async () => {
-        try {
-            const userId = localStorage.getItem('id');
-            const token = localStorage.getItem('token');
-    
-            const response = await axiosInstance.get(`/orders/user/${userId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-    
-            setCartItems(response.data);
-        } catch (error) {
-            console.error('Error fetching cart items:', error);
-            toast.error("Failed to fetch cart items. Please try again.");
-        }
-    }, []);
+
     
     useEffect(() => {
         fetchCartItems();
