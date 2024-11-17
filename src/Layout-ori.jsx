@@ -31,10 +31,7 @@ const Layout = ({ children }) => {
     useEffect(() => {
         const fetchAccessibleMenus = async () => {
             const roleId = localStorage.getItem('roleID');
-            if (!token || !roleId) {
-                console.warn('Token atau RoleID tidak ditemukan.');
-                return;
-            }
+           
 
 
             try {
