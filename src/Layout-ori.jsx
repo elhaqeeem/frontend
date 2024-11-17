@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import Logout from './Logout';
 import Joyride from 'react-joyride';
 import axiosInstance from './axiosInstance';
+import Swal from 'sweetalert2';
+
 
 const Layout = ({ children }) => {
     const [accessibleMenuItems, setAccessibleMenuItems] = useState([]);
