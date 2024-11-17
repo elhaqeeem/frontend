@@ -138,7 +138,7 @@ const LoginForm = ({ onLogin }) => {
 
 const Login = ({ onLogin }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center">
+    <div className="min-h-screen bg-gradient-to-r from-white-500 to-indigo-500 flex items-center">
       <div className="card mx-auto w-full max-w-5xl shadow-xl">
         <div className="grid md:grid-cols-2 grid-cols-1 bg-base-100 rounded-xl">
           <div className="hero min-h-full rounded-l-xl bg-base-200">

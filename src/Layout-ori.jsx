@@ -156,6 +156,10 @@ const Layout = ({ children }) => {
             if (response.status === 200) {
                 // Remove the deleted order from cartItems
                 setCartItems(cartItems.filter(item => item.id !== orderId));
+                toast.success('Delete Courses successfully!');
+
+                window.location.reload(); 
+
             }
         } catch (error) {
             console.error("Failed to delete order:", error);
