@@ -28,22 +28,23 @@ const CreateKraeplin = () => {
     setFilteredTests(result);
   }, [search, tests]);
 
+
   const fetchKraeplinTests = async () => {
     try {
-      const response = await fetch("/kraeplin-tests", {
+      const response = await axios.get("/kraeplin-tests", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-
+  
       if (response.status === 401) {
         console.error("Authorization header required");
         return;
       }
-
-      const data = await response.json();
-
+  
+      const data = response.data;
+  
       if (Array.isArray(data)) {
         setTests(data);
       } else {
