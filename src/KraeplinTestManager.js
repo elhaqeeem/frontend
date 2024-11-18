@@ -32,7 +32,7 @@ const CreateKraeplin = () => {
   const fetchKraeplinTests = async () => {
     setIsCoursesLoading(true); // Set loading state to true
     try {
-        const response = await axiosInstance.get('/kraeplin-tests'); // Endpoint API untuk mendapatkan courses
+        const response = await axios.get('/kraeplin-tests'); // Endpoint API untuk mendapatkan courses
         setTests(response.data.courses || []);
     } catch (error) {
         console.error('Failed to fetch courses:', error);
