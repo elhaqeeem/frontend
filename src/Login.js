@@ -149,7 +149,7 @@ const Login = ({ onLogin }) => {
           <LoginForm onLogin={onLogin} />
         </div>
       </div>
-      <ToastContainer />
+      <ToastContainer position="top-center" /> {/* Tambahkan posisi di sini */}
     </div>
   );
 };
