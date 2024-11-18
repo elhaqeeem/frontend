@@ -32,7 +32,7 @@ const CreateKraeplin = () => {
     try {
       const response = await axios.get('/kraeplin-tests');
       console.log('Test fetched:', response.data); 
-      setTests(response.data.courses || []); 
+      setTests(response.data.CreateKraeplin || []); 
     } catch (error) {
       toast.error('Failed to fetch courses.');
     }
