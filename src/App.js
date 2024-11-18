@@ -18,6 +18,7 @@ import TestAnswerManager from './TestAnswers';
 import TestResultManager from './TestResultManager';
 import RoleMenuManager from './RoleMenuManager';
 import Quiz from './Quiz';
+import QuizMath from './Quiz-math';
 import CourseManager from './CourseManager';
 import MaterialManager from './MaterialManager';
 import QuizKraeplin from './Quiz-kraeplin';
@@ -107,6 +108,10 @@ function App() {
                     <Route 
                         path="/quiz" 
                         element={<PrivateRoute element={<Layout><Quiz /></Layout>} />} 
+                    />
+                     <Route 
+                        path="/quiz-math" 
+                        element={<PrivateRoute element={<Layout><QuizMath /></Layout>} />} 
                     />
                     <Route 
                         path="/resulttest" 

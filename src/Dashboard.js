@@ -119,7 +119,7 @@ function Dashboard() {
             setIsLoading(true); // eslint-disable-next-line
             const response = await axiosInstance.post('/orders', orderData);
             toast.success('Order created successfully!');
-            window.location.reload(); 
+            window.location.reload();
             closeModal();
         } catch (error) {
             console.error('Failed to create order:', error);
@@ -145,7 +145,7 @@ function Dashboard() {
             cloudName: process.env.REACT_APP_CLOUD_NAME, // Ambil cloudName dari .env
         },
     });
-// eslint-disable-next-line
+    // eslint-disable-next-line
     return (
         <div className="flex min-h-screen">
             {/* ToastContainer for notifications */}
@@ -164,7 +164,7 @@ function Dashboard() {
                                 <div className="h-64 skeleton"></div> {/* Skeleton for image */}
                                 <div className="card-body bg-white">
                                     <h2 className="skeleton text-xl">
-                                        </h2> {/* Skeleton for title */}
+                                    </h2> {/* Skeleton for title */}
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <div className="skeleton h-10 w-20"></div> {/* Skeleton for price */}
@@ -207,17 +207,15 @@ function Dashboard() {
                                     <div className="card-body bg-white">
                                         <h2 className="card-title">{course.title}</h2>
                                         <div className="flex items-center">
-                                        <div>
-  <a href={course.description} target="_blank" rel="noopener noreferrer">
-    <button className="btn btn-outline btn-secondary">
-      Start
-    </button>
-  </a>
+    <div>
+        <a href={course.description}>
+            <button className="btn btn-outline btn-secondary">
+                Start
+            </button>
+        </a>
+    </div>
 </div>
 
-                                                    
-
-                                        </div>
                                     </div>
                                 </div>
                             );
