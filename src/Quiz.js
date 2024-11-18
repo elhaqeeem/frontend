@@ -7,7 +7,11 @@ import { FaStopwatch } from 'react-icons/fa';
 // Fungsi checkPreviousAnswers dideklarasikan di luar komponen
 const checkPreviousAnswers = async (userTestId, setHasPreviousAnswers) => {
   try {
-    const answerResponse = await axios.get(`/test-answers?user_test_id=${userTestId}`);
+    // Langsung menggunakan kraeplin_test_id = 7
+    const kraeplinTestId = 7;
+
+    const answerResponse = await axios.get(`/test-answers?user_test_id=${userTestId}&kraeplin_test_id=${kraeplinTestId}`);
+
     if (answerResponse.data.length > 0) {
       setHasPreviousAnswers(true);
     }
@@ -16,6 +20,8 @@ const checkPreviousAnswers = async (userTestId, setHasPreviousAnswers) => {
     console.error('Error:', error);
   }
 };
+
+
 
 const TimerComponent = ({ timer, initialTime }) => {
   // Menghitung progress dari timer
@@ -100,8 +106,9 @@ const Quiz = () => {
         const kraeplinTestId = userTest.kraeplin_test_id;
 
         const matchingQuestions = questionResponse.data.filter(
-          question => question.kraeplin_test_id === kraeplinTestId
+          question => [7].includes(question.kraeplin_test_id)
         );
+
 
         if (matchingQuestions.length === 0) {
           toast.error('Tidak ada pertanyaan yang cocok.');
@@ -232,34 +239,34 @@ const Quiz = () => {
               key={question.id}
               className="question-block mb-4 p-4 border border-base-300 rounded-lg bg-base-100 shadow-md"
             >
-<strong>
-  <h1 className="text-lg font-semibold text-center text-orange-500">{question.question_text}</h1>
-</strong>
+              <strong>
+                <h1 className="text-lg font-semibold text-center text-orange-500">{question.question_text}</h1>
+              </strong>
               <div className="flex flex-wrap justify-center items-center space-x-4 mt-5">
-  {(question.kraeplin_test_id === 7 || question.kraeplin_test_id === 9) ? (
-    question.answer_options.map((option, index) => (
-      <button
-        key={index}
-        onClick={() => handleAnswerChange(question.id, index, false)} // single-answer (false)
-        className={`btn mr-2 mb-2 ${answers[question.id] === index ? 'btn-warning' : 'btn btn-outline'}`}
-        disabled={hasPreviousAnswers}
-      >
-        {option}
-      </button>
-    ))
-  ) : (
-    question.answer_options.map((option, index) => (
-      <button
-        key={index}
-        onClick={() => handleAnswerChange(question.id, index, true)} // multiple-answer (true)
-        className={`btn mr-2 mb-2 ${answers[question.id]?.includes(index) ? 'btn-warning' : 'btn btn-outline'}`}
-        disabled={hasPreviousAnswers}
-      >
-        {option}
-      </button>
-    ))
-  )}
-</div>
+                {(question.kraeplin_test_id === 7 || question.kraeplin_test_id === 9) ? (
+                  question.answer_options.map((option, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleAnswerChange(question.id, index, false)} // single-answer (false)
+                      className={`btn mr-2 mb-2 ${answers[question.id] === index ? 'btn-warning' : 'btn btn-outline'}`}
+                      disabled={hasPreviousAnswers}
+                    >
+                      {option}
+                    </button>
+                  ))
+                ) : (
+                  question.answer_options.map((option, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleAnswerChange(question.id, index, true)} // multiple-answer (true)
+                      className={`btn mr-2 mb-2 ${answers[question.id]?.includes(index) ? 'btn-warning' : 'btn btn-outline'}`}
+                      disabled={hasPreviousAnswers}
+                    >
+                      {option}
+                    </button>
+                  ))
+                )}
+              </div>
 
             </div>
           ))}

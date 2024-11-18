@@ -14,6 +14,7 @@ const TestAnswerManager = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [userTestId, setUserTestId] = useState('');
   const [questionId, setQuestionId] = useState('');
+  const [kraeplinTestId,setkraeplinTestId ] = useState('');
   const [answer, setAnswer] = useState('');
   const [isCorrect, setIsCorrect] = useState(false);
   const [answeredAt, setAnsweredAt] = useState(null);
@@ -49,6 +50,7 @@ const TestAnswerManager = () => {
     const testAnswerData = {
       user_test_id: Number(userTestId),
       question_id: Number(questionId),
+      kraeplin_test_id: Number(kraeplinTestId),
       answer,
       is_correct: isCorrect,
       answered_at: answeredAt.toISOString(),
@@ -153,6 +155,11 @@ const TestAnswerManager = () => {
     {
       name: 'Question ID',
       selector: (row) => row.question_id,
+      sortable: true,
+    },
+    {
+      name: 'Test ID',
+      selector: (row) => row.kraeplin_test_id,
       sortable: true,
     },
     {
