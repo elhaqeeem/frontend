@@ -28,8 +28,6 @@ const CreateKraeplin = () => {
     setFilteredTests(result);
   }, [search, tests]);
 
-  import axios from "axios";
-
   const fetchKraeplinTests = async () => {
     try {
       const response = await axios.get("/kraeplin-tests", {
