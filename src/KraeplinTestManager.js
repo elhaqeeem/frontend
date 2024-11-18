@@ -30,22 +30,11 @@ const CreateKraeplin = () => {
 
   const fetchKraeplinTests = async () => {
     try {
-      const response = await axios.get("/kraeplin-tests");
-  
-      // Status cek
-      if (response.status === 200) {
-        const data = response.data;
-  
-        if (Array.isArray(data)) {
-          setTests(data); // Pastikan `setTests` adalah fungsi untuk mengupdate state
-        } else {
-          console.error("Data format is not an array:", data);
-        }
-      } else {
-        console.error("Unexpected response status:", response.status);
-      }
+      const response = await axios.get('/kraeplin-tests');
+      console.log('Test fetched:', response.data); 
+      setTests(response.data.courses || []); 
     } catch (error) {
-      console.error("Error fetching kraeplin tests:", error);
+      toast.error('Failed to fetch courses.');
     }
   };
   
