@@ -207,11 +207,14 @@ function Dashboard() {
                                     <div className="card-body bg-white">
                                         <h2 className="card-title">{course.title}</h2>
                                         <div className="flex items-center">
-                                            <div>
-                                                <button className="btn btn-outline btn-secondary">
-                                                   Start
-                                                </button>
-                                            </div>
+                                        <div>
+  <a href={course.description} target="_blank" rel="noopener noreferrer">
+    <button className="btn btn-outline btn-secondary">
+      Start
+    </button>
+  </a>
+</div>
+
                                                     
 
                                         </div>

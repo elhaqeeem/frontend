@@ -359,18 +359,17 @@ const CourseManager = () => {
           />
       </div>
       <div className="form-control mt-4">
-        <label className="label">
-          <span className="label-text">Description</span>
-        </label>
-        <ReactQuill
-          ref={quillRef}
-          value={courseData.description}
-          onChange={(value) => setCourseData({ ...courseData, description: value })}
-          className="mb-4"
-          modules={modules} // Tambahkan modules untuk toolbar lengkap
-      formats={formats} 
-          />
-      </div>
+  <label className="label">
+    <span className="label-text">Description</span>
+  </label>
+  <input
+    type="text"
+    value={courseData.description}
+    onChange={(e) => setCourseData({ ...courseData, description: e.target.value })}
+    className="input input-bordered mb-4"
+  />
+</div>
+
       <div className="form-control mt-4">
               <label className="label">
                 <span className="label-text">Price</span>
