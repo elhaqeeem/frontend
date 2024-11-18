@@ -31,19 +31,25 @@ const CreateKraeplin = () => {
   const fetchKraeplinTests = async () => {
     try {
       const response = await axios.get("/kraeplin-tests", {
+        headers: {
+          Authorization: `Bearer ${token}`, // Pastikan variabel `token` sudah didefinisikan
+          "Content-Type": "application/json",
+        },
       });
   
-      if (response.status === 401) {
+      // Status cek
+      if (response.status === 200) {
+        const data = response.data;
+  
+        if (Array.isArray(data)) {
+          setTests(data); // Pastikan `setTests` adalah fungsi untuk mengupdate state
+        } else {
+          console.error("Data format is not an array:", data);
+        }
+      } else if (response.status === 401) {
         console.error("Authorization header required");
-        return;
-      }
-  
-      const data = response.data;
-  
-      if (Array.isArray(data)) {
-        setTests(data);
       } else {
-        console.error("Data format is not an array:", data);
+        console.error("Unexpected response status:", response.status);
       }
     } catch (error) {
       console.error("Error fetching kraeplin tests:", error);
