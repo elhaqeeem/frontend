@@ -72,7 +72,9 @@ const LoginForm = ({ onLogin }) => {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.8 }}
     >
-      <h2 className="text-2xl font-semibold mb-2 text-center">EDULMS</h2>
+      <h2 className="text-2xl font-semibold mb-2 text-center"> <i className="fa fa-university" aria-hidden="true"></i>
+                        <i style={{ color: 'white' }}>Edu</i>
+                        <i><strong style={{ color: 'orange' }}>LMS</strong></i></h2>
       <form onSubmit={handleLogin}>
         {error && <p className="text-center text-error mt-4">{error}</p>}
         <div className="form-control w-full mt-4">
