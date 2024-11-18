@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import axios from './axiosInstance'; // Pastikan path benar
+import React, { useEffect, useState } from 'react';
+import axios from './axiosInstance'; // Ensure this path is correct
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
@@ -14,60 +14,66 @@ const CreateKraeplin = () => {
   const [durationMinutes, setDurationMinutes] = useState('');
   const [description, setDescription] = useState('');
   const [selectedTest, setSelectedTest] = useState(null);
-  const [testId, setTestId] = useState('');
-  
-  // Fetch data saat komponen dimount
-  const fetchKraeplinTests = useCallback(async () => {
-    try {
-      const { data } = await axios.get('/kraeplin-tests');
-      if (Array.isArray(data)) {
-        setTests(data);
-      } else {
-        toast.error('Invalid data format received from server.');
-      }
-    } catch (error) {
-      console.error('Error fetching tests:', error.response || error);
-      toast.error('Failed to fetch tests.');
-    }
+  const [testId, setTestId] = useState(''); // State to hold the test ID
+  const token = localStorage.getItem("token"); // Ambil token dari localStorage
+
+  useEffect(() => {
+    fetchKraeplinTests();// eslint-disable-next-line
   }, []);
 
   useEffect(() => {
-    fetchKraeplinTests();
-  }, [fetchKraeplinTests]);
-
-  // Filter berdasarkan pencarian
-  useEffect(() => {
-    setFilteredTests(
-      tests.filter(test =>
-        test.description.toLowerCase().includes(search.toLowerCase())
-      )
+    const result = tests.filter(test => 
+      test.description.toLowerCase().includes(search.toLowerCase())
     );
+    setFilteredTests(result);
   }, [search, tests]);
 
-  // Reset form
-  const resetForm = () => {
-    setSelectedTest(null);
-    setTestDate('');
-    setDurationMinutes('');
-    setDescription('');
-    setTestId('');
-    setIsModalOpen(false);
-  };
+  import axios from "axios";
 
-  // Buat atau update data
+  const fetchKraeplinTests = async () => {
+    try {
+      const response = await axios.get("/kraeplin-tests", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.status === 401) {
+        console.error("Authorization header required");
+        return;
+      }
+  
+      const data = response.data;
+  
+      if (Array.isArray(data)) {
+        setTests(data);
+      } else {
+        console.error("Data format is not an array:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching kraeplin tests:", error);
+    }
+  };
+  
+  
+  
+
   const handleCreateOrUpdate = async () => {
     if (!testDate || !durationMinutes || !description) {
       toast.error('All fields are required.');
       return;
     }
-
-    const formattedTestDate = new Date(testDate).toISOString();
+  
+    const formattedTestDate = new Date(testDate).toISOString(); // Convert to ISO format
+  
     const testData = {
       test_date: formattedTestDate,
-      duration_minutes: parseInt(durationMinutes, 10),
+      duration_minutes: parseInt(durationMinutes, 10), // Ensure it's an integer
       description,
+      id: testId ? parseInt(testId, 10) : undefined, // Ensure id is an integer or undefined for new entries
     };
-
+  
     try {
       if (selectedTest) {
         const result = await Swal.fire({
@@ -76,9 +82,11 @@ const CreateKraeplin = () => {
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Yes, update it!',
+          cancelButtonText: 'No, cancel!',
         });
+  
         if (result.isConfirmed) {
-          await axios.put(`/kraeplin-tests/${testId}`, testData);
+          await axios.put(`/kraeplin-tests/${testId}`, testData); // Use the testId here as a number
           toast.success('Test updated successfully.');
         }
       } else {
@@ -88,22 +96,21 @@ const CreateKraeplin = () => {
       fetchKraeplinTests();
       resetForm();
     } catch (error) {
-      console.error('Error saving test:', error.response || error);
       toast.error('Failed to save test.');
     }
   };
+  
+  
 
-  // Edit data
   const handleEdit = (test) => {
     setSelectedTest(test);
-    setTestId(test.id);
+    setTestId(test.id); // Set the test ID when editing
     setTestDate(test.test_date);
     setDurationMinutes(test.duration_minutes);
     setDescription(test.description);
     setIsModalOpen(true);
   };
 
-  // Hapus data
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: 'Are you sure?',
@@ -111,6 +118,7 @@ const CreateKraeplin = () => {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'No, cancel!',
     });
 
     if (result.isConfirmed) {
@@ -119,23 +127,32 @@ const CreateKraeplin = () => {
         toast.success('Test deleted successfully.');
         fetchKraeplinTests();
       } catch (error) {
-        console.error('Error deleting test:', error.response || error);
         toast.error('Failed to delete test.');
       }
     }
   };
 
+  const resetForm = () => {
+    setSelectedTest(null);
+    setTestDate('');
+    setDurationMinutes('');
+    setDescription('');
+    setTestId(''); // Reset the test ID
+    setIsModalOpen(false);
+  };
+
   const columns = [
     {
-      name: 'ID',
+      name: 'ID', // Changed the column name to ID
       selector: (row) => row.id,
       sortable: true,
+      cell: row => (row.id),
     },
     {
       name: 'Test Date',
       selector: (row) => row.test_date,
       sortable: true,
-      cell: (row) => new Date(row.test_date).toLocaleDateString(),
+      cell: row => new Date(row.test_date).toLocaleDateString(), // Formatting date
     },
     {
       name: 'Duration (minutes)',
@@ -146,23 +163,19 @@ const CreateKraeplin = () => {
       name: 'Description',
       selector: (row) => row.description,
       sortable: true,
-      cell: (row) => <div dangerouslySetInnerHTML={{ __html: row.description }} />,
+      cell: row => (
+        <div dangerouslySetInnerHTML={{ __html: row.description }} />
+      ),
     },
     {
       name: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
-          <button
-            className="btn btn-outline btn-primary"
-            onClick={() => handleEdit(row)}
-          >
-            <i className="fa fa-pencil"></i>
+          <button className="btn btn-outline btn-primary" onClick={() => handleEdit(row)}>
+            <i className="fa fa-pencil" aria-hidden="true"></i>
           </button>
-          <button
-            className="btn btn-outline btn-error"
-            onClick={() => handleDelete(row.id)}
-          >
-            <i className="fa fa-trash"></i>
+          <button className="btn btn-outline btn-error" onClick={() => handleDelete(row.id)}>
+            <i className="fa fa-trash" aria-hidden="true"></i>
           </button>
         </div>
       ),
@@ -173,10 +186,7 @@ const CreateKraeplin = () => {
     <div className="container mx-auto p-4 bg-white text-black">
       <ToastContainer />
       <div className="flex justify-between items-center mb-4">
-        <button
-          className="btn btn-outline btn-primary"
-          onClick={() => setIsModalOpen(true)}
-        >
+        <button className="btn btn-outline btn-primary" onClick={() => setIsModalOpen(true)}>
           Add Test
         </button>
         <div className="relative">
@@ -195,22 +205,21 @@ const CreateKraeplin = () => {
         title="Test List"
         columns={columns}
         data={filteredTests}
-        pagination
         noDataComponent="No tests available"
+        pagination
+        className="rounded-lg shadow-lg bg-white"
       />
 
       {isModalOpen && (
-        <div className="modal modal-open">
+        <div className="modal modal-open bg-dark text-black">
           <div className="modal-box max-w-lg mx-auto">
-            <h2 className="font-bold text-lg">
-              {selectedTest ? 'Edit Kraeplin Test' : 'Add Test'}
-            </h2>
+            <h2 className="font-bold text-lg">{selectedTest ? 'Edit Kraeplin Test' : 'Add Test'}</h2>
             <input
               type="date"
               value={testDate}
               onChange={(e) => setTestDate(e.target.value)}
               className="input input-bordered w-full mb-2"
-              required
+              required  
             />
             <input
               type="number"
@@ -218,11 +227,12 @@ const CreateKraeplin = () => {
               value={durationMinutes}
               onChange={(e) => setDurationMinutes(e.target.value)}
               className="input input-bordered w-full mb-2"
-              required
+              required  
             />
+            {/* Replaced ReactQuill with a standard text input */}
             <input
               type="text"
-              placeholder="Description"
+              placeholder="Write the description here..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="input input-bordered w-full mb-2"
