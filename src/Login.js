@@ -7,11 +7,7 @@ import axiosInstance from './axiosInstance';
 
 const FeatureList = () => {
   const features = [
-    '🌙 Dark/light mode switch',
-    '⚡ Redux toolkit and utility libraries set up',
-    '📅 Calendar, Modal, Sidebar components included',
-    '📘 User-friendly documentation provided',
-    '✨ Daisy UI components and Tailwind CSS supported',
+    
   ];
 
   return (
@@ -20,7 +16,6 @@ const FeatureList = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
     >
-      <h1 className="text-2xl mt-8 font-bold">EduLMS Features</h1>
       {features.map((feature, index) => (
         <p key={index} className="py-2">
           <span className="font-semibold">{feature}</span>
@@ -77,7 +72,7 @@ const LoginForm = ({ onLogin }) => {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.8 }}
     >
-      <h2 className="text-2xl font-semibold mb-2 text-center">Login</h2>
+      <h2 className="text-2xl font-semibold mb-2 text-center">EDULMS</h2>
       <form onSubmit={handleLogin}>
         {error && <p className="text-center text-error mt-4">{error}</p>}
         <div className="form-control w-full mt-4">
@@ -124,13 +119,16 @@ const LoginForm = ({ onLogin }) => {
             Access Dashboard
           </button>
         )}
-
+      {/* 
         <div className="text-center mt-4">
           Don't have an account yet?{' '}
           <a href="/register" className="hover:underline">
             Join Now
           </a>
         </div>
+       */}
+
+
       </form>
     </motion.div>
   );
