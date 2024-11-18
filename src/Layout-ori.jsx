@@ -396,21 +396,27 @@ const Layout = ({ children }) => {
                                 transform: isProfileModalOpen ? 'translateX(0)' : 'translateX(-100%)', // Slide in/out effect
                             }}
                         >
+                             {/* 
                             <h3 className="text-lg text-black font-bold mb-4">User Menu</h3>
-
+                              */}
                             <ul style={{ listStyle: 'none', padding: 0 }}>
+                                
+                                 {/* 
                                 <li>
                                     <Link to="/profile" className="flex items-center text-black justify-start">
                                         <i className="fa fa-users mr-2" aria-hidden="true" style={{ color: 'red' }}></i>
                                         Profile
                                     </Link>
-                                </li>
+                                </li> 
+                               */}
+                                 {/* Left Sidebar Profile
                                 <li className="mt-2">
                                     <Link to="/setting" className="flex items-center text-black justify-start">
                                         <i className="fa fa-gear mr-2" aria-hidden="true" style={{ color: 'red' }}></i>
                                         Settings
                                     </Link>
                                 </li>
+                                  */}
                                 <li className="mt-2">
                                     <Logout />
                                 </li>
