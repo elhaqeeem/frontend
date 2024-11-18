@@ -16,6 +16,7 @@ const CreateKraeplin = () => {
   const [selectedTest, setSelectedTest] = useState(null);
   const [testId, setTestId] = useState(''); // State to hold the test ID
   const token = localStorage.getItem("token"); // Ambil token dari localStorage
+  const [isCoursesLoading, setIsCoursesLoading] = useState(true); // State untuk loading courses
 
   useEffect(() => {
     fetchKraeplinTests();// eslint-disable-next-line
@@ -29,30 +30,16 @@ const CreateKraeplin = () => {
   }, [search, tests]);
 
   const fetchKraeplinTests = async () => {
+    setIsCoursesLoading(true); // Set loading state to true
     try {
-      const response = await axios.get("/kraeplin-tests", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-  
-      if (response.status === 401) {
-        console.error("Authorization header required");
-        return;
-      }
-  
-      const data = response.data;
-  
-      if (Array.isArray(data)) {
-        setTests(data);
-      } else {
-        console.error("Data format is not an array:", data);
-      }
+        const response = await axiosInstance.get('/kraeplin-tests'); // Endpoint API untuk mendapatkan courses
+        setTests(response.data.courses || []);
     } catch (error) {
-      console.error("Error fetching kraeplin tests:", error);
+        console.error('Failed to fetch courses:', error);
+    } finally {
+        setIsCoursesLoading(false); // Set loading state to false
     }
-  };
+};
   
   
   
