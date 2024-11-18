@@ -30,11 +30,27 @@ const CreateKraeplin = () => {
 
   const fetchKraeplinTests = async () => {
     try {
-      const response = await axios.get('/kraeplin-tests');
-      console.log('Test fetched:', response.data); 
-      setTests(response.data.CreateKraeplin || []); 
+      const response = await fetch("/kraeplin-tests", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 401) {
+        console.error("Authorization header required");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setTests(data);
+      } else {
+        console.error("Data format is not an array:", data);
+      }
     } catch (error) {
-      toast.error('Failed to fetch courses.');
+      console.error("Error fetching kraeplin tests:", error);
     }
   };
   
