@@ -29,6 +29,7 @@ import { ToastContainer } from 'react-toastify';
 import Register from './register';
 import Materialsdata from './materialdata';
 import ClassManager from './class';
+import QuizKoran from './Quiz-Koran';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -112,6 +113,10 @@ function App() {
                      <Route 
                         path="/quiz-math" 
                         element={<PrivateRoute element={<Layout><QuizMath /></Layout>} />} 
+                    />
+                     <Route 
+                        path="/quiz-koran" 
+                        element={<PrivateRoute element={<Layout><QuizKoran /></Layout>} />} 
                     />
                     <Route 
                         path="/resulttest" 
