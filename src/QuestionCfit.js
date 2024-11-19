@@ -30,12 +30,10 @@ const QuestionManagerCfit = () => {
   useEffect(() => {
     const fetchKraeplinTests = async () => {
       try {
-        const response = await fetch("/kraeplin-tests", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Tambahkan Authorization header
-            "Content-Type": "application/json",
-          },
-        });
+       
+
+        const response = await axios.get('/kraeplin-tests');
+
 
         if (response.status === 401) {
           console.error("Authorization header required");
