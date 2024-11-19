@@ -26,27 +26,17 @@ const QuestionManagerCfit = () => {
     fetchQuestions();
   }, []);
 
-   // Fetch data from the API
   useEffect(() => {
     const fetchKraeplinTests = async () => {
       try {
-       
-
-        const response = await axios.get('/kraeplin-tests');
-
-
-        if (response.status === 401) {
-          console.error("Authorization header required");
-          return;
-        }
-
-        const data = await response.json();
+        // Menggunakan Axios untuk melakukan request
+        const response = await axios.get("/kraeplin-tests");
         
-        // Pastikan data yang diterima adalah array
-        if (Array.isArray(data)) {
-          setKraeplinTests(data);
+        // Periksa apakah data yang diterima adalah array
+        if (Array.isArray(response.data)) {
+          setKraeplinTests(response.data);
         } else {
-          console.error("Data format is not an array:", data);
+          console.error("Data format is not an array:", response.data);
         }
       } catch (error) {
         console.error("Error fetching kraeplin tests:", error);
@@ -54,12 +44,11 @@ const QuestionManagerCfit = () => {
     };
 
     if (token) {
-      fetchKraeplinTests(); // Panggil fetch jika token ada
+      fetchKraeplinTests(); // Panggil fungsi fetch jika token ada
     } else {
       console.error("No authorization token found");
     }
   }, [token]);
-
   const fetchQuestions = async () => {
     try {
       const response = await axios.get('/questions');
