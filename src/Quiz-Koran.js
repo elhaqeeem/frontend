@@ -6,20 +6,20 @@ import { FaStopwatch } from 'react-icons/fa';
 
 // Fungsi checkPreviousAnswers dideklarasikan di luar komponen
 const checkPreviousAnswers = async (userTestId, setHasPreviousAnswers) => {
-  try {
-    // Langsung menggunakan kraeplin_test_id = 7
-    const kraeplinTestId = 9;
-
-    const answerResponse = await axios.get(`/test-answers?user_test_id=${userTestId}&kraeplin_test_id=${kraeplinTestId}`);
-
-    if (answerResponse.data.length > 0) {
-      setHasPreviousAnswers(true);
+    try {
+      const kraeplinTestIds = [9, 10]; // Memeriksa kategori 7 atau 9
+  
+      const answerResponse = await axios.get(`/test-answers?user_test_id=${userTestId}&kraeplin_test_id_in=${kraeplinTestIds.join(',')}`);
+  
+      if (answerResponse.data.length > 0) {
+        setHasPreviousAnswers(true); // Jika ada jawaban sebelumnya untuk kategori 7 atau 9
+      }
+    } catch (error) {
+      toast.info('Anda bisa memulai mengerjakan test');
+      console.error('Error:', error);
     }
-  } catch (error) {
-    toast.info('Anda bisa memulai mengerjakan test');
-    console.error('Error:', error);
-  }
-};
+  };
+  
 
 
 
@@ -106,8 +106,9 @@ const QuizKoran = () => {
         const kraeplinTestId = userTest.kraeplin_test_id;
 
         const matchingQuestions = questionResponse.data.filter(
-          question => [9,10].includes(question.kraeplin_test_id)
-        );
+            question => [9,10].includes(question.kraeplin_test_id) // Menampilkan pertanyaan dengan kraeplin_test_id 7 atau 9
+          );
+          
 
 
         if (matchingQuestions.length === 0) {

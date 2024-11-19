@@ -30,6 +30,7 @@ import Register from './register';
 import Materialsdata from './materialdata';
 import ClassManager from './class';
 import QuizKoran from './Quiz-Koran';
+import QuestionManagerCfit from './QuestionCfit';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -97,6 +98,10 @@ function App() {
                     <Route 
                         path="/questions" 
                         element={<PrivateRoute element={<Layout><QuestionManager /></Layout>} />} 
+                    />
+                     <Route 
+                        path="/questions-cfit" 
+                        element={<PrivateRoute element={<Layout><QuestionManagerCfit /></Layout>} />} 
                     />
                     <Route 
                         path="/usertest" 
