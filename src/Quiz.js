@@ -233,51 +233,69 @@ const Quiz = () => {
       {timer && <TimerComponent timer={timer} initialTime={initialTime} />}
 
       {!hasPreviousAnswers && !submitted && questions.length > 0 ? (
-        <>
-          {questions.map((question) => (
-            <div
-              key={question.id}
-              className="question-block mb-4 p-4 border border-base-300 rounded-lg bg-base-100 shadow-md"
-            >
-              <strong>
-                <h1 className="text-lg font-semibold text-center text-orange-500">{question.question_text}</h1>
-              </strong>
-              <div className="flex flex-wrap justify-center items-center space-x-4 mt-5">
-                {(question.kraeplin_test_id === 7 || question.kraeplin_test_id === 9) ? (
-                  question.answer_options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleAnswerChange(question.id, index, false)} // single-answer (false)
-                      className={`btn mr-2 mb-2 ${answers[question.id] === index ? 'btn-warning' : 'btn btn-outline'}`}
-                      disabled={hasPreviousAnswers}
-                    >
-                      {option}
-                    </button>
-                  ))
-                ) : (
-                  question.answer_options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleAnswerChange(question.id, index, true)} // multiple-answer (true)
-                      className={`btn mr-2 mb-2 ${answers[question.id]?.includes(index) ? 'btn-warning' : 'btn btn-outline'}`}
-                      disabled={hasPreviousAnswers}
-                    >
-                      {option}
-                    </button>
-                  ))
-                )}
-              </div>
+  <>
+    {questions.map((question) => (
+      <div
+        key={question.id}
+        className="question-block mb-4 p-4 border border-base-300 rounded-lg bg-base-100 shadow-md"
+      >
+        {/* Menampilkan pertanyaan sebagai gambar */}
+        <div className="flex justify-center mb-4">
+          <img
+            src={question.question_text}
+            alt={`Question ${question.id}`}
+            className="max-w-full max-h-64 object-contain"
+          />
+        </div>
 
-            </div>
-          ))}
+        <div className="flex flex-wrap justify-center items-center space-x-4 mt-5">
+          {(question.kraeplin_test_id === 7 || question.kraeplin_test_id === 9) ? (
+            // Untuk opsi jawaban tunggal
+            question.answer_options.map((option, index) => (
+              <button
+                key={index}
+                onClick={() => handleAnswerChange(question.id, index, false)} // single-answer (false)
+                className={`btn mr-2 mb-2 ${answers[question.id] === index ? 'btn-warning' : 'btn btn-outline'}`}
+                disabled={hasPreviousAnswers}
+              >
+                {/* Menampilkan opsi jawaban sebagai gambar */}
+                <img
+                  src={option}
+                  alt={`Answer option ${index}`}
+                  className="max-w-20 max-h-20 object-contain"
+                />
+              </button>
+            ))
+          ) : (
+            // Untuk opsi jawaban ganda
+            question.answer_options.map((option, index) => (
+              <button
+                key={index}
+                onClick={() => handleAnswerChange(question.id, index, true)} // multiple-answer (true)
+                className={`btn mr-2 mb-2 ${answers[question.id]?.includes(index) ? 'btn-warning' : 'btn btn-outline'}`}
+                disabled={hasPreviousAnswers}
+              >
+                {/* Menampilkan opsi jawaban sebagai gambar */}
+                <img
+                  src={option}
+                  alt={`Answer option ${index}`}
+                  className="max-w-20 max-h-20 object-contain"
+                />
+              </button>
+            ))
+          )}
+        </div>
+      </div>
+    ))}
 
-          <div className="flex justify-end">
-            <button className="btn btn-primary" onClick={handleSubmit}>
-              Submit
-            </button>
-          </div>
-        </>
-      ) : (
+    <div className="flex justify-end">
+      <button className="btn btn-primary" onClick={handleSubmit}>
+        Submit
+      </button>
+    </div>
+  </>
+) 
+ : (
         <p className="text-lg font-bold">
           {submitted ? 'Jawaban Anda telah disubmit!' : 'Anda sudah mengerjakan kuis ini.'}
         </p>
