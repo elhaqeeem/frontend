@@ -5,7 +5,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
 import 'react-quill/dist/quill.snow.css';
 import Swal from 'sweetalert2';
-import axiosInstance from './axiosInstance';
 
 const QuestionManagerCfit = () => {
   const [questions, setQuestions] = useState([]);
@@ -31,7 +30,7 @@ const QuestionManagerCfit = () => {
     const fetchKraeplinTests = async () => {
       try {
         // Menggunakan Axios untuk melakukan request
-        const response = await axiosInstance.get("/kraeplin-tests");
+        const response = await axios.get("/kraeplin-tests");
         
         // Periksa apakah data yang diterima adalah array
         if (Array.isArray(response.data)) {
@@ -50,6 +49,7 @@ const QuestionManagerCfit = () => {
       console.error("No authorization token found");
     }
   }, [token]);
+  
   const fetchQuestions = async () => {
     try {
       const response = await axios.get('/questions');
