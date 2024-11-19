@@ -200,21 +200,26 @@ function Dashboard() {
                                         <AdvancedImage
                                             cldImg={myImage}
                                             alt={course.title}
-                                            className="object-cover h-100 w-full"
+                                            className="object-cover h-20 w-20"
                                         />
                                     </figure>
 
+
                                     <div className="card-body bg-white">
                                         <h2 className="card-title">{course.title}</h2>
-                                        <div className="flex items-center">
-    <div>
-        <a href={course.description}>
-            <button className="btn btn-outline btn-secondary">
-                Start
-            </button>
-        </a>
-    </div>
+                                        <div className="flex items-center justify-between">
+    <a href={course.description}>
+        <button className="btn btn-outline btn-primary">
+            Start
+        </button>
+    </a>
+    <a href={course.description}>
+        <button className="btn btn-outline btn-warning">
+        Instructions
+        </button>
+    </a>
 </div>
+
 
                                     </div>
                                 </div>
