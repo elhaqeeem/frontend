@@ -7,7 +7,7 @@ import axiosInstance from './axiosInstance';
 
 const FeatureList = () => {
   const features = [
-    
+
   ];
 
   return (
@@ -73,8 +73,8 @@ const LoginForm = ({ onLogin }) => {
       transition={{ duration: 0.8 }}
     >
       <h2 className="text-2xl font-semibold mb-2 text-center"> <i className="fa fa-university" aria-hidden="true"></i>
-                        <i style={{ color: 'white' }}>Edu</i>
-                        <i><strong style={{ color: 'orange' }}>LMS</strong></i></h2>
+        <i style={{ color: 'white' }}>Edu</i>
+        <i><strong style={{ color: 'orange' }}>LMS</strong></i></h2>
       <form onSubmit={handleLogin}>
         {error && <p className="text-center text-error mt-4">{error}</p>}
         <div className="form-control w-full mt-4">
@@ -121,7 +121,7 @@ const LoginForm = ({ onLogin }) => {
             Access Dashboard
           </button>
         )}
-      {/* 
+        {/* 
         <div className="text-center mt-4">
           Don't have an account yet?{' '}
           <a href="/register" className="hover:underline">
@@ -141,11 +141,20 @@ const Login = ({ onLogin }) => {
     <div className="min-h-screen bg-gradient-to-r from-white-500 to-indigo-500 flex items-center">
       <div className="card mx-auto w-full max-w-5xl shadow-xl">
         <div className="grid md:grid-cols-2 grid-cols-1 bg-base-100 rounded-xl">
-          <div className="hero min-h-full rounded-l-xl bg-base-200">
-            <div className="hero-content py-12">
-              <FeatureList />
-            </div>
-          </div>
+        <div
+  className="hero min-h-full rounded-l-xl bg-base-200"
+  style={{
+    backgroundImage: 'url(https://res.cloudinary.com/db8atpjwp/image/upload/e_improve,w_300,h_600,c_thumb,g_auto/v1727529449/psychedelic-paper-shapes-with-copy-space_1_ddrhft.jpg)', // Ganti dengan path gambar Anda
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  }}
+>
+  <div className="hero-content py-12">
+    <FeatureList />
+  </div>
+</div>
+
+
           <LoginForm onLogin={onLogin} />
         </div>
       </div>

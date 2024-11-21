@@ -244,47 +244,48 @@ const Quiz = () => {
           <img
             src={question.question_text}
             alt={`Question ${question.id}`}
-            className="max-w-full max-h-64 object-contain"
+            className="w-40 h-20 object-contain"
           />
         </div>
 
         <div className="flex flex-wrap justify-center items-center space-x-4 mt-5">
-          {(question.kraeplin_test_id === 7 || question.kraeplin_test_id === 9) ? (
-            // Untuk opsi jawaban tunggal
-            question.answer_options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleAnswerChange(question.id, index, false)} // single-answer (false)
-                className={`btn mr-2 mb-2 ${answers[question.id] === index ? 'btn-warning' : 'btn btn-outline'}`}
-                disabled={hasPreviousAnswers}
-              >
-                {/* Menampilkan opsi jawaban sebagai gambar */}
-                <img
-                  src={option}
-                  alt={`Answer option ${index}`}
-                  className="max-w-20 max-h-20 object-contain"
-                />
-              </button>
-            ))
-          ) : (
-            // Untuk opsi jawaban ganda
-            question.answer_options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleAnswerChange(question.id, index, true)} // multiple-answer (true)
-                className={`btn mr-2 mb-2 ${answers[question.id]?.includes(index) ? 'btn-warning' : 'btn btn-outline'}`}
-                disabled={hasPreviousAnswers}
-              >
-                {/* Menampilkan opsi jawaban sebagai gambar */}
-                <img
-                  src={option}
-                  alt={`Answer option ${index}`}
-                  className="max-w-20 max-h-20 object-contain"
-                />
-              </button>
-            ))
-          )}
-        </div>
+  {(question.kraeplin_test_id === 7 || question.kraeplin_test_id === 9) ? (
+    // Untuk opsi jawaban tunggal
+    question.answer_options.map((option, index) => (
+      <button
+        key={index}
+        onClick={() => handleAnswerChange(question.id, index, false)} // single-answer (false)
+        className={`btn w-20 h-20 mr-2 mb-2 ${answers[question.id] === index ? 'btn-warning' : 'btn btn-outline'}`}
+        disabled={hasPreviousAnswers}
+      >
+        {/* Menampilkan opsi jawaban sebagai gambar */}
+        <img
+          src={option}
+          alt={`Answer option ${index}`}
+          className="max-w-full max-h-full object-contain"
+        />
+      </button>
+    ))
+  ) : (
+    // Untuk opsi jawaban ganda
+    question.answer_options.map((option, index) => (
+      <button
+        key={index}
+        onClick={() => handleAnswerChange(question.id, index, true)} // multiple-answer (true)
+        className={`btn w-19 h-19 mr-2 mb-2 ${answers[question.id]?.includes(index) ? 'btn-warning' : 'btn btn-outline'}`}
+        disabled={hasPreviousAnswers}
+      >
+        {/* Menampilkan opsi jawaban sebagai gambar */}
+        <img
+          src={option}
+          alt={`Answer option ${index}`}
+          className="max-w-full max-h-full object-contain"
+        />
+      </button>
+    ))
+  )}
+</div>
+
       </div>
     ))}
 
