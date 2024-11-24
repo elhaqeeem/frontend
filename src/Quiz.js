@@ -244,7 +244,8 @@ const Quiz = () => {
           <img
             src={question.question_text}
             alt={`Question ${question.id}`}
-            className="w-40 h-20 object-contain"
+            className="max-w-40 max-h-full object-contain"
+
           />
         </div>
 
@@ -272,7 +273,7 @@ const Quiz = () => {
       <button
         key={index}
         onClick={() => handleAnswerChange(question.id, index, true)} // multiple-answer (true)
-        className={`btn w-19 h-19 mr-2 mb-2 ${answers[question.id]?.includes(index) ? 'btn-warning' : 'btn btn-outline'}`}
+        className={`btn w-20 h-20 mr-2 mb-2 ${answers[question.id]?.includes(index) ? 'btn-warning' : 'btn btn-outline'}`}
         disabled={hasPreviousAnswers}
       >
         {/* Menampilkan opsi jawaban sebagai gambar */}
