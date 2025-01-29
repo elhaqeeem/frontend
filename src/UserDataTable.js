@@ -152,17 +152,21 @@ const UserDataTable = () => {
 
     const columns = [
         { name: 'ID', selector: row => row.id, sortable: true },
-        { name: 'Username', selector: row => row.username || '', sortable: true },
-        { name: 'Email', selector: row => row.email || '', sortable: true },
-        { name: 'First Name', selector: row => row.first_name || '', sortable: true },
-        { name: 'Last Name', selector: row => row.last_name || '', sortable: true },
-        { name: 'Role ID', selector: row => row.role_id, sortable: true },
+        { name: 'Npp', selector: row => row.username || '', sortable: true },
+        //{ name: 'Email', selector: row => row.email || '', sortable: true },
+        { name: 'Nama Lengkap', selector: row => row.first_name || '', sortable: true },
+        { name: 'Perangkat', selector: row => row.device_info?.String  || 'No Data', sortable: true },
+
         {
             name: 'Actions',
             cell: row => (
                 <div className="flex space-x-2">
-                    <button onClick={() => handleOpenModal(row)} className="btn btn-primary btn-sm">Edit</button>
-                    <button onClick={() => handleDeleteUser(row.id)} className="btn btn-danger btn-sm">Delete</button>
+                    <button onClick={() => handleOpenModal(row)} className="btn btn-warning btn-sm">
+                    <i className="fa fa-pencil" aria-hidden="true"></i>
+
+                    </button>
+                    <button onClick={() => handleDeleteUser(row.id)} className="btn btn-danger btn-sm">                <i className="fa fa-trash" aria-hidden="true"></i>
+                    </button>
                 </div>
             ),
         },
@@ -283,7 +287,7 @@ const UserDataTable = () => {
                 progressPending={loading}
                 pagination
                 className="rounded-lg shadow-lg bg-white"
-                title="Question Test List"
+                title="Users List"
         
             />
         </div>
