@@ -31,6 +31,7 @@ import Materialsdata from './materialdata';
 import ClassManager from './class';
 import QuizKoran from './Quiz-Koran';
 import QuestionManagerCfit from './QuestionCfit';
+import SendNotificationPage from './notification';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -162,6 +163,10 @@ function App() {
                      <Route 
                         path="/Class-data" 
                         element={<PrivateRoute element={<Layout><ClassManager /></Layout>} />} 
+                    />
+                    <Route 
+                        path="/Notification" 
+                        element={<PrivateRoute element={<Layout><SendNotificationPage /></Layout>} />} 
                     />
                     
                   
