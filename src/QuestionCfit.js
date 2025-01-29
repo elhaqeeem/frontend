@@ -26,41 +26,39 @@ const QuestionManagerCfit = () => {
     fetchQuestions();
   }, []);
 
-   // Fetch data from the API
-  useEffect(() => {
-    const fetchKraeplinTests = async () => {
-      try {
-        const response = await fetch("/kraeplin-tests", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Tambahkan Authorization header
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.status === 401) {
-          console.error("Authorization header required");
-          return;
-        }
-
-        const data = await response.json();
-        
-        // Pastikan data yang diterima adalah array
-        if (Array.isArray(data)) {
-          setKraeplinTests(data);
-        } else {
-          console.error("Data format is not an array:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching kraeplin tests:", error);
-      }
-    };
-
-    if (token) {
-      fetchKraeplinTests(); // Panggil fetch jika token ada
-    } else {
-      console.error("No authorization token found");
-    }
-  }, [token]);
+  
+   useEffect(() => {
+     const fetchKraeplinTests = async () => {
+       try {
+         const response = await axios.get("/kraeplin-tests", {
+           headers: {
+             Authorization: `Bearer ${token}`, // Tambahkan Authorization header
+             "Content-Type": "application/json",
+           },
+         });
+   
+         // Pastikan data yang diterima adalah array
+         if (Array.isArray(response.data)) {
+           setKraeplinTests(response.data);
+         } else {
+           console.error("Data format is not an array:", response.data);
+         }
+       } catch (error) {
+         if (error.response && error.response.status === 401) {
+           console.error("Authorization header required");
+         } else {
+           console.error("Error fetching kraeplin tests:", error);
+         }
+       }
+     };
+   
+     if (token) {
+       fetchKraeplinTests(); // Panggil fetch jika token ada
+     } else {
+       console.error("No authorization token found");
+     }
+   }, [token]);
+   
 
   const fetchQuestions = async () => {
     try {
