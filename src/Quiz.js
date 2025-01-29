@@ -8,7 +8,7 @@ import { FaStopwatch } from 'react-icons/fa';
 const checkPreviousAnswers = async (userTestId, setHasPreviousAnswers) => {
   try {
     // Langsung menggunakan kraeplin_test_id = 7
-    const kraeplinTestId = 7;
+    const kraeplinTestId = 11;
 
     const answerResponse = await axios.get(`/test-answers?user_test_id=${userTestId}&kraeplin_test_id=${kraeplinTestId}`);
 
@@ -106,7 +106,7 @@ const Quiz = () => {
         const kraeplinTestId = userTest.kraeplin_test_id;
 
         const matchingQuestions = questionResponse.data.filter(
-          question => [7].includes(question.kraeplin_test_id)
+          question => [11].includes(question.kraeplin_test_id)
         );
 
 
@@ -241,13 +241,14 @@ const Quiz = () => {
       >
         {/* Menampilkan pertanyaan sebagai gambar */}
         <div className="flex justify-center mb-4">
-          <img
-            src={question.question_text}
-            alt={`Question ${question.id}`}
-            className="max-w-40 max-h-full object-contain"
-
-          />
-        </div>
+  <img
+    src={question.question_text}
+    alt={`Question ${question.id}`}
+    className="max-w-90 max-h-full object-contain"
+    width="200"  // Lebar gambar dalam piksel
+    height="150" // Tinggi gambar dalam piksel
+  />
+</div>
 
         <div className="flex flex-wrap justify-center items-center space-x-4 mt-5">
   {(question.kraeplin_test_id === 7 || question.kraeplin_test_id === 9) ? (
