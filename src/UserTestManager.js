@@ -51,38 +51,30 @@ const UserTestManager = () => {
     }
   };
 
- 
-useEffect(() => {
-  const fetchKraeplinTests = async () => {
-    try {
-      const response = await axios.get("/kraeplin-tests", {
-        headers: {
-          Authorization: `Bearer ${token}`, // Tambahkan Authorization header
-          "Content-Type": "application/json",
-        },
-      });
 
-      // Pastikan data yang diterima adalah array
-      if (Array.isArray(response.data)) {
-        setKraeplinTests(response.data);
-      } else {
-        console.error("Data format is not an array:", response.data);
-      }
-    } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.error("Authorization header required");
-      } else {
-        console.error("Error fetching kraeplin tests:", error);
-      }
+const fetchKraeplinTests = async () => {
+  try {
+    const response = await axios.get("/kraeplin-tests", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Pastikan response.data adalah array sebelum di-set
+    if (Array.isArray(response.data)) {
+      setKraeplinTests(response.data);
+    } else {
+      console.error("Data format is not an array:", response.data);
     }
-  };
-
-  if (token) {
-    fetchKraeplinTests(); // Panggil fetch jika token ada
-  } else {
-    console.error("No authorization token found");
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      console.error("Authorization header required");
+    } else {
+      console.error("Error fetching kraeplin tests:", error);
+    }
   }
-}, [token]);
+};
 
 
 // Tambahkan handleBulkDelete sebelum return
