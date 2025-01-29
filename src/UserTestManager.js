@@ -51,31 +51,39 @@ const UserTestManager = () => {
     }
   };
 
+ 
+useEffect(() => {
   const fetchKraeplinTests = async () => {
     try {
-      const response = await fetch("/kraeplin-tests", {
+      const response = await axios.get("/kraeplin-tests", {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // Tambahkan Authorization header
           "Content-Type": "application/json",
         },
       });
 
-      if (response.status === 401) {
-        console.error("Authorization header required");
-        return;
-      }
-
-      const data = await response.json();
-
-      if (Array.isArray(data)) {
-        setKraeplinTests(data);
+      // Pastikan data yang diterima adalah array
+      if (Array.isArray(response.data)) {
+        setKraeplinTests(response.data);
       } else {
-        console.error("Data format is not an array:", data);
+        console.error("Data format is not an array:", response.data);
       }
     } catch (error) {
-      console.error("Error fetching kraeplin tests:", error);
+      if (error.response && error.response.status === 401) {
+        console.error("Authorization header required");
+      } else {
+        console.error("Error fetching kraeplin tests:", error);
+      }
     }
   };
+
+  if (token) {
+    fetchKraeplinTests(); // Panggil fetch jika token ada
+  } else {
+    console.error("No authorization token found");
+  }
+}, [token]);
+
 
 // Tambahkan handleBulkDelete sebelum return
 const handleBulkDelete = async () => {
