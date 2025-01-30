@@ -26,41 +26,51 @@ const QuestionManager = () => {
     fetchQuestions();
   }, []);
 
-   // Fetch data from the API
-  useEffect(() => {
-    const fetchKraeplinTests = async () => {
-      try {
-        const response = await fetch("/kraeplin-tests", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Tambahkan Authorization header
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.status === 401) {
-          console.error("Authorization header required");
-          return;
-        }
-
-        const data = await response.json();
-        
-        // Pastikan data yang diterima adalah array
-        if (Array.isArray(data)) {
-          setKraeplinTests(data);
-        } else {
-          console.error("Data format is not an array:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching kraeplin tests:", error);
-      }
-    };
-
-    if (token) {
-      fetchKraeplinTests(); // Panggil fetch jika token ada
-    } else {
-      console.error("No authorization token found");
-    }
-  }, [token]);
+   
+   useEffect(() => {
+     const fetchKraeplinTests = async () => {
+       try {
+         const response = await axios.get("/kraeplin-tests", {
+           headers: {
+             Authorization: `Bearer ${token}`, // Tambahkan Authorization header
+             "Content-Type": "application/json",
+           },
+         });
+   
+         // Pastikan response sukses (status 2xx)
+         if (response.status === 200) {
+           const data = response.data;
+   
+           if (Array.isArray(data)) {
+             setKraeplinTests(data);
+           } else {
+             console.error("Data format is not an array:", data);
+           }
+         }
+       } catch (error) {
+         if (error.response) {
+           // Jika server memberikan response error (4xx atau 5xx)
+           console.error("Error response:", error.response.data);
+           if (error.response.status === 401) {
+             console.error("Authorization header required");
+           }
+         } else if (error.request) {
+           // Jika request dikirim tapi tidak ada response dari server
+           console.error("No response received:", error.request);
+         } else {
+           // Error lainnya
+           console.error("Error setting up request:", error.message);
+         }
+       }
+     };
+   
+     if (token) {
+       fetchKraeplinTests(); // Panggil fetch jika token ada
+     } else {
+       console.error("No authorization token found");
+     }
+   }, [token]);
+   
 
   const fetchQuestions = async () => {
     try {
