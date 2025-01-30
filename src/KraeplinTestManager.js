@@ -28,31 +28,33 @@ const CreateKraeplin = () => {
     setFilteredTests(result);
   }, [search, tests]);
 
-  const fetchKraeplinTests = async () => {
-    try {
-      const response = await fetch("/kraeplin-tests", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
 
-      if (response.status === 401) {
-        console.error("Authorization header required");
-        return;
-      }
+const fetchKraeplinTests = async () => {
+  try {
+    const response = await axios.get("/kraeplin-tests", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-      const data = await response.json();
-
-      if (Array.isArray(data)) {
-        setTests(data);
-      } else {
-        console.error("Data format is not an array:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching kraeplin tests:", error);
+    if (response.status === 401) {
+      console.error("Authorization header required");
+      return;
     }
-  };
+
+    const data = response.data;
+
+    if (Array.isArray(data)) {
+      setTests(data);
+    } else {
+      console.error("Data format is not an array:", data);
+    }
+  } catch (error) {
+    console.error("Error fetching kraeplin tests:", error);
+  }
+};
+
   
   
   
