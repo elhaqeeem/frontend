@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "./api/grpc/pb;pb";
+
+service AuthService {
+    rpc Login (LoginRequest) returns (LoginResponse);
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+    rpc SaveDeviceToken (SaveDeviceTokenRequest) returns (SaveDeviceTokenResponse);
+}
+
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string token = 1;
+    string message = 2;
+    string user_id = 3; // Add a user_id field
+}
+
+
+message RegisterRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message RegisterResponse {
+    string message = 1;
+}
+
+message SaveDeviceTokenRequest {
+    string user_id = 1;
+    string device_token = 2;
+}
+
+message SaveDeviceTokenResponse {
+    string message = 1;
+}
