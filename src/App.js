@@ -32,7 +32,7 @@ import ClassManager from './class';
 import QuizKoran from './Quiz-Koran';
 import QuestionManagerCfit from './QuestionCfit';
 import SendNotificationPage from './notification';
-import MergedPage from './lacak';
+import RankingPage from './lacak';
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
         return !!localStorage.getItem('token');
@@ -171,7 +171,7 @@ function App() {
                     
                     <Route 
                         path="/Spy-material" 
-                        element={<PrivateRoute element={<Layout><MergedPage /></Layout>} />} 
+                        element={<PrivateRoute element={<Layout><RankingPage /></Layout>} />} 
                     />
                     
                   
