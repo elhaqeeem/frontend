@@ -39,7 +39,7 @@ const MergedPage = () => {
             console.log("Materials:", materialResponse.data);
     
             // Pastikan hanya menyimpan array yang benar
-            setRankings(Array.isArray(pdfResponse.data) ? pdfResponse.data : []);
+            setPdfStatuses(Array.isArray(pdfResponse.data) ? pdfResponse.data : []);
             setUsers(Array.isArray(userResponse.data) ? userResponse.data : []);
             setMaterials(Array.isArray(materialResponse.data.materials) ? materialResponse.data.materials : []);
     
