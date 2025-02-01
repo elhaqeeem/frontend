@@ -152,7 +152,6 @@ const UserDataTable = () => {
 
     const columns = [
         { name: 'Npp', selector: row => row.username || '', sortable: true },
-        { name: 'Email', selector: row => row.email || '', sortable: true },
         { name: 'Nama Lengkap', selector: row => row.first_name || '', sortable: true },
         { name: 'Perangkat', selector: row => row.device_info?.String  || 'No Data', sortable: true },
         { name: 'Email', selector: row => row.email || '', sortable: true },
