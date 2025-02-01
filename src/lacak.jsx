@@ -4,60 +4,70 @@ import DataTable from 'react-data-table-component';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const RankingPage = () => {
-    const [rankings, setRankings] = useState([]);
+const MergedPage = () => {
+    const [users, setUsers] = useState([]);
+    const [pdfStatuses, setPdfStatuses] = useState([]);
+    const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchText, setSearchText] = useState('');
-    const [filteredRankings, setFilteredRankings] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
 
     useEffect(() => {
-        fetchRankings();
+        fetchData();
     }, []);
 
     useEffect(() => {
-        if (Array.isArray(rankings)) {
-            const result = rankings.filter(item => 
-                item?.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-                item?.username?.toLowerCase().includes(searchText.toLowerCase())
+        if (Array.isArray(users)) {
+            const result = users.filter(user =>
+                user?.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+                user?.username?.toLowerCase().includes(searchText.toLowerCase())
             );
-            setFilteredRankings(result);
+            setFilteredUsers(result);
         }
-    }, [searchText, rankings]);
+    }, [searchText, users]);
 
-    const fetchRankings = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await axios.get('/pdf_statuses');
-            setRankings(response.data || []);
-            setFilteredRankings(response.data || []);
+            const [usersRes, pdfRes, materialsRes] = await Promise.all([
+                axios.get('/users'),
+                axios.get('/pdf_statuses'),
+                axios.get('/materials')
+            ]);
+
+            setUsers(usersRes.data || []);
+            setPdfStatuses(pdfRes.data || []);
+            setMaterials(materialsRes.data || []);
+            setFilteredUsers(usersRes.data || []);
         } catch (error) {
-            toast.error('Failed to fetch rankings.');
+            toast.error('Failed to fetch data.');
         } finally {
             setLoading(false);
         }
     };
 
     const columns = [
-        { name: 'Ranking', selector: (row, index) => index + 1, sortable: true },
         { name: 'Nama', selector: row => row.first_name, sortable: true },
         { name: 'Username', selector: row => row.username, sortable: true },
-        {
-            name: 'PDF',
-            cell: row => (
-                <a href={row.pdf_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                    View PDF
-                </a>
-            ),
+        ...materials.map(material => ({
+            name: material.title,
+            cell: row => {
+                const userPdf = pdfStatuses.find(pdf => pdf.username === row.username && pdf.pdf_url === material.content);
+                return userPdf ? (
+                    <a href={userPdf.pdf_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                        View PDF
+                    </a>
+                ) : 'Belum Dibaca';
+            },
             ignoreRowClick: true,
             allowOverflow: true,
-        },
-        { name: 'Created At', selector: row => new Date(row.created_at).toLocaleString(), sortable: true }
+        }))
     ];
 
     return (
         <div className="container mx-auto p-4 bg-white text-black">
             <ToastContainer />
-            <h2 className="text-2xl font-bold mb-4">Ranking List</h2>
+            <h2 className="text-2xl font-bold mb-4">Materi dan Status Bacaan</h2>
             <input
                 type="text"
                 placeholder="Search by name or username"
@@ -67,7 +77,7 @@ const RankingPage = () => {
             />
             <DataTable
                 columns={columns}
-                data={filteredRankings}
+                data={filteredUsers}
                 progressPending={loading}
                 pagination
                 className="rounded-lg shadow-lg bg-white"
@@ -76,4 +86,4 @@ const RankingPage = () => {
     );
 };
 
-export default RankingPage;
+export default MergedPage;
