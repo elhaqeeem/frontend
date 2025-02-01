@@ -21,27 +21,28 @@ const MaterialManager = () => {
   });
   const [selectedRows, setSelectedRows] = useState([]);
 
-  const fetchCourses = async () => {
-    try {
-      const token = localStorage.getItem('token'); // Ambil token dari localStorage
-      const response = await fetch('/courses', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`, // Tambahkan Bearer token ke header
-          'Content-Type': 'application/json', // Jika perlu, tambahkan header ini
-        },
-      });
 
-      const data = await response.json();
-      if (data.courses) {
-        setCourses(data.courses);
-      } else {
-        console.error('Courses data is not available in the response.');
-      }
-    } catch (error) {
-      console.error('Error fetching courses:', error);
+const fetchCourses = async () => {
+  try {
+    const token = localStorage.getItem('token'); // Ambil token dari localStorage
+    const response = await axios.get('/courses', {
+      headers: {
+        'Authorization': `Bearer ${token}`, // Tambahkan Bearer token ke header
+        'Content-Type': 'application/json', // Jika perlu, tambahkan header ini
+      },
+    });
+
+    const data = response.data;
+    if (data.courses) {
+      setCourses(data.courses);
+    } else {
+      console.error('Courses data is not available in the response.');
     }
-  };
+  } catch (error) {
+    console.error('Error fetching courses:', error);
+  }
+};
+
 
   const fetchMaterials = async () => {
     try {
