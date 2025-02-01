@@ -27,24 +27,27 @@ const MergedPage = () => {
     }, [searchText, users]);
 
     const fetchData = async () => {
-        setLoading(true);
         try {
-            const [usersRes, pdfRes, materialsRes] = await Promise.all([
-                axios.get('/users'),
+            const [pdfResponse, userResponse, materialResponse] = await Promise.all([
                 axios.get('/pdf_statuses'),
+                axios.get('/users'),
                 axios.get('/materials')
             ]);
-
-            setUsers(usersRes.data || []);
-            setPdfStatuses(pdfRes.data || []);
-            setMaterials(materialsRes.data || []);
-            setFilteredUsers(usersRes.data || []);
+    
+            console.log("PDF Statuses:", pdfResponse.data);
+            console.log("Users:", userResponse.data);
+            console.log("Materials:", materialResponse.data);
+    
+            // Pastikan hanya menyimpan array yang benar
+            setRankings(Array.isArray(pdfResponse.data) ? pdfResponse.data : []);
+            setUsers(Array.isArray(userResponse.data) ? userResponse.data : []);
+            setMaterials(Array.isArray(materialResponse.data.materials) ? materialResponse.data.materials : []);
+    
         } catch (error) {
-            toast.error('Failed to fetch data.');
-        } finally {
-            setLoading(false);
+            console.error("Error fetching data:", error);
         }
     };
+    
 
     const columns = [
         { name: 'Nama', selector: row => row.first_name, sortable: true },
@@ -67,17 +70,25 @@ const MergedPage = () => {
     return (
         <div className="container mx-auto p-4 bg-white text-black">
             <ToastContainer />
-            <h2 className="text-2xl font-bold mb-4">Materi dan Status Bacaan</h2>
-            <input
-                type="text"
-                placeholder="Search by name or username"
-                value={searchText}
-                onChange={e => setSearchText(e.target.value)}
-                className="input input-bordered mb-4 w-full"
-            />
+            
+            {/* Bagian Judul Materi */}
+            <h2 className="text-2xl font-bold mb-4">Tracking Pembaca Materi</h2>
+            <div className="flex gap-4 overflow-x-auto mb-4 p-2 bg-gray-200 rounded-lg">
+                {materials.length > 0 ? (
+                    materials.map(material => (
+                        <div key={material.id} className="p-2 bg-blue-500 text-white rounded-lg">
+                            {material.title}
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-gray-500">Tidak ada materi tersedia</p>
+                )}
+            </div>
+
+            {/* Tabel Pembaca Materi */}
             <DataTable
                 columns={columns}
-                data={filteredUsers}
+                data={pdfStatuses}
                 progressPending={loading}
                 pagination
                 className="rounded-lg shadow-lg bg-white"
