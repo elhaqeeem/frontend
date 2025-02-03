@@ -29,36 +29,31 @@ const CreateKraeplin = () => {
   }, [search, tests]);
 
 
-  const fetchKraeplinTests = async () => {
-    try {
-      const response = await axios.get("/kraeplin-tests", {
-        withCredentials: true, // Tambahkan ini untuk mengirim kredensial (cookie/token)
-        headers: {
-          "Content-Type": "application/json", 
-          // Authorization header bisa dihapus jika sudah ada di axiosInstance.js
-        },
-      });
-  
-      // Tidak perlu cek 401 di sini, karena kalau 401 akan otomatis masuk ke catch
-      const data = response.data;
-  
-      if (Array.isArray(data)) {
-        setTests(data);
-      } else {
-        console.error("Data format is not an array:", data);
-      }
-    } catch (error) {
-      // Menangani error dengan lebih spesifik untuk masalah CORS atau Authorization
-      if (error.response) {
-        console.error(`Error ${error.response.status}: ${error.response.data}`);
-      } else if (error.request) {
-        console.error("No response received:", error.request);
-      } else {
-        console.error("Error setting up request:", error.message);
-      }
+const fetchKraeplinTests = async () => {
+  try {
+    const response = await axios.get("/kraeplin-tests", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 401) {
+      console.error("Authorization header required");
+      return;
     }
-  };
-  
+
+    const data = response.data;
+
+    if (Array.isArray(data)) {
+      setTests(data);
+    } else {
+      console.error("Data format is not an array:", data);
+    }
+  } catch (error) {
+    console.error("Error fetching kraeplin tests:", error);
+  }
+};
 
   
   
