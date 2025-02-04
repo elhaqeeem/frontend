@@ -71,7 +71,7 @@ const fetchKraeplinTests = async () => {
       test_date: formattedTestDate,
       duration_minutes: parseInt(durationMinutes, 10), // Ensure it's an integer
       description,
-      id: testId ? parseInt(testId, 10) : undefined, // Ensure id is an integer or undefined for new entries
+      id: testId ? parseInt(testId, 10) : undefined, 
     };
   
     try {
