@@ -103,7 +103,6 @@ const QuizKoran = () => {
         setIdToSubmit(idToSubmit);
 
         const questionResponse = await axios.get('/questions');
-        const kraeplinTestId = userTest.kraeplin_test_id;
 
         const matchingQuestions = questionResponse.data.filter(
             question => [9,10].includes(question.kraeplin_test_id) // Menampilkan pertanyaan dengan kraeplin_test_id 7 atau 9

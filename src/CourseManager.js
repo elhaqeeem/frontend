@@ -4,7 +4,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DataTable from 'react-data-table-component';
 import Swal from 'sweetalert2';
-import ReactQuill from 'react-quill'; // Import ReactQuill
 import 'react-quill/dist/quill.snow.css'; // Import Quill stylesheet
 
 const CourseManager = () => {
@@ -24,30 +23,9 @@ const CourseManager = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [permissions, setPermissions] = useState([]);// eslint-disable-next-line
   const [userId, setUserId] = useState(null);
-  const quillRef = useRef(null);
-  const modules = {
-    toolbar: [
-      [{ header: '1' }, { header: '2' }, { font: [] }],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ color: [] }, { background: [] }],
-      [{ script: 'sub' }, { script: 'super' }],
-      ['blockquote', 'code-block'],
-      [{ align: [] }],
-      ['link', 'image', 'video'],
-      ['clean'], // clear formatting
-    ],
-  };
+  
 
-  const formats = [
-    'header', 'font', 'size',
-    'bold', 'italic', 'underline', 'strike', 'blockquote',
-    'list', 'bullet', 'indent',
-    'link', 'image', 'video',
-    'color', 'background',
-    'script', 'align',
-  ];
-
+  
   useEffect(() => {
     const storedUserId = localStorage.getItem('id');
     setUserId(storedUserId);

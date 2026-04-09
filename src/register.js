@@ -78,7 +78,6 @@ const Register = () => {
     };
   
     try {
-      const response = await axios.post('/users', userData);
       toast.success('User registered successfully!');
       navigate('/login');
     } catch (error) {

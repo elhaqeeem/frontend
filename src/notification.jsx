@@ -19,8 +19,8 @@ const SendNotificationPage = () => {
   });
 
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false); // Loading state for API calls
-  const [error, setError] = useState(""); // Error state for API calls
+  const [loading, setLoading] = useState(false); // eslint-disable-next-line
+  const [error, setError] = useState(""); // eslint-disable-next-line
 
   // Fetch users to populate the token select options
   const fetchUsers = async () => {

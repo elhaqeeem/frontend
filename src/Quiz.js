@@ -103,7 +103,6 @@ const Quiz = () => {
         setIdToSubmit(idToSubmit);
 
         const questionResponse = await axios.get('/questions');
-        const kraeplinTestId = userTest.kraeplin_test_id;
 
         const matchingQuestions = questionResponse.data.filter(
           question => [11].includes(question.kraeplin_test_id)

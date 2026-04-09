@@ -78,11 +78,7 @@ function Dashboard() {
     };
 
     // Function to handle "Learn More" button click
-    const handleLearnMore = (course) => {
-        setSelectedCourse(course);
-        setIsModalOpen(true);
-        setOrderStatus(null); // Reset order status
-    };
+   
 
     // Function to close modal
     const closeModal = () => {
